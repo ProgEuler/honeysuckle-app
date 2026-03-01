@@ -21,7 +21,7 @@ const variants = {
   medium: { fontFamily: 'Medium', color: Colors.primaryText },
   title: { fontFamily: 'ExtraBold', color: Colors.brown },
   header: { fontFamily: 'Bold', color: Colors.brown },
-  subtitle: { fontStyle: "semibold", color: Colors.brown },
+  subtitle: { fontFamily: "SemiBold", color: Colors.brown },
   // primary: { fontWeight: "bold", color: COLORS.primary },
   // accent: { fontWeight: "light", color: COLORS.accent },
   // secondary: { color: COLORS.secondaryText },

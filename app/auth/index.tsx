@@ -98,7 +98,7 @@ const index = () => {
             </View> */}
           </View>
           <View>
-            <RNButton path={'/auth/otp'} value={'Sign Up'} />
+            <RNButton path={'/onboarding'} value={'Sign In'} />
           </View>
           <View
             style={{

@@ -139,7 +139,11 @@ const Index = () => {
 
           <SectionHeader title="Log Out" />
           <View style={styles.card}>
-            <SettingItem icon={Logout} title="Log Out" />
+            <SettingItem
+              icon={Logout}
+              title="Log Out"
+              onPress={() => router.push("/auth")}
+            />
           </View>
         </View>
       </ScrollView>
@@ -228,7 +232,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
     gap: 4,
-    marginBottom: 20
+    marginBottom: 20,
   },
   profileName: {
     color: Colors.brown,
@@ -242,9 +246,9 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   settingsContent: {
-   //  marginTop: 20,
+    //  marginTop: 20,
     paddingHorizontal: 20,
-    marginBottom: 40
+    marginBottom: 40,
   },
   sectionHeader: {
     flexDirection: "row",

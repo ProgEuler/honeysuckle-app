@@ -3,7 +3,6 @@ import { Stack } from 'expo-router';
 import { useEffect } from 'react';
 import { StatusBar } from 'react-native';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
-import { Host } from 'react-native-portalize';
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -26,12 +25,11 @@ export default function RootLayout() {
 
   if (!fontsLoaded) return null;
   return (
-    <Host>
       <KeyboardProvider>
+         <StatusBar barStyle="dark-content" backgroundColor={'transparent'} />
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
         </Stack>
       </KeyboardProvider>
-    </Host>
   );
 }

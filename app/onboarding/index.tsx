@@ -3,7 +3,7 @@ import { RNText } from '@/components/ui/input';
 import { Colors } from '@/constants/color';
 import { router } from 'expo-router';
 import React from 'react';
-import { Image, TouchableOpacity, View, StyleSheet } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Index = () => {
