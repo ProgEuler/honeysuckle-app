@@ -1,14 +1,12 @@
-import Back from '@/assets/svgs/back.svg';
 import Calender from '@/assets/svgs/calender.svg';
 import TimePick from '@/components/timepick';
 import { BackButton } from '@/components/ui/BackButton';
 import RNButton from '@/components/ui/button';
 import { RNText } from '@/components/ui/input';
 import { Colors } from '@/constants/color';
-import { router } from 'expo-router';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { TextInput, TouchableOpacity, View } from 'react-native';
+import { TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const TimeStart = () => {
@@ -52,7 +50,7 @@ const TimeStart = () => {
           }}
         >
           <RNText variant="title" size="sm" style={{ color: '#926247' }}>
-            3 OF 4
+            2 OF 3
           </RNText>
         </View>
       </View>

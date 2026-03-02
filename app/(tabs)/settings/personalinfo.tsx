@@ -4,32 +4,47 @@ import Edit from '@/assets/svgs/edit.svg';
 import Gender from '@/assets/svgs/gender.svg';
 import Location from '@/assets/svgs/location.svg';
 import Person from '@/assets/svgs/person.svg';
-import DatePicker from '@/components/datepicker';
+import DatePicker, { DatePickerRef } from '@/components/datepicker';
 import InputForm from '@/components/inputform';
-import RNButton from '@/components/ui/button';
 import { RNText } from '@/components/ui/input';
 import { Colors } from '@/constants/color';
 import { router } from 'expo-router';
 import React, { useRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
-  Image,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Image,
+    ScrollView,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
+import { RNSwitch } from '@/components/ui/switch';
+import { useUserStore } from '@/store/useUserStore';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const PersonalInfo = () => {
+  const { hasSoughtProfessionalHelp, setHasSoughtProfessionalHelp } = useUserStore();
   const {
     control,
     handleSubmit,
     formState: { errors },
     setValue,
-  } = useForm();
-  const DatePickRef = useRef(null);
+  } = useForm({
+    defaultValues: {
+      fullName: 'Shinomiya Kaguya',
+      gender: 'Female',
+      location: 'Tokyo, Japan',
+      dateOfBirth: new Date('2000-01-01'),
+    }
+  });
+  const DatePickRef = useRef<DatePickerRef>(null);
+
+  const onSubmit = (data: any) => {
+     // Save and go back
+     router.back();
+  };
+
   return (
     <>
       <SafeAreaView>
@@ -117,7 +132,7 @@ const PersonalInfo = () => {
                     <DatePicker ref={DatePickRef} onChange={onChange} />
                     <TouchableOpacity
                       onPress={() => {
-                        DatePickRef.current.showDatePicker();
+                        DatePickRef.current?.showDatePicker();
                       }}
                       style={{
                         flexDirection: 'row',
@@ -133,7 +148,7 @@ const PersonalInfo = () => {
                       <Calender />
                       <TextInput
                         placeholder="Select Date"
-                        value={value ? value.toDateString() : ''}
+                        value={value ? (value as Date).toDateString() : ''}
                         editable={false}
                         pointerEvents="none"
                         placeholderTextColor="#999"
@@ -170,20 +185,32 @@ const PersonalInfo = () => {
               errors={{}}
               Icon={Location}
             />
-            {/* <View style={{ marginTop: 10 }}>
+
+            <View style={{ marginTop: 20, gap: 15 }}>
+              <RNText variant="header" size="md">Additional Information</RNText>
+
               <RNSwitch
-                value={false}
-                label={'Chatbot Notification'}
-                onToggle={() => console.log('hello')}
+                value={hasSoughtProfessionalHelp ?? false}
+                label={'Sought professional help before?'}
+                onToggle={setHasSoughtProfessionalHelp}
               />
-            </View> */}
+            </View>
           </View>
-          <View style={{ width: '100%' }}>
-            <RNButton
-              value={'Save'}
-              path={'/(tabs)/settings'}
-              tag={'replace'}
-            />
+          <View style={{ width: '100%', marginBottom: 40 }}>
+            <TouchableOpacity
+              onPress={handleSubmit(onSubmit)}
+              style={{
+                backgroundColor: Colors.brown,
+                paddingVertical: 18,
+                borderRadius: 100,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <RNText variant="header" size="lg" style={{ color: Colors.white }}>
+                 Save Changes
+              </RNText>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>

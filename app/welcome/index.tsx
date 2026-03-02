@@ -91,7 +91,7 @@ export default function WelcomeScreen() {
           <View style={styles.welcomeHeader}>
             <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
             <RNText variant="title" size="3xl" style={styles.welcomeTitle}>
-              Welcome to MindMate AI
+              Welcome to Honeysuckle Trail
             </RNText>
             <View style={styles.subtitleWrapper}>
               <RNText variant="medium" size="md" style={styles.welcomeSubtitle}>
@@ -107,7 +107,7 @@ export default function WelcomeScreen() {
           <View style={styles.welcomeImageContainer}>
             <View style={styles.circleBackground} />
             <Image
-              source={require('@/assets/images/welcome_flower.png')}
+              source={require('@/assets/images/logo.png')}
               style={styles.welcomeIllustration}
               resizeMode="contain"
             />
@@ -142,7 +142,7 @@ export default function WelcomeScreen() {
 
   return (
     <View style={styles.sliderContainer}>
-      <StatusBar style="light" />
+      {/* <StatusBar style="dark" /> */}
       <Animated.FlatList
         ref={flatListRef}
         data={ONBOARDING_STEPS}
@@ -341,8 +341,8 @@ const styles = StyleSheet.create({
   },
   bottomCard: {
     backgroundColor: Colors.white,
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
+    borderTopLeftRadius: "30%",
+    borderTopRightRadius: "30%",
     paddingHorizontal: 28,
     paddingTop: 36,
     paddingBottom: 50,

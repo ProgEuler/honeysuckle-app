@@ -118,7 +118,7 @@ const JournalEntry = () => {
             }}
           >
             <RNText variant="title" size="sm" style={{ color: '#926247' }}>
-              4 OF 4
+              3 OF 3
             </RNText>
           </View>
         </View>

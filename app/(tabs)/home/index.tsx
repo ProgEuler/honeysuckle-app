@@ -54,6 +54,7 @@ const index = () => {
             />
           </View>
           <TouchableOpacity
+            onPress={() => router.push('/notifications')}
             style={{
               flex: 1,
               // alignItems: 'flex-start',

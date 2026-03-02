@@ -4,10 +4,9 @@
     "slug": "mentalheath",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/uilogo.png",
+    "icon": "./assets/images/logo.png",
     "scheme": "mentalheath",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.honeysuckleco.honeysuckletrail",
@@ -38,7 +37,7 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#FFF6DD",
           "dark": {
             "backgroundColor": "#000000"
           }

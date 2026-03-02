@@ -4,9 +4,8 @@ import Edit from '@/assets/svgs/edit.svg';
 import Gender from '@/assets/svgs/gender.svg';
 import Location from '@/assets/svgs/location.svg';
 import Person from '@/assets/svgs/person.svg';
-import DatePicker from '@/components/datepicker';
+import DatePicker, { DatePickerRef } from '@/components/datepicker';
 import InputForm from '@/components/inputform';
-import RNButton from '@/components/ui/button';
 import { RNText } from '@/components/ui/input';
 import { RNSwitch } from '@/components/ui/switch';
 import { Colors } from '@/constants/color';
@@ -14,23 +13,39 @@ import { router } from 'expo-router';
 import React, { useRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
-  Image,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Image,
+    ScrollView,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
+import { useUserStore } from '@/store/useUserStore';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ProfileSetUp = () => {
+  const { hasSoughtProfessionalHelp, setHasSoughtProfessionalHelp } = useUserStore();
   const {
     control,
     handleSubmit,
     formState: { errors },
     setValue,
-  } = useForm();
-  const DatePickRef = useRef(null);
+  } = useForm({
+    defaultValues: {
+      fullName: '',
+      gender: '',
+      location: '',
+      dateOfBirth: null,
+    }
+  });
+  const DatePickRef = useRef<DatePickerRef>(null);
+
+  const onSubmit = (data: any) => {
+    // If we wanted to save all fields to zustand on submit
+    // But currently we're just handling the professional help toggle
+    router.replace('/auth/picktime');
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View
@@ -117,7 +132,7 @@ const ProfileSetUp = () => {
                     <DatePicker ref={DatePickRef} onChange={onChange} />
                     <TouchableOpacity
                       onPress={() => {
-                        DatePickRef.current.showDatePicker();
+                        DatePickRef.current?.showDatePicker();
                       }}
                       style={{
                         flexDirection: 'row',
@@ -133,7 +148,7 @@ const ProfileSetUp = () => {
                       <Calender />
                       <TextInput
                         placeholder="Select Date"
-                        value={value ? value.toDateString() : ''}
+                        value={value ? (value as Date).toDateString() : ''}
                         editable={false}
                         pointerEvents="none"
                         placeholderTextColor="#999"
@@ -149,10 +164,6 @@ const ProfileSetUp = () => {
                         }}
                       />
                     </TouchableOpacity>
-
-                    {/* {errors.dateOfBirth && (
-                        <RNText style={{ color: 'red' }}>{errors.dateOfBirth.message}</RNText>
-                      )} */}
                   </>
                 )}
               />
@@ -174,7 +185,16 @@ const ProfileSetUp = () => {
               errors={{}}
               Icon={Location}
             />
-            <View style={{ marginTop: 10 }}>
+
+            <View style={{ marginTop: 20, gap: 15 }}>
+              <RNText variant="header" size="md">Additional Information</RNText>
+
+              <RNSwitch
+                value={hasSoughtProfessionalHelp ?? false}
+                label={'Sought professional help before?'}
+                onToggle={setHasSoughtProfessionalHelp}
+              />
+
               <RNSwitch
                 value={false}
                 label={'Chatbot Notification'}
@@ -182,12 +202,21 @@ const ProfileSetUp = () => {
               />
             </View>
           </View>
-          <View style={{ width: '100%' }}>
-            <RNButton
-              value={'Continue'}
-              path={'/auth/picktime'}
-              tag={'replace'}
-            />
+          <View style={{ width: '100%', marginBottom: 40 }}>
+            <TouchableOpacity
+              onPress={handleSubmit(onSubmit)}
+              style={{
+                backgroundColor: Colors.brown,
+                paddingVertical: 18,
+                borderRadius: 100,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <RNText variant="header" size="lg" style={{ color: Colors.white }}>
+                Continue
+              </RNText>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>

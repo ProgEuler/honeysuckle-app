@@ -33,7 +33,7 @@ const Forgot = () => {
           borderRadius: 1234,
         }}
       />
-         <BackButton style={{ top: 80 }} />
+         <BackButton style={{ top: 80, left: 24 }} />
       <SafeAreaView style={{ flex: 1, gap: 120, marginTop: 30 }}>
         <View style={{ alignItems: "center" }}>
           <Image

@@ -1,14 +1,19 @@
-import Back from '@/assets/svgs/back.svg';
 import { BackButton } from '@/components/ui/BackButton';
 import RNButton from '@/components/ui/button';
 import { RNText } from '@/components/ui/input';
 import { Colors } from '@/constants/color';
 import React, { useState } from 'react';
-import { Image, ScrollView, TouchableOpacity, View } from 'react-native';
+import { ScrollView, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { moodOptions } from './emotiontype';
 
-const index = () => {
-  const [previousService, setPreviousService] = useState(true);
+const Index = () => {
+  const [selectedMood, setSelectedMood] = useState<string | null>(null);
+
+  const handleMoodSelect = (label: string) => {
+    setSelectedMood(label);
+  };
+
   return (
     <>
       <SafeAreaView>
@@ -43,84 +48,72 @@ const index = () => {
             }}
           >
             <RNText variant="title" size="sm" style={{ color: '#926247' }}>
-              1 OF 4
+              1 OF 3
             </RNText>
           </View>
         </View>
       </SafeAreaView>
       <ScrollView>
-        <View>
+        <View style={{ paddingBottom: 50 }}>
           <View
             style={{
-              borderRadius: 60,
-              overflow: 'hidden',
-              justifyContent: 'center',
-              alignItems: 'center',
+              width: '90%',
+              marginHorizontal: 'auto',
+              marginTop: 20,
             }}
           >
-            <Image
-              source={require('@/assets/images/26939.png')}
-              style={{ height: 286, width: 286, borderRadius: 600 }}
-            />
-          </View>
-          <View
-            style={{ width: '90%', marginHorizontal: 'auto', marginTop: 50 }}
-          >
             <RNText variant="title" size="3xl" style={{ textAlign: 'center' }}>
-              Have you sought professional help before?
+              Every day is different. Choose the mood that fits best today.
             </RNText>
           </View>
           <View
             style={{
               width: '90%',
               marginHorizontal: 'auto',
-              marginTop: 50,
-              marginBottom: 20,
-              flexDirection: 'row',
-              justifyContent: 'space-between',
               gap: 20,
+              marginTop: 50,
+              marginBottom: 30,
             }}
           >
-            <TouchableOpacity
-              onPress={() => setPreviousService(true)}
-              style={{
-                backgroundColor: previousService ? Colors.green : Colors.white,
-                flex: 1,
-                borderRadius: 30,
-              }}
-            >
-              <RNText
-                variant="title"
-                size="lg"
-                style={{
-                  textAlign: 'center',
-                  color: previousService ? Colors.white : Colors.brown,
-                  paddingVertical: 13,
-                }}
-              >
-                Yes
-              </RNText>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setPreviousService(false)}
-              style={{
-                backgroundColor: previousService ? Colors.white : Colors.green,
-                flex: 1,
-                borderRadius: 30,
-              }}
-            >
-              <RNText
-                variant="title"
-                size="lg"
-                style={{
-                  textAlign: 'center',
-                  color: previousService ? Colors.brown : Colors.white,
-                  paddingVertical: 13,
-                }}
-              >
-                No
-              </RNText>
-            </TouchableOpacity>
+            {moodOptions.map((mood, index) => {
+              const isActive = selectedMood === mood.label;
+              return (
+                <TouchableOpacity
+                  onPress={() => handleMoodSelect(mood.label)}
+                  key={index}
+                  style={{
+                    flexDirection: 'row',
+                    borderColor: Colors.green,
+                    backgroundColor: isActive ? '#CFD9B5' : Colors.white,
+                    borderWidth: 1,
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    paddingHorizontal: 25,
+                    paddingVertical: 10,
+                    borderRadius: 20,
+                  }}
+                >
+                  <RNText
+                    variant="title"
+                    size="3xl"
+                    style={{ color: '#8F8985' }}
+                  >
+                    {mood.label}
+                  </RNText>
+                  <View
+                    style={{
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 3,
+                      elevation: 3,
+                    }}
+                  >
+                    <mood.icon />
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
           </View>
           <View
             style={{
@@ -136,8 +129,7 @@ const index = () => {
             <View style={{ width: '100%' }}>
               <RNButton
                 value={'Continue'}
-                path={'/(tabs)/dailycheck/emotiontype'}
-                // tag={'replace'}
+                path={'/(tabs)/dailycheck/timestart'}
               />
             </View>
           </View>
@@ -147,4 +139,4 @@ const index = () => {
   );
 };
 
-export default index;
+export default Index;
