@@ -4,11 +4,36 @@ import { RNText } from '@/components/ui/input';
 import { Colors } from '@/constants/color';
 import { router } from 'expo-router';
 import { AlertCircle, ChevronDown } from 'lucide-react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Fifth = () => {
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
+
+  const prompts = [
+    {
+      question: 'What patterns do you notice this week?',
+      answer: 'Your mood dips mid-week (Wednesday) consistently over the past 3 weeks. Your anxiety spikes correlate with lower sleep scores. Consider protecting Wednesday evenings.'
+    },
+    {
+      question: 'What might be triggering my anxiety?',
+      answer: 'Based on your entries, work-related stress and lack of sleep usually precede your anxiety spikes. Try to prioritize rest and mindful breaks.'
+    },
+    {
+      question: 'Give me 3 evidence-based tools.',
+      answer: '1. 4-7-8 Breathing Technique\n2. Progressive Muscle Relaxation\n3. Cognitive Restructuring Exercises'
+    },
+    {
+      question: 'Summarize my last 7 days.',
+      answer: 'You started the week feeling overwhelmed but gradually improved. You engaged in 3 positive activities and logged 4 journal entries over the weekend.'
+    }
+  ];
+
+  const toggleAccordion = (index: number) => {
+    setExpandedIndex(expandedIndex === index ? null : index);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -33,28 +58,34 @@ const Fifth = () => {
         </RNText>
 
         <View style={styles.promptsContainer}>
-          <View style={styles.promptItem}>
-            <View style={styles.promptHeader}>
-               <RNText variant="medium" size="sm" style={styles.promptLabel}>What patterns do you notice this week?</RNText>
-               <ChevronDown size={18} color="#6D6661" />
-            </View>
-            <View style={styles.responseBox}>
-              <RNText variant="base" size="sm" style={styles.responseText}>
-                Your mood dips mid-week (Wednesday) consistently over the past 3 weeks. Your anxiety spikes correlate with lower sleep scores. Consider protecting Wednesday evenings.
-              </RNText>
-            </View>
-          </View>
+          {prompts.map((item, index) => {
+            const isExpanded = expandedIndex === index;
+            return (
+              <TouchableOpacity
+                key={index}
+                activeOpacity={0.8}
+                onPress={() => toggleAccordion(index)}
+                style={isExpanded ? styles.promptItem : styles.collapsedPrompt}
+              >
+                <View style={styles.promptHeader}>
+                  <RNText variant="medium" size="sm" style={styles.promptLabel}>{item.question}</RNText>
+                  <ChevronDown
+                    size={18}
+                    color="#6D6661"
+                    style={{ transform: [{ rotate: isExpanded ? '180deg' : '0deg' }] }}
+                  />
+                </View>
 
-          {[
-            'What might be triggering my anxiety?',
-            'Give me 3 evidence-based tools.',
-            'Summarize my last 7 days.'
-          ].map((prompt, index) => (
-            <View key={index} style={styles.collapsedPrompt}>
-              <RNText variant="medium" size="sm" style={styles.promptLabel}>{prompt}</RNText>
-              <ChevronDown size={18} color="#6D6661" />
-            </View>
-          ))}
+                {isExpanded && (
+                  <View style={styles.responseBox}>
+                    <RNText variant="base" size="sm" style={styles.responseText}>
+                      {item.answer}
+                    </RNText>
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         <TouchableOpacity

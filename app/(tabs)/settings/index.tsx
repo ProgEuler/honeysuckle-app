@@ -9,20 +9,20 @@ import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { router } from "expo-router";
 import {
-  HelpCircle,
-  MoreVertical,
-  ShieldCheck,
-  Smile,
+    HelpCircle,
+    MoreVertical,
+    ShieldCheck,
+    Smile,
 } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-  Dimensions,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const { width } = Dimensions.get("window");
@@ -127,14 +127,14 @@ const Index = () => {
                 />
               }
             />
-            <SettingItem icon={Share} title="Invite Friends" />
-            <SettingItem icon={Feedback} title="Submit Feedback" />
+            <SettingItem icon={Share} title="Invite Friends" onPress={() => router.push("/(tabs)/settings/invitefriends")} />
+            <SettingItem icon={Feedback} title="Submit Feedback" onPress={() => router.push("/(tabs)/settings/submitfeedback")} />
           </View>
 
           <SectionHeader title="Security & Privacy" />
           <View style={styles.card}>
-            <SettingItem icon={ShieldCheck} title="Security" isLucide />
-            <SettingItem icon={HelpCircle} title="Help & Support" isLucide />
+            <SettingItem icon={ShieldCheck} title="Security" isLucide onPress={() => router.push("/(tabs)/settings/security")} />
+            <SettingItem icon={HelpCircle} title="Help & Support" isLucide onPress={() => router.push("/welcome")} />
           </View>
 
           <SectionHeader title="Log Out" />
