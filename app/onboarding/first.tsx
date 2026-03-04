@@ -36,7 +36,7 @@ const First = () => {
             <RNText variant="title" size="4xl" style={[styles.titleText, { color: Colors.green }]}>Feeling today?</RNText>
           </View>
           <RNText variant="medium" size="md" style={styles.description}>
-            Pick the mood that's closest to how you're feeling right now. One tap, every day — this is your anchor.
+            Pick the mood that fits right now. A quick daily tap helps you notice patterns over time.
           </RNText>
         </View>
 

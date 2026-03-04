@@ -1,10 +1,8 @@
-import { ClerkProvider } from "@clerk/clerk-expo";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
 import { StatusBar } from "react-native";
 import { KeyboardProvider } from "react-native-keyboard-controller";
-import { tokenCache } from '@clerk/clerk-expo/token-cache'
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -28,12 +26,12 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
   return (
     <KeyboardProvider>
-      <ClerkProvider tokenCache={tokenCache}>
+      {/* <ClerkProvider tokenCache={tokenCache}> */}
         <StatusBar barStyle="dark-content" backgroundColor={"transparent"} />
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
         </Stack>
-      </ClerkProvider>
+      {/* </ClerkProvider> */}
     </KeyboardProvider>
   );
 }

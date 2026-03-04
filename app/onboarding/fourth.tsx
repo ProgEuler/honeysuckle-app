@@ -32,7 +32,7 @@ const Fourth = () => {
             <RNText variant="title" size="4xl" style={[styles.titleText, { color: Colors.green }]}>Patterns unfold</RNText>
           </View>
           <RNText variant="medium" size="md" style={styles.description}>
-            After a week of check-ins, Analytics begins to show you what's really happening beneath the surface.
+            After about a week of check ins, your trends start to show up. You will begin to see what helps and what makes things harder.
           </RNText>
         </View>
 

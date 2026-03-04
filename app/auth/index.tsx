@@ -7,7 +7,7 @@ import RNButton from "@/components/ui/button";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import useSocialAuth from "@/hooks/useSocialAuth";
-import { useSignIn } from "@clerk/clerk-expo";
+// import { useSignIn } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import React, { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -17,10 +17,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const index = () => {
   const dummyForm = useForm();
 
-  const { handleSocialAuth, loadingStrategy } = useSocialAuth();
-  const { signIn, setActive } = useSignIn();
+//   const { handleSocialAuth, loadingStrategy } = useSocialAuth();
+//   const { signIn, setActive } = useSignIn();
 
-  const isLoading = loadingStrategy !== null;
+//   const isLoading = loadingStrategy !== null;
 
 //     const onSignInPress = useCallback(async () => {
 //     if (!isLoaded) return
@@ -178,7 +178,7 @@ const index = () => {
                 alignItems: "center",
                 borderRadius: 40,
               }}
-              onPress={() => !isLoading && handleSocialAuth("oauth_google")}
+            //   onPress={() => !isLoading && handleSocialAuth("oauth_google")}
             >
               <Google />
             </TouchableOpacity>
@@ -191,7 +191,7 @@ const index = () => {
                 alignItems: "center",
                 borderRadius: 40,
               }}
-              onPress={() => !isLoading && handleSocialAuth("oauth_apple")}
+            //   onPress={() => !isLoading && handleSocialAuth("oauth_apple")}
             >
               <Apple />
             </TouchableOpacity>

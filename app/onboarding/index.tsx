@@ -21,7 +21,7 @@ const Index = () => {
         </View>
 
         <RNText variant="medium" size="lg" style={styles.description}>
-          A gentle daily practice that helps you understand your patterns, track your mood, and feel more grounded — in just minutes a day.
+          A calm daily habit to track your mood, notice patterns, and feel a little more steady. Just a couple minutes a day.
         </RNText>
 
         <View style={styles.cardsContainer}>

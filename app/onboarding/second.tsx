@@ -22,7 +22,7 @@ const Second = () => {
             <RNText variant="title" size="4xl" style={[styles.titleText, { color: Colors.green }]}>your mind?</RNText>
           </View>
           <RNText variant="medium" size="md" style={styles.description}>
-            Write a few lines — or even just one sentence. No format, no pressure. Just what's true right now.
+            Write what is true right now. One sentence is enough. Keep it simple.
           </RNText>
         </View>
 

@@ -42,7 +42,7 @@ const Third = () => {
             <RNText variant="title" size="4xl" style={[styles.titleText, { color: Colors.green }]}>that fits your life</RNText>
           </View>
           <RNText variant="medium" size="md" style={styles.description}>
-            There's no wrong choice. Consistency matters more than timing — pick what you'll actually stick to.
+            Pick what fits your real life. You can change it anytime. What matters most is coming back to it.
           </RNText>
         </View>
 

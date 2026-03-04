@@ -54,7 +54,7 @@ const Fifth = () => {
         </View>
 
         <RNText variant="medium" size="md" style={styles.description}>
-          The AI reviews your mood data and journal entries together — and offers thoughtful, personalised suggestions. Tap a prompt to see how it responds.
+          It looks at your check ins and journal notes together, then suggests a few ideas you can try. Tap a prompt to see an example.
         </RNText>
 
         <View style={styles.promptsContainer}>
