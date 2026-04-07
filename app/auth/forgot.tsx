@@ -5,116 +5,153 @@ import RNButton from "@/components/ui/button";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
-import { Image, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Forgot = () => {
-  const dummyForm = useForm();
-  const [isChecked, setChecked] = useState(false);
-  return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: Colors.background,
-        overflow: "hidden",
-      }}
-    >
-      <View
-        style={{
-          backgroundColor: Colors.green,
-          width: 960,
-          height: 960,
-          position: "absolute",
-          top: -750,
-          left: "50%",
-          marginLeft: -480,
-          borderRadius: 1234,
-        }}
-      />
-         <BackButton style={{ top: 80, left: 24 }} />
-      <SafeAreaView style={{ flex: 1, gap: 120, marginTop: 30 }}>
-        <View style={{ alignItems: "center" }}>
-          <Image
-            source={require("@/assets/images/logo.png")}
-            style={{ height: 60, width: 60 }}
-          />
-        </View>
-        <View
-          style={{
-            width: "90%",
-            marginHorizontal: "auto",
-            alignSelf: "center",
-            gap: 40,
-          }}
-        >
-          <View style={{ gap: 20 }}>
-            <RNText variant="title" size="3xl" style={{ textAlign: "center" }}>
-              Forgot Password
-            </RNText>
-            <RNText
-              variant="base"
-              size="lg"
-              style={{
-                textAlign: "center",
-                marginBottom: 20,
-                width: "90%",
-                marginHorizontal: "auto",
-              }}
-            >
-              Don't worry! Please enter the email address linked with your
-              account.
-            </RNText>
-          </View>
-          <View style={{ gap: 10 }}>
-            <View style={{ gap: 20 }}>
-              <InputForm
-                title={"email"}
-                label={"Enter Your Email Address"}
-                placeHolder={"abc@email.com"}
-                control={dummyForm.control}
-                errors={{}}
-                Icon={Email}
-              />
-            </View>
-          </View>
-          <View>
-            <RNButton path={"/auth/forgototp"} value={"Send"} />
-          </View>
+    const dummyForm = useForm();
 
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: 50,
-            }}
-          >
-            <RNText variant="medium" size="lg">
-              {" "}
-              Remember Password?{" "}
-            </RNText>
-            <TouchableOpacity
-              onPress={() => router.replace("/auth")}
-              style={{ alignItems: "center", justifyContent: "center" }}
-            >
-              <RNText
-                variant="medium"
-                size="lg"
-                style={{
-                  color: Colors.orange,
-                  textDecorationLine: "underline",
-                }}
-              >
-                Sign In.
-              </RNText>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </SafeAreaView>
-    </View>
-  );
+    return (
+        <KeyboardAwareScrollView
+            style={styles.container}
+            contentContainerStyle={styles.contentContainer}
+            keyboardShouldPersistTaps="handled"
+            bottomOffset={24}
+        >
+            <View style={styles.backgroundCircle} />
+            <BackButton style={styles.backButton} />
+
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.logoContainer}>
+                    <Image
+                        source={require("@/assets/images/logo.png")}
+                        style={styles.logo}
+                    />
+                </View>
+
+                <View style={styles.formWrapper}>
+                    <View style={styles.titleGroup}>
+                        <RNText variant="title" size="3xl" style={styles.titleText}>
+                            Forgot Password
+                        </RNText>
+                        <RNText variant="base" size="lg" style={styles.subtitleText}>
+                            Don't worry! Please enter the email address linked with your
+                            account.
+                        </RNText>
+                    </View>
+
+                    <View style={styles.formGroup}>
+                        <View style={styles.inputsGroup}>
+                            <InputForm
+                                title={"email"}
+                                label={"Enter Your Email Address"}
+                                placeHolder={"abc@email.com"}
+                                control={dummyForm.control}
+                                errors={{}}
+                                Icon={Email}
+                            />
+                        </View>
+                    </View>
+
+                    <RNButton path={"/auth/forgototp"} value={"Send"} />
+
+                    <View style={styles.footerRow}>
+                        <RNText variant="medium" size="lg">
+                            {" "}
+                            Remember Password?{" "}
+                        </RNText>
+                        <TouchableOpacity
+                            onPress={() => router.replace("/auth")}
+                            style={styles.centerAlign}
+                        >
+                            <RNText variant="medium" size="lg" style={styles.linkText}>
+                                Sign In.
+                            </RNText>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </SafeAreaView>
+        </KeyboardAwareScrollView>
+    );
 };
 
 export default Forgot;
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: Colors.background,
+    },
+    contentContainer: {
+        flexGrow: 1,
+        paddingBottom: 32,
+    },
+    backgroundCircle: {
+        backgroundColor: Colors.green,
+        width: 960,
+        height: 960,
+        position: "absolute",
+        top: -750,
+        left: "50%",
+        marginLeft: -480,
+        borderRadius: 1234,
+    },
+    backButton: {
+        top: 80,
+        left: 24,
+    },
+    safeArea: {
+        flex: 1,
+        gap: 80,
+        marginTop: 20,
+        justifyContent: "space-between",
+    },
+    logoContainer: {
+        alignItems: "center",
+    },
+    logo: {
+        height: 60,
+        width: 60,
+    },
+    formWrapper: {
+        width: "90%",
+        marginHorizontal: "auto",
+        alignSelf: "center",
+        gap: 40,
+    },
+    titleGroup: {
+        gap: 20,
+    },
+    titleText: {
+        textAlign: "center",
+    },
+    subtitleText: {
+        textAlign: "center",
+        marginBottom: 20,
+        width: "90%",
+        marginHorizontal: "auto",
+    },
+    formGroup: {
+        gap: 10,
+    },
+    inputsGroup: {
+        gap: 20,
+    },
+    footerRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 50,
+    },
+    centerAlign: {
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    linkText: {
+        color: Colors.orange,
+        textDecorationLine: "underline",
+    },
+});

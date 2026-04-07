@@ -5,17 +5,16 @@ import { router } from 'expo-router';
 import { ArrowRight } from 'lucide-react-native';
 import React from 'react';
 import {
-    Dimensions,
     StyleSheet,
     TouchableOpacity,
     View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 
-const { width } = Dimensions.get('window');
-
 const InviteFriends = () => {
+  const { bottom } = useSafeAreaInsets();
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -30,7 +29,12 @@ const InviteFriends = () => {
         </RNText>
       </View>
 
-      <View style={styles.content}>
+      <KeyboardAwareScrollView
+        style={styles.scroll}
+        contentContainerStyle={[styles.content, { paddingBottom: bottom + 40 }]}
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={24}
+      >
         <View style={styles.imageContainer}>
           <Svg width="220" height="220" viewBox="0 0 200 200">
             <Circle cx="100" cy="100" r="100" fill="#EFEFDE" />
@@ -66,7 +70,7 @@ const InviteFriends = () => {
             <ArrowRight size={22} color={Colors.white} />
           </TouchableOpacity>
         </View>
-      </View>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 };
@@ -94,8 +98,11 @@ const styles = StyleSheet.create({
     color: Colors.brown,
     marginTop: 2,
   },
-  content: {
+  scroll: {
     flex: 1,
+  },
+  content: {
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,

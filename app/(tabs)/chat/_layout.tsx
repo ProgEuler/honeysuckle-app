@@ -1,8 +1,8 @@
-import { Stack } from 'expo-router';
-import React from 'react';
+import { Stack } from "expo-router";
+import React from "react";
 
-const ChatLayout = () => {
-  return <Stack screenOptions={{ headerShown: false }} />;
+const DailyCheckLayout = () => {
+    return <Stack screenOptions={{ headerShown: false }} />;
 };
 
-export default ChatLayout;
+export default DailyCheckLayout;

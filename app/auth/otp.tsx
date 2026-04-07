@@ -5,32 +5,24 @@ import { Colors } from '@/constants/color';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { OtpInput } from 'react-native-otp-entry';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Otp = () => {
   const [verify, setVerify] = useState(false);
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'flex-start',
-          alignItems: 'center',
-          gap: 20,
-          marginLeft: 20,
-          marginTop: 20,
-        }}
-      >
+    <KeyboardAwareScrollView
+      style={styles.screen}
+      contentContainerStyle={styles.contentContainer}
+      keyboardShouldPersistTaps="handled"
+      bottomOffset={24}
+    >
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.headerRow}>
         <TouchableOpacity
           onPress={() => router.back()}
-          style={{
-            padding: 12,
-            borderWidth: 1,
-            borderColor: Colors.brown,
-            alignItems: 'flex-start',
-            borderRadius: 40,
-          }}
+          style={styles.backButton}
         >
           <Back />
         </TouchableOpacity>
@@ -39,25 +31,15 @@ const Otp = () => {
         </RNText>
       </View>
 
-      <View
-        style={{
-          width: '90%',
-          marginHorizontal: 'auto',
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 50,
-          marginTop: -100,
-        }}
-      >
-        <View style={{ width: '95%', marginHorizontal: 'auto', gap: 20 }}>
-          <RNText variant="title" size="2xl" style={{ textAlign: 'center' }}>
+      <View style={styles.mainContent}>
+        <View style={styles.headerContent}>
+          <RNText variant="title" size="2xl" style={styles.titleText}>
             Enter 4 digit OTP Code
           </RNText>
           <RNText
             variant="medium"
             size="md"
-            style={{ textAlign: 'center', lineHeight: 30 }}
+            style={styles.subtitleText}
           >
             We’ve sent a 4-digit verification code to your Email. Enter the code
             below to proceed.
@@ -84,29 +66,87 @@ const Otp = () => {
             }}
           />
         </View>
-        <View style={{ width: '100%' }}>
+        <View style={styles.fullWidth}>
           <RNButton value={'Continue'} path={'/onboarding'} />
         </View>
-        <View style={{ flexDirection: 'row', gap: 5, marginTop: 20 }}>
+        <View style={styles.footerRow}>
           <RNText variant="subtitle" size="sm">
             Din't receive the code?
           </RNText>
           <RNText
             variant="subtitle"
             size="sm"
-            style={{ textDecorationLine: 'underline', color: Colors.orange }}
+            style={styles.linkText}
           >
             Resend.
           </RNText>
         </View>
       </View>
     </SafeAreaView>
+    </KeyboardAwareScrollView>
   );
 };
 
 export default Otp;
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  contentContainer: {
+    flexGrow: 1,
+  },
+  safeArea: {
+    flex: 1,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    gap: 20,
+    marginLeft: 20,
+    marginTop: 20,
+  },
+  backButton: {
+    padding: 12,
+    borderWidth: 1,
+    borderColor: Colors.brown,
+    alignItems: 'flex-start',
+    borderRadius: 40,
+  },
+  mainContent: {
+    width: '90%',
+    marginHorizontal: 'auto',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 50,
+    marginTop: -100,
+  },
+  headerContent: {
+    width: '95%',
+    marginHorizontal: 'auto',
+    gap: 20,
+  },
+  titleText: {
+    textAlign: 'center',
+  },
+  subtitleText: {
+    textAlign: 'center',
+    lineHeight: 30,
+  },
+  fullWidth: {
+    width: '100%',
+  },
+  footerRow: {
+    flexDirection: 'row',
+    gap: 5,
+    marginTop: 20,
+  },
+  linkText: {
+    textDecorationLine: 'underline',
+    color: Colors.orange,
+  },
   container: {
     padding: 10,
   },

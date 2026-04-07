@@ -4,15 +4,16 @@ import { Colors } from '@/constants/color';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    ScrollView,
     StyleSheet,
     TextInput,
     TouchableOpacity,
     View
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const SubmitFeedback = () => {
+  const { bottom } = useSafeAreaInsets();
   const [feedback, setFeedback] = useState('');
 
   return (
@@ -29,7 +30,12 @@ const SubmitFeedback = () => {
         </RNText>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <KeyboardAwareScrollView
+        style={styles.scroll}
+        contentContainerStyle={[styles.content, { paddingBottom: bottom + 40 }]}
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={24}
+      >
         <RNText variant="medium" size="lg" style={styles.description}>
           We'd love to hear your thoughts. How can we improve your experience?
         </RNText>
@@ -50,7 +56,6 @@ const SubmitFeedback = () => {
           style={[styles.submitButton, !feedback.trim() && styles.submitButtonDisabled]}
           onPress={() => {
             if (feedback.trim()) {
-              // Submit feedback logic here
               router.back();
             }
           }}
@@ -60,7 +65,7 @@ const SubmitFeedback = () => {
             Submit
           </RNText>
         </TouchableOpacity>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 };
@@ -87,6 +92,9 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: Colors.brown,
     marginTop: 2,
+  },
+  scroll: {
+    flex: 1,
   },
   content: {
     padding: 24,

@@ -7,22 +7,22 @@ import React, { useRef, useState } from 'react';
 import {
     Animated,
     Dimensions,
-    ScrollView,
     StyleSheet,
     TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
 const ChangePassword = () => {
+  const { bottom } = useSafeAreaInsets();
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  // Toast State
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
   const toastOpacity = useRef(new Animated.Value(0)).current;
@@ -31,14 +31,12 @@ const ChangePassword = () => {
     setToastMessage(message);
     setToastType(type);
 
-    // Animate in
     Animated.timing(toastOpacity, {
       toValue: 1,
       duration: 300,
       useNativeDriver: true,
     }).start();
 
-    // Animate out after 2.5s
     setTimeout(() => {
       Animated.timing(toastOpacity, {
         toValue: 0,
@@ -68,7 +66,6 @@ const ChangePassword = () => {
       return;
     }
 
-    // Success
     showToast('Password changed successfully!', 'success');
   };
 
@@ -86,7 +83,12 @@ const ChangePassword = () => {
         </RNText>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <KeyboardAwareScrollView
+        style={styles.scroll}
+        contentContainerStyle={[styles.content, { paddingBottom: bottom + 40 }]}
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={24}
+      >
         <View style={styles.inputContainer}>
           <RNText variant="medium" size="sm" style={styles.label}>Old Password</RNText>
           <View style={styles.inputWrapper}>
@@ -137,9 +139,8 @@ const ChangePassword = () => {
             Update Password
           </RNText>
         </TouchableOpacity>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
-      {/* Toast Notification */}
       <Animated.View
         style={[
           styles.toastContainer,
@@ -185,6 +186,9 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: Colors.brown,
     marginTop: 2,
+  },
+  scroll: {
+    flex: 1,
   },
   content: {
     padding: 24,
@@ -236,7 +240,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 30,
     gap: 10,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 10,

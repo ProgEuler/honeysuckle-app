@@ -210,6 +210,7 @@ const styles = StyleSheet.create({
     color: Colors.white,
   },
   chartWrapper: {
+      overflow: 'hidden',
     alignItems: 'center',
     marginLeft: -10,
   },

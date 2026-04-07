@@ -1,41 +1,15 @@
 import Back from '@/assets/svgs/back.svg';
-import Depressed from '@/assets/svgs/depressed.svg';
-import Excellent from '@/assets/svgs/excellent.svg';
-import Happy from '@/assets/svgs/happy.svg';
-import Neutral from '@/assets/svgs/neutral.svg';
-import Sad from '@/assets/svgs/sad.svg';
+import { moodOptions } from '@/app/dailycheck-sub-screens/_moodOptions';
 import { BackButton } from '@/components/ui/BackButton';
 import RNButton from '@/components/ui/button';
 import { RNText } from '@/components/ui/input';
 import { Colors } from '@/constants/color';
 import React, { useState } from 'react';
 import { ScrollView, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
-export const moodOptions = [
-  {
-    label: 'Excellent',
-    icon: Excellent,
-  },
-  {
-    label: 'Happy',
-    icon: Happy,
-  },
-  {
-    label: 'Neutral',
-    icon: Neutral,
-  },
-  {
-    label: 'Sad',
-    icon: Sad,
-  },
-  {
-    label: 'Depressed',
-    icon: Depressed,
-  },
-];
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const EmotionType = () => {
+  const { bottom } = useSafeAreaInsets();
   // const [moods, setMoods] = useState({
   //   Excellent: false,
   //   Happy: false,
@@ -54,8 +28,8 @@ const EmotionType = () => {
   //   });
   // };
 
-  const [selectedMood, setSelectedMood] = useState(null);
-  const handleMoodSelect = (label) => {
+  const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const handleMoodSelect = (label: string) => {
     setSelectedMood(label);
   };
 
@@ -99,7 +73,7 @@ const EmotionType = () => {
         </View>
       </SafeAreaView>
       <ScrollView>
-        <View style={{ paddingBottom: 50 }}>
+        <View style={{ paddingBottom: bottom + 40 }}>
           <View
             style={{
               width: '90%',
@@ -174,7 +148,7 @@ const EmotionType = () => {
             <View style={{ width: '100%' }}>
               <RNButton
                 value={'Continue'}
-                path={'/(tabs)/dailycheck/timestart'}
+                path={'/dailycheck-sub-screens/timestart'}
                 // tag={'replace'}
               />
             </View>

@@ -4,77 +4,44 @@ import { Colors } from '@/constants/color';
 import React, { useState } from 'react';
 import {
   Image,
-  Keyboard,
   StyleSheet,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { OtpInput } from 'react-native-otp-entry';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ForgotOtp = () => {
   const [verify, setVerify] = useState(false);
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: Colors.background,
-        overflow: 'hidden',
-      }}
+    <KeyboardAwareScrollView
+      style={styles.screen}
+      contentContainerStyle={styles.contentContainer}
+      keyboardShouldPersistTaps="handled"
+      bottomOffset={24}
     >
-      <View
-        style={{
-          backgroundColor: Colors.green,
-          width: 960,
-          height: 960,
-          position: 'absolute',
-          top: -750,
-          left: '50%',
-          marginLeft: -480,
-          borderRadius: 1234,
-        }}
-      />
-      <SafeAreaView style={{ flex: 1, marginTop: 30 }}>
-        <View style={{ alignItems: 'center' }}>
+      <View style={styles.backgroundCircle} />
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.logoContainer}>
           <Image
             source={require('@/assets/images/logo.png')}
-            style={{ height: 60, width: 60 }}
+            style={styles.logo}
           />
         </View>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            contentContainerStyle={{ marginTop: 120 }}
-          >
-            <View
-              style={{
-                width: '90%',
-                marginHorizontal: 'auto',
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: 40,
-              }}
-            >
-              <View style={{ gap: 20, width: '90%', marginHorizontal: 'auto' }}>
+        <View style={styles.mainContent}>
+              <View style={styles.headerContent}>
                 <RNText
                   variant="title"
                   size="3xl"
-                  style={{ textAlign: 'center' }}
+                  style={styles.titleText}
                 >
                   Enter 4 digit OTP Code
                 </RNText>
                 <RNText
                   variant="base"
                   size="lg"
-                  style={{
-                    textAlign: 'center',
-                    marginBottom: 20,
-                    width: '90%',
-                    marginHorizontal: 'auto',
-                  }}
+                  style={styles.subtitleText}
                 >
                   We’ve sent a 4-digit verification code to your Email. Enter
                   the code below to proceed.
@@ -101,48 +68,105 @@ const ForgotOtp = () => {
                   }}
                 />
               </View>
-              <View style={{ width: '100%' }}>
+              <View style={styles.fullWidth}>
                 <RNButton value={'Continue'} path={'/auth/newpassword'} />
               </View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginTop: 50,
-                }}
-              >
+              <View style={styles.footerRow}>
                 <RNText variant="medium" size="lg">
                   {' '}
                   Didn't receive the code?{' '}
                 </RNText>
                 <TouchableOpacity
                   // onPress={() => router.replace('/auth')}
-                  style={{ alignItems: 'center', justifyContent: 'center' }}
+                  style={styles.centerAlign}
                 >
                   <RNText
                     variant="medium"
                     size="lg"
-                    style={{
-                      color: Colors.orange,
-                      textDecorationLine: 'underline',
-                    }}
+                    style={styles.linkText}
                   >
                     Resend.
                   </RNText>
                 </TouchableOpacity>
               </View>
-            </View>
-          </KeyboardAvoidingView>
-        </TouchableWithoutFeedback>
+        </View>
       </SafeAreaView>
-    </View>
+    </KeyboardAwareScrollView>
   );
 };
 
 export default ForgotOtp;
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  contentContainer: {
+    flexGrow: 1,
+    paddingBottom: 32,
+  },
+  backgroundCircle: {
+    backgroundColor: Colors.green,
+    width: 960,
+    height: 960,
+    position: 'absolute',
+    top: -750,
+    left: '50%',
+    marginLeft: -480,
+    borderRadius: 1234,
+  },
+  safeArea: {
+    flex: 1,
+    marginTop: 30,
+  },
+  logoContainer: {
+    alignItems: 'center',
+  },
+  logo: {
+    height: 60,
+    width: 60,
+  },
+  mainContent: {
+    width: '90%',
+    marginHorizontal: 'auto',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 40,
+    marginTop: 120,
+  },
+  headerContent: {
+    gap: 20,
+    width: '90%',
+    marginHorizontal: 'auto',
+  },
+  titleText: {
+    textAlign: 'center',
+  },
+  subtitleText: {
+    textAlign: 'center',
+    marginBottom: 20,
+    width: '90%',
+    marginHorizontal: 'auto',
+  },
+  fullWidth: {
+    width: '100%',
+  },
+  footerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 50,
+  },
+  centerAlign: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  linkText: {
+    color: Colors.orange,
+    textDecorationLine: 'underline',
+  },
   container: {
     padding: 10,
   },

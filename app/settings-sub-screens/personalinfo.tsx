@@ -7,30 +7,26 @@ import Person from '@/assets/svgs/person.svg';
 import DatePicker, { DatePickerRef } from '@/components/datepicker';
 import InputForm from '@/components/inputform';
 import { RNText } from '@/components/ui/input';
+import { RNSwitch } from '@/components/ui/switch';
 import { Colors } from '@/constants/color';
+import { useUserStore } from '@/store/useUserStore';
 import { router } from 'expo-router';
 import React, { useRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
     Image,
-    ScrollView,
+    StyleSheet,
     TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
-
-import { RNSwitch } from '@/components/ui/switch';
-import { useUserStore } from '@/store/useUserStore';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const PersonalInfo = () => {
+  const { bottom } = useSafeAreaInsets();
   const { hasSoughtProfessionalHelp, setHasSoughtProfessionalHelp } = useUserStore();
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-  } = useForm({
+  const { control, handleSubmit } = useForm({
     defaultValues: {
       fullName: 'Shinomiya Kaguya',
       gender: 'Female',
@@ -40,74 +36,44 @@ const PersonalInfo = () => {
   });
   const DatePickRef = useRef<DatePickerRef>(null);
 
-  const onSubmit = (data: any) => {
-     // Save and go back
+  const onSubmit = () => {
      router.back();
   };
 
   return (
-    <>
-      <SafeAreaView>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'flex-start',
-            alignItems: 'center',
-            gap: 20,
-            marginLeft: 20,
-            marginTop: 20,
-          }}
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.headerRow}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
         >
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={{
-              padding: 12,
-              borderWidth: 1,
-              borderColor: Colors.brown,
-              alignItems: 'flex-start',
-              borderRadius: 40,
-            }}
-          >
-            <Back />
-          </TouchableOpacity>
-          <RNText variant="title" size="xl">
-            Edit Personal Info
-          </RNText>
-        </View>
-      </SafeAreaView>
-      <ScrollView>
-        <View
-          style={{
-            width: '90%',
-            marginHorizontal: 'auto',
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: 30,
-            marginTop: 20,
-          }}
-        >
+          <Back />
+        </TouchableOpacity>
+        <RNText variant="title" size="xl">
+          Edit Personal Info
+        </RNText>
+      </View>
+
+      <KeyboardAwareScrollView
+        style={styles.scroll}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: bottom + 40 }]}
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={24}
+      >
+        <View style={styles.mainContent}>
           <View>
-            <View
-              style={{
-                borderWidth: 1,
-                borderColor: Colors.green,
-                borderRadius: 150,
-                overflow: 'hidden',
-              }}
-            >
+            <View style={styles.profileImageFrame}>
               <Image
                 source={require('@/assets/images/person.jpg')}
-                style={{ height: 120, width: 120, overflow: 'hidden' }}
+                style={styles.profileImage}
               />
             </View>
-            <TouchableOpacity
-              style={{ position: 'absolute', right: 0, bottom: 0 }}
-            >
+            <TouchableOpacity style={styles.editButton}>
               <Edit />
             </TouchableOpacity>
           </View>
-          <View style={{ width: '100%', gap: 10 }}>
+
+          <View style={styles.formSection}>
             <InputForm
               title={'fullName'}
               label={'Full Name'}
@@ -116,11 +82,12 @@ const PersonalInfo = () => {
               errors={{}}
               Icon={Person}
             />
-            <View style={{ marginBottom: 10 }}>
+
+            <View style={styles.dateFieldSection}>
               <RNText
                 variant="header"
                 size="sm"
-                style={{ fontSize: 20, marginBottom: 12 }}
+                style={styles.dateFieldLabel}
               >
                 Date of Birth
               </RNText>
@@ -134,16 +101,7 @@ const PersonalInfo = () => {
                       onPress={() => {
                         DatePickRef.current?.showDatePicker();
                       }}
-                      style={{
-                        flexDirection: 'row',
-                        borderWidth: 1,
-                        backgroundColor: Colors.white,
-                        borderRadius: 30,
-                        paddingHorizontal: 12,
-                        paddingVertical: 10,
-                        alignItems: 'center',
-                        borderColor: Colors.green,
-                      }}
+                      style={styles.dateInputWrap}
                     >
                       <Calender />
                       <TextInput
@@ -152,22 +110,14 @@ const PersonalInfo = () => {
                         editable={false}
                         pointerEvents="none"
                         placeholderTextColor="#999"
-                        style={{
-                          flex: 1,
-                          paddingVertical: 5,
-                          paddingHorizontal: 10,
-                          borderRadius: 10,
-                          fontSize: 18,
-                          fontFamily: 'PoppinsRegular',
-                          backgroundColor: Colors.white,
-                          color: Colors.brown,
-                        }}
+                        style={styles.dateInput}
                       />
                     </TouchableOpacity>
                   </>
                 )}
               />
             </View>
+
             <InputForm
               title={'gender'}
               label={'Gender'}
@@ -186,7 +136,7 @@ const PersonalInfo = () => {
               Icon={Location}
             />
 
-            <View style={{ marginTop: 20, gap: 15 }}>
+            <View style={styles.additionalInfoSection}>
               <RNText variant="header" size="md">Additional Information</RNText>
 
               <RNSwitch
@@ -196,26 +146,122 @@ const PersonalInfo = () => {
               />
             </View>
           </View>
-          <View style={{ width: '100%', marginBottom: 40 }}>
+
+          <View style={styles.submitWrap}>
             <TouchableOpacity
               onPress={handleSubmit(onSubmit)}
-              style={{
-                backgroundColor: Colors.brown,
-                paddingVertical: 18,
-                borderRadius: 100,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
+              style={styles.submitButton}
             >
-              <RNText variant="header" size="lg" style={{ color: Colors.white }}>
-                 Save Changes
+              <RNText variant="header" size="lg" style={styles.submitText}>
+                Save Changes
               </RNText>
             </TouchableOpacity>
           </View>
         </View>
-      </ScrollView>
-    </>
+      </KeyboardAwareScrollView>
+    </SafeAreaView>
   );
 };
 
 export default PersonalInfo;
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    gap: 20,
+    marginLeft: 20,
+    marginTop: 20,
+  },
+  backButton: {
+    padding: 12,
+    borderWidth: 1,
+    borderColor: Colors.brown,
+    alignItems: 'flex-start',
+    borderRadius: 40,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  mainContent: {
+    width: '90%',
+    marginHorizontal: 'auto',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 30,
+    marginTop: 20,
+  },
+  profileImageFrame: {
+    borderWidth: 1,
+    borderColor: Colors.green,
+    borderRadius: 150,
+    overflow: 'hidden',
+  },
+  profileImage: {
+    height: 120,
+    width: 120,
+    overflow: 'hidden',
+  },
+  editButton: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+  },
+  formSection: {
+    width: '100%',
+    gap: 10,
+  },
+  dateFieldSection: {
+    marginBottom: 10,
+  },
+  dateFieldLabel: {
+    fontSize: 20,
+    marginBottom: 12,
+  },
+  dateInputWrap: {
+    flexDirection: 'row',
+    borderWidth: 1,
+    backgroundColor: Colors.white,
+    borderRadius: 30,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderColor: Colors.green,
+  },
+  dateInput: {
+    flex: 1,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    fontSize: 18,
+    fontFamily: 'PoppinsRegular',
+    backgroundColor: Colors.white,
+    color: Colors.brown,
+  },
+  additionalInfoSection: {
+    marginTop: 20,
+    gap: 15,
+  },
+  submitWrap: {
+    width: '100%',
+    marginBottom: 40,
+  },
+  submitButton: {
+    backgroundColor: Colors.brown,
+    paddingVertical: 18,
+    borderRadius: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  submitText: {
+    color: Colors.white,
+  },
+});

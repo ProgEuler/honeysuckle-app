@@ -1,17 +1,19 @@
 import Back from '@/assets/svgs/back.svg';
-import Next from "@/assets/svgs/next.svg";
+import Next from '@/assets/svgs/next.svg';
 import { RNText } from '@/components/ui/input';
 import { Colors } from '@/constants/color';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  StyleSheet,
-  TouchableOpacity,
-  View
+    StyleSheet,
+    TouchableOpacity,
+    View
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Security = () => {
+  const { bottom } = useSafeAreaInsets();
   const [biometricsEnabled, setBiometricsEnabled] = useState(false);
 
   return (
@@ -28,9 +30,14 @@ const Security = () => {
         </RNText>
       </View>
 
-      <View style={styles.content}>
+      <KeyboardAwareScrollView
+        style={styles.scroll}
+        contentContainerStyle={[styles.content, { paddingBottom: bottom + 40 }]}
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={24}
+      >
         <View style={styles.card}>
-          <TouchableOpacity style={styles.settingItem} onPress={() => router.push('/(tabs)/settings/changepassword')}>
+          <TouchableOpacity style={styles.settingItem} onPress={() => router.push('/settings-sub-screens/changepassword')}>
             <View style={styles.settingItemLeft}>
               <RNText variant="header" size="md" style={styles.settingItemTitle}>
                 Change Password
@@ -38,23 +45,8 @@ const Security = () => {
             </View>
             <Next />
           </TouchableOpacity>
-
-          {/* <View style={[styles.settingItem, styles.noBorder]}>
-            <View style={styles.settingItemLeft}>
-              <RNText variant="header" size="md" style={styles.settingItemTitle}>
-                Biometric Authentication
-              </RNText>
-            </View>
-            <Switch
-              value={biometricsEnabled}
-              onValueChange={setBiometricsEnabled}
-              trackColor={{ false: "#E0E0E0", true: Colors.green }}
-              thumbColor={Colors.white}
-              ios_backgroundColor="#E0E0E0"
-            />
-          </View> */}
         </View>
-      </View>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 };
@@ -82,6 +74,9 @@ const styles = StyleSheet.create({
     color: Colors.brown,
     marginTop: 2,
   },
+  scroll: {
+    flex: 1,
+  },
   content: {
     paddingHorizontal: 20,
     marginTop: 30,
@@ -89,29 +84,26 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.white,
     borderRadius: 24,
-    overflow: "hidden",
+    overflow: 'hidden',
     paddingHorizontal: 8,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 2,
   },
   settingItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 18,
     paddingHorizontal: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
   },
-  noBorder: {
-    borderBottomWidth: 0,
-  },
   settingItemLeft: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
   },
   settingItemTitle: {
