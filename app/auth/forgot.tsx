@@ -20,6 +20,7 @@ const Forgot = () => {
             contentContainerStyle={styles.contentContainer}
             keyboardShouldPersistTaps="handled"
             bottomOffset={24}
+            scrollEnabled={false}
         >
             <View style={styles.backgroundCircle} />
             <BackButton style={styles.backButton} />
