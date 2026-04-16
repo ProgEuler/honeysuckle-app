@@ -1,34 +1,110 @@
-import Back from '@/assets/svgs/back.svg';
-import Enter from '@/assets/svgs/enter.svg';
-import Menu from '@/assets/svgs/menu.svg';
-import Type from '@/assets/svgs/type.svg';
-import { RNText } from '@/components/ui/input';
-import { Colors } from '@/constants/color';
-import { useKeyboardVisibility } from '@/hooks/useKeyborad';
-import { router } from 'expo-router';
-import React from 'react';
+import Back from "@/assets/svgs/back.svg";
+import Enter from "@/assets/svgs/enter.svg";
+import Menu from "@/assets/svgs/menu.svg";
+import Type from "@/assets/svgs/type.svg";
+import { RNText } from "@/components/ui/input";
+import { Colors } from "@/constants/color";
 import {
+  chatHistoryQueryKey,
+  useChatHistoryQuery,
+} from "@/hooks/useChatHistoryQuery";
+import { useKeyboardVisibility } from "@/hooks/useKeyborad";
+import { sendChatMessage } from "@/lib/api/chat";
+import { ApiError } from "@/lib/api/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { router } from "expo-router";
+import React, { useMemo, useState } from "react";
+import {
+  ActivityIndicator,
   Platform,
   ScrollView,
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
-import { SafeAreaView } from 'react-native-safe-area-context';
+} from "react-native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { toast } from "sonner-native";
 
 const ChatPage = () => {
   const keyboardVisibility = useKeyboardVisibility();
+  const queryClient = useQueryClient();
+  const [inputMessage, setInputMessage] = useState("");
+  const pageSize = 20;
+
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useChatHistoryQuery(pageSize);
+
+  const sendMessageMutation = useMutation({
+    mutationFn: sendChatMessage,
+    onSuccess: async () => {
+      setInputMessage("");
+      await queryClient.invalidateQueries({
+        queryKey: chatHistoryQueryKey(pageSize),
+      });
+    },
+    onError: (error) => {
+      const message =
+        error instanceof ApiError || error instanceof Error
+          ? error.message
+          : "Unable to send message right now.";
+
+      toast.error(message);
+    },
+  });
+
+  const handleSendMessage = () => {
+    const message = inputMessage.trim();
+
+    if (!message || sendMessageMutation.isPending) {
+      return;
+    }
+
+    sendMessageMutation.mutate({ message });
+  };
+
+  const canSend =
+    inputMessage.trim().length > 0 && !sendMessageMutation.isPending;
+
+  const messages = useMemo(() => {
+    if (!data?.pages) {
+      return [];
+    }
+
+    // API returns latest messages first; render oldest-to-newest for chat UX.
+    return [...data.pages]
+      .reverse()
+      .flatMap((page) => [...page.messages].reverse());
+  }, [data?.pages]);
+
+  const formatMessageTime = (value: string) => {
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return "";
+    }
+
+    return date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background }}>
       <SafeAreaView
         style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
           backgroundColor: Colors.white,
-          shadowColor: '#000',
+          shadowColor: "#000",
           shadowOffset: { width: 0, height: 3 },
           shadowOpacity: 0.1,
           shadowRadius: 4,
@@ -36,25 +112,25 @@ const ChatPage = () => {
           borderBottomLeftRadius: 30,
           borderBottomRightRadius: 30,
           paddingHorizontal: 15,
-          paddingTop: 10,
-          paddingBottom: -10,
+          //  paddingTop: 10,
+          paddingBottom: -20,
         }}
       >
         <View
           style={{
-            flexDirection: 'row',
-            justifyContent: 'flex-start',
-            alignItems: 'center',
+            flexDirection: "row",
+            justifyContent: "flex-start",
+            alignItems: "center",
             gap: 20,
           }}
         >
           <TouchableOpacity
             onPress={() => router.back()}
             style={{
-              padding: 12,
+              padding: 8,
               borderWidth: 1,
               borderColor: Colors.brown,
-              alignItems: 'flex-start',
+              alignItems: "flex-start",
               borderRadius: 40,
             }}
           >
@@ -77,78 +153,118 @@ const ChatPage = () => {
       </SafeAreaView>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
           contentContainerStyle={{
-            flex: 1,
-            justifyContent: 'flex-end',
             paddingHorizontal: 20,
             paddingBottom: 30,
             gap: 15,
           }}
+          keyboardShouldPersistTaps="handled"
         >
-          <View style={{ alignItems: 'flex-end' }}>
-            <RNText
-              variant="medium"
-              size="md"
+          {hasNextPage ? (
+            <TouchableOpacity
+              onPress={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
               style={{
-                backgroundColor: Colors.brown,
-                paddingVertical: 10,
-                paddingHorizontal: 18,
-                maxWidth: '80%',
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-                borderBottomLeftRadius: 20,
-                color: Colors.white,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.3,
-                shadowRadius: 1,
-                elevation: 1,
+                alignSelf: "center",
+                backgroundColor: "#E8DDD9",
+                paddingHorizontal: 14,
+                paddingVertical: 8,
+                borderRadius: 20,
+                opacity: isFetchingNextPage ? 0.7 : 1,
               }}
             >
-              I’ve been feeling really anxious today. I have a big presentation
-              tomorrow, and I’m worried I’ll mess up.
-            </RNText>
-          </View>
-          <View style={{ alignItems: 'flex-start' }}>
-            <RNText
-              variant="medium"
-              size="md"
-              style={{
-                backgroundColor: '#E8DDD9',
-                paddingVertical: 10,
-                paddingHorizontal: 18,
-                maxWidth: '80%',
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-                borderBottomRightRadius: 20,
-                color: Colors.brown,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.3,
-                shadowRadius: 1,
-                elevation: 1,
-              }}
-            >
-              I hear you. It’s okay to feel anxious sometimes. Let’s try a quick
-              grounding exercise: take a deep breath in for 4 seconds… hold… and
-              exhale for 6 seconds. Want to do it together?
-            </RNText>
-          </View>
+              <RNText variant="medium" size="sm">
+                {isFetchingNextPage
+                  ? "Loading older messages..."
+                  : "Load older"}
+              </RNText>
+            </TouchableOpacity>
+          ) : null}
+
+          {isLoading ? (
+            <View style={{ alignItems: "center", marginTop: 30 }}>
+              <RNText variant="medium" size="md">
+                Loading chat history...
+              </RNText>
+            </View>
+          ) : isError ? (
+            <View style={{ alignItems: "center", marginTop: 30 }}>
+              <RNText
+                variant="medium"
+                size="md"
+                style={{ color: Colors.orange }}
+              >
+                Unable to load chat history.
+              </RNText>
+            </View>
+          ) : messages.length === 0 ? (
+            <View style={{ alignItems: "center", marginTop: 30 }}>
+              <RNText variant="medium" size="md">
+                No messages yet. Start your first chat.
+              </RNText>
+            </View>
+          ) : (
+            messages.map((item, index) => {
+              const isUser = item.role === "user";
+
+              return (
+                <View
+                  key={`${item.time}-${index}`}
+                  style={{ alignItems: isUser ? "flex-end" : "flex-start" }}
+                >
+                  <RNText
+                    variant="medium"
+                    size="md"
+                    style={{
+                      backgroundColor: isUser ? Colors.brown : "#E8DDD9",
+                      paddingVertical: 10,
+                      paddingHorizontal: 18,
+                      maxWidth: "82%",
+                      borderTopLeftRadius: 20,
+                      borderTopRightRadius: 20,
+                      borderBottomLeftRadius: isUser ? 20 : 6,
+                      borderBottomRightRadius: isUser ? 6 : 20,
+                      color: isUser ? Colors.white : Colors.brown,
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 2,
+                      elevation: 1,
+                    }}
+                  >
+                    {item.message}
+                  </RNText>
+                  <RNText
+                    variant="base"
+                    size="xs"
+                    style={{
+                      marginTop: 4,
+                      color: Colors.primaryText,
+                      marginRight: isUser ? 2 : 0,
+                      marginLeft: isUser ? 0 : 2,
+                    }}
+                  >
+                    {formatMessageTime(item.time)}
+                  </RNText>
+                </View>
+              );
+            })
+          )}
         </ScrollView>
 
         <View
           style={{
-            width: '100%',
-            flexDirection: 'row',
+            width: "100%",
+            flexDirection: "row",
             backgroundColor: Colors.white,
             paddingHorizontal: 20,
             paddingBottom: keyboardVisibility ? 15 : 40,
             paddingTop: 20,
             gap: 30,
-            shadowColor: '#000',
+            shadowColor: "#000",
             shadowOffset: { width: 0, height: -3 },
             shadowOpacity: 0.1,
             shadowRadius: 4,
@@ -160,8 +276,8 @@ const ChatPage = () => {
           <View
             style={{
               flex: 1,
-              flexDirection: 'row',
-              alignItems: 'center',
+              flexDirection: "row",
+              alignItems: "center",
               borderWidth: 1,
               borderColor: Colors.green,
               borderRadius: 30,
@@ -172,32 +288,44 @@ const ChatPage = () => {
           >
             <Type />
             <TextInput
-              placeholder={'Type to start chatting...'}
+              placeholder={"Type to start chatting..."}
               placeholderTextColor={Colors.primaryText}
               autoCorrect={false}
-              autoCapitalize="words"
+              autoCapitalize="sentences"
               spellCheck={false}
+              value={inputMessage}
+              onChangeText={setInputMessage}
+              onSubmitEditing={handleSendMessage}
+              returnKeyType="send"
+              editable={!sendMessageMutation.isPending}
               style={{
                 flex: 1,
                 paddingVertical: 5,
                 paddingHorizontal: 15,
                 borderRadius: 10,
                 fontSize: 18,
-                fontFamily: 'PoppinsRegular',
+                fontFamily: "PoppinsRegular",
                 backgroundColor: Colors.background,
                 color: Colors.brown,
               }}
             />
           </View>
           <TouchableOpacity
+            onPress={handleSendMessage}
+            disabled={!canSend}
             style={{
               backgroundColor: Colors.green,
-              alignSelf: 'flex-start',
+              alignSelf: "flex-start",
               padding: 12,
               borderRadius: 100,
+              opacity: canSend ? 1 : 0.6,
             }}
           >
-            <Enter />
+            {sendMessageMutation.isPending ? (
+              <ActivityIndicator color={Colors.brown} />
+            ) : (
+              <Enter />
+            )}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
