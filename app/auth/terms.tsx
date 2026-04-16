@@ -1,22 +1,26 @@
 import Back from "@/assets/svgs/back.svg";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
+import { updateMe } from "@/lib/api/auth";
+import { useAuthStore } from "@/store/useAuthStore";
 import Checkbox from "expo-checkbox";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { ArrowDown, ArrowRight } from "lucide-react-native";
-import React, { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
+   ActivityIndicator,
     NativeScrollEvent,
     NativeSyntheticEvent,
     ScrollView,
     StyleSheet,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
 import {
     SafeAreaView,
     useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import { toast } from "sonner-native";
 
 const TERMS = [
     {
@@ -55,13 +59,15 @@ const TERMS = [
 
 export default function TermsScreen() {
     const scrollRef = useRef<ScrollView>(null);
-
     const { bottom } = useSafeAreaInsets();
+    const { from } = useLocalSearchParams<{ from?: string }>();
+    const setUserProfile = useAuthStore((state) => state.setUserProfile);
+    const user = useAuthStore((state) => state.user);
 
     const [isAgreed, setIsAgreed] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isScrollable, setIsScrollable] = useState(false);
     const [showDownArrow, setShowDownArrow] = useState(false);
-
     const [layoutHeight, setLayoutHeight] = useState(0);
     const [contentHeight, setContentHeight] = useState(0);
 
@@ -82,13 +88,28 @@ export default function TermsScreen() {
         setShowDownArrow(isScrollable && !atBottom);
     };
 
-    const handleContinue = () => {
+    const handleContinue = async () => {
         if (!isAgreed) return;
 
-        router.replace({
-            pathname: "/auth/signup",
-            params: { acceptedTerms: "1" },
-        });
+        // Coming from post-auth flow (policy: false user) — update policy then go to onboarding
+        if (user) {
+            setIsSubmitting(true);
+            try {
+                const updated = await updateMe({ policy: true });
+                setUserProfile({ ...user, ...updated, policy: true });
+                router.replace("/onboarding");
+            } catch {
+                toast.error("Failed to save. Please try again.");
+            } finally {
+                setIsSubmitting(false);
+            }
+        } else {
+            // Coming from signup flow before account creation
+            router.replace({
+                pathname: "/auth/signup",
+                params: { acceptedTerms: "1" },
+            });
+        }
     };
 
     return (
@@ -156,16 +177,22 @@ export default function TermsScreen() {
 
                     <TouchableOpacity
                         onPress={handleContinue}
-                        disabled={!isAgreed}
+                        disabled={!isAgreed || isSubmitting}
                         style={[
                             styles.continueButton,
-                            !isAgreed && styles.continueButtonDisabled,
+                            (!isAgreed || isSubmitting) && styles.continueButtonDisabled,
                         ]}
                     >
-                        <RNText variant="header" size="lg" style={styles.continueText}>
-                            Continue
-                        </RNText>
-                        <ArrowRight size={18} color={Colors.white} />
+                        {isSubmitting ? (
+                            <ActivityIndicator color={Colors.white} />
+                        ) : (
+                            <>
+                                <RNText variant="header" size="lg" style={styles.continueText}>
+                                    Continue
+                                </RNText>
+                                <ArrowRight size={18} color={Colors.white} />
+                            </>
+                        )}
                     </TouchableOpacity>
                 </View>
             </ScrollView>

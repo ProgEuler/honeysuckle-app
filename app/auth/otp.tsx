@@ -4,14 +4,16 @@ import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { getOtp, verifyOtp } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
+import { navigateAfterAuth } from "@/lib/navigateAfterAuth";
+import { useAuthStore } from "@/store/useAuthStore";
 import { useMutation } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
-  ActivityIndicator,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { OtpInput } from "react-native-otp-entry";
@@ -25,6 +27,8 @@ const Otp = () => {
   const email =
     typeof emailParam === "string" ? emailParam.trim().toLowerCase() : "";
 
+  const setAuthSession = useAuthStore((state) => state.setAuthSession);
+
   const verifyOtpMutation = useMutation({
     mutationFn: async (payload: { email: string; otp_code: string }) => {
       const response = await verifyOtp(payload);
@@ -35,9 +39,20 @@ const Otp = () => {
 
       return response;
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       toast.success("OTP verified successfully.");
-      router.replace("/onboarding");
+      if (response.access && response.refresh && response.log) {
+        setAuthSession({
+          status: true,
+          access: response.access,
+          refresh: response.refresh,
+          log: response.log,
+        });
+        navigateAfterAuth(response.log);
+      } else {
+        // fallback: no session in response, send to terms/onboarding
+        router.replace("/auth/terms");
+      }
     },
     onError: (error) => {
       const message =

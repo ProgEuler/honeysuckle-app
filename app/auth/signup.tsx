@@ -1,17 +1,16 @@
-import Apple from "@/assets/svgs/apple.svg";
 import ArrowRight from "@/assets/svgs/arrowright.svg";
 import Email from "@/assets/svgs/email.svg";
-import Google from "@/assets/svgs/google.svg";
 import Lock from "@/assets/svgs/lock.svg";
 import InputForm from "@/components/inputform";
+import SocialAuth from "@/components/shared/social-auth";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { getOtp, signUp, SignUpRequest } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
+import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
-import Checkbox from "expo-checkbox";
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { router } from "expo-router";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -38,7 +37,8 @@ const SignUp = () => {
     },
   });
   const [isChecked, setChecked] = useState(false);
-  const { acceptedTerms } = useLocalSearchParams<{ acceptedTerms?: string }>();
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const passwordValue = watch("password");
 
@@ -76,10 +76,10 @@ const SignUp = () => {
   });
 
   const submitSignUp = (values: SignUpRequest) => {
-    if (!isChecked) {
-      toast.error("Please accept Terms & Conditions to continue.");
-      return;
-    }
+    // if (!isChecked) {
+    //   toast.error("Please accept Terms & Conditions to continue.");
+    //   return;
+    // }
 
     signUpMutation.mutate({
       email: values.email.trim().toLowerCase(),
@@ -88,19 +88,14 @@ const SignUp = () => {
     });
   };
 
-  useEffect(() => {
-    if (acceptedTerms === "1") {
-      setChecked(true);
-    }
-  }, [acceptedTerms]);
-
   return (
     <KeyboardAwareScrollView
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       keyboardShouldPersistTaps="handled"
       bottomOffset={24}
-      scrollEnabled={false}
+      // scrollEnabled={false}
+      showsVerticalScrollIndicator={false}
     >
       <View style={styles.backgroundCircle} />
 
@@ -144,10 +139,20 @@ const SignUp = () => {
                 errors={errors}
                 Icon={Lock}
                 autoCapitalize={"none"}
-                secureTextEntry
+                secureTextEntry={!showNewPassword}
+                textContentType="oneTimeCode"
                 rules={{
                   required: "Password is required",
                 }}
+                rightElement={
+                  <TouchableOpacity onPress={() => setShowNewPassword((p) => !p)} hitSlop={10}>
+                    <Ionicons
+                      name={showNewPassword ? "eye-off-outline" : "eye-outline"}
+                      size={20}
+                      color={Colors.brown}
+                    />
+                  </TouchableOpacity>
+                }
               />
               <InputForm
                 title={"confirm_password"}
@@ -157,16 +162,26 @@ const SignUp = () => {
                 errors={errors}
                 Icon={Lock}
                 autoCapitalize={"none"}
-                secureTextEntry
+                secureTextEntry={!showConfirmPassword}
+                textContentType="oneTimeCode"
                 rules={{
                   required: "Confirm password is required",
                   validate: (value) =>
                     value === passwordValue || "Passwords do not match",
                 }}
+                rightElement={
+                  <TouchableOpacity onPress={() => setShowConfirmPassword((p) => !p)} hitSlop={10}>
+                    <Ionicons
+                      name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+                      size={20}
+                      color={Colors.brown}
+                    />
+                  </TouchableOpacity>
+                }
               />
             </View>
 
-            <View style={styles.termsRow}>
+            {/* <View style={styles.termsRow}>
               <Checkbox
                 style={styles.checkbox}
                 value={isChecked}
@@ -182,7 +197,7 @@ const SignUp = () => {
                   Terms & Conditions
                 </RNText>
               </TouchableOpacity>
-            </View>
+            </View> */}
           </View>
 
           <TouchableOpacity
@@ -205,14 +220,8 @@ const SignUp = () => {
             )}
           </TouchableOpacity>
 
-          <View style={styles.socialButtonsRow}>
-            <TouchableOpacity style={styles.socialButton}>
-              <Google />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
-              <Apple />
-            </TouchableOpacity>
-          </View>
+          {/* social auth */}
+          <SocialAuth />
 
           <View style={styles.centerRow}>
             <RNText variant="medium" size="lg">
@@ -258,15 +267,15 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     gap: 80,
-    marginTop: 20,
+    //  marginTop: 20,
     justifyContent: "space-between",
   },
   logoContainer: {
     alignItems: "center",
   },
   logo: {
-    height: 60,
-    width: 60,
+    height: 120,
+    width: 120,
   },
   formWrapper: {
     width: "90%",
@@ -276,7 +285,7 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: "center",
-    marginBottom: 20,
+    //  marginBottom: 20,
   },
   formGroup: {
     gap: 10,
@@ -304,7 +313,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 30,
-    marginVertical: 10,
+    //  marginVertical: 10,
   },
   socialButton: {
     height: 56,

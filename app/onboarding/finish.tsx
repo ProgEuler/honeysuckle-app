@@ -1,10 +1,9 @@
 import ArrowRight from '@/assets/svgs/arrowright.svg';
 import { RNText } from '@/components/ui/input';
 import { Colors } from '@/constants/color';
-import Checkbox from 'expo-checkbox';
 import { router } from 'expo-router';
 import { Brain, CheckCircle2, Clock, Leaf, LineChart, PenLine, Sun } from 'lucide-react-native';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -84,15 +83,15 @@ const Finish = () => {
             <ArrowRight fill={Colors.white} />
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.secondaryButton}
           >
             <RNText variant="header" size="lg" style={styles.secondaryButtonText}>Ask AI about my trends</RNText>
             <ArrowRight fill={Colors.brown} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
-        <View style={styles.disclaimerContainer}>
+        {/* <View style={styles.disclaimerContainer}>
           <View style={styles.checkboxRow}>
             <Checkbox
               value={agreed}
@@ -108,7 +107,7 @@ const Finish = () => {
           <RNText variant="base" size="xs" style={styles.safetyNotice}>
             If you feel unsafe or are in crisis, contact emergency services or a crisis hotline. You are not alone. 🌿
           </RNText>
-        </View>
+        </View> */}
       </ScrollView>
     </SafeAreaView>
   );

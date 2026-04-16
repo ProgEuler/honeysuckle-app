@@ -1,34 +1,33 @@
-import Apple from "@/assets/svgs/apple.svg";
 import ArrowRight from "@/assets/svgs/arrowright.svg";
 import Email from "@/assets/svgs/email.svg";
-import Google from "@/assets/svgs/google.svg";
 import Lock from "@/assets/svgs/lock.svg";
 import InputForm from "@/components/inputform";
+import SocialAuth from "@/components/shared/social-auth";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
-import { useAppleSignIn } from "@/hooks/useAppleSignIn";
-import { useGoogleSignIn } from "@/hooks/useGoogleSignIn";
-import { signIn, SignInRequest, socialLogin } from "@/lib/api/auth";
+import { signIn, SignInRequest } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
+import { navigateAfterAuth } from "@/lib/navigateAfterAuth";
 import { useAuthStore } from "@/store/useAuthStore";
+import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
 import { router } from "expo-router";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
-  ActivityIndicator,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Image,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { toast } from "sonner-native";
 
 const SignIn = () => {
-  const { signInWithGoogle, isLoading: isGoogleLoading } = useGoogleSignIn();
-  const { signInWithApple, isLoading: isAppleLoading } = useAppleSignIn();
   const setAuthSession = useAuthStore((state) => state.setAuthSession);
+  const [showPassword, setShowPassword] = useState(false);
   const {
     control,
     handleSubmit,
@@ -53,7 +52,7 @@ const SignIn = () => {
     onSuccess: (response) => {
       setAuthSession(response);
       toast.success("Signed in successfully.");
-      router.replace("/(tabs)/home");
+      navigateAfterAuth(response.log);
     },
     onError: (error) => {
       const message =
@@ -72,66 +71,14 @@ const SignIn = () => {
     });
   };
 
-  const socialLoginMutation = useMutation({
-    mutationFn: socialLogin,
-    onSuccess: (response) => {
-      setAuthSession(response);
-      toast.success("Signed in successfully.");
-      router.replace("/(tabs)/home");
-    },
-    onError: (error) => {
-      const message =
-        error instanceof ApiError || error instanceof Error
-          ? error.message
-          : "Unable to sign in with social account right now.";
-
-      toast.error(message);
-    },
-  });
-
-  const handleGoogleSignIn = async () => {
-    if (socialLoginMutation.isPending) {
-      return;
-    }
-
-    try {
-      const user = await signInWithGoogle();
-      const idToken = await user.getIdToken(true);
-      await socialLoginMutation.mutateAsync(idToken);
-    } catch (error) {
-      console.error("Google sign-in failed:", error);
-      toast.error("Google sign-in failed. Please try again.");
-    }
-  };
-
-  const handleAppleSignIn = async () => {
-    if (socialLoginMutation.isPending) {
-      return;
-    }
-
-    try {
-      const user = await signInWithApple();
-      if (!user) {
-        return;
-      }
-
-      const idToken = await user.getIdToken(true);
-      await socialLoginMutation.mutateAsync(idToken);
-    } catch {
-      toast.error("Apple sign-in failed. Please try again.");
-    }
-  };
-
-  const disableSocialButtons =
-    isGoogleLoading || isAppleLoading || socialLoginMutation.isPending;
-
   return (
     <KeyboardAwareScrollView
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       bottomOffset={24}
       keyboardShouldPersistTaps="handled"
-      scrollEnabled={false}
+      // scrollEnabled={false}
+      showsVerticalScrollIndicator={false}
     >
       <View style={styles.backgroundCircle} />
       <SafeAreaView style={styles.safeArea}>
@@ -172,10 +119,20 @@ const SignIn = () => {
                 errors={errors}
                 Icon={Lock}
                 autoCapitalize={"none"}
-                secureTextEntry
+                secureTextEntry={!showPassword}
+                textContentType="oneTimeCode"
                 rules={{
                   required: "Password is required",
                 }}
+                rightElement={
+                  <TouchableOpacity onPress={() => setShowPassword((p) => !p)} hitSlop={10}>
+                    <Ionicons
+                      name={showPassword ? "eye-off-outline" : "eye-outline"}
+                      size={20}
+                      color={Colors.brown}
+                    />
+                  </TouchableOpacity>
+                }
               />
             </View>
             <TouchableOpacity
@@ -209,22 +166,10 @@ const SignIn = () => {
               )}
             </TouchableOpacity>
           </View>
-          <View style={styles.socialButtonsRow}>
-            <TouchableOpacity
-              onPress={handleGoogleSignIn}
-              disabled={disableSocialButtons}
-              style={styles.socialButton}
-            >
-              <Google />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleAppleSignIn}
-              disabled={disableSocialButtons}
-              style={styles.socialButton}
-            >
-              <Apple />
-            </TouchableOpacity>
-          </View>
+
+          {/* social login buttons */}
+          <SocialAuth />
+
           <View style={styles.centerRow}>
             <RNText variant="medium" size="lg">
               {" "}
@@ -276,8 +221,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logo: {
-    height: 78,
-    width: 78,
+    height: 120,
+    width: 120,
   },
   formWrapper: {
     width: "90%",
@@ -294,21 +239,6 @@ const styles = StyleSheet.create({
   },
   inputsGroup: {
     gap: 8,
-  },
-  socialButtonsRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 30,
-    marginVertical: 10,
-  },
-  socialButton: {
-    height: 56,
-    width: 56,
-    backgroundColor: "#E8DDD9",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 40,
   },
   centerRow: {
     flexDirection: "row",

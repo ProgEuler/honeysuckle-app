@@ -1,19 +1,19 @@
 import { Colors } from "@/constants/color";
 import { ComponentType, ReactNode } from "react";
 import {
-  Control,
-  Controller,
-  FieldErrors,
-  FieldValues,
-  Path,
-  RegisterOptions,
+    Control,
+    Controller,
+    FieldErrors,
+    FieldValues,
+    Path,
+    RegisterOptions,
 } from "react-hook-form";
 import {
-  StyleSheet,
-  Text,
-  TextInput,
-  TextInputProps,
-  View,
+    StyleSheet,
+    Text,
+    TextInput,
+    TextInputProps,
+    View,
 } from "react-native";
 import { RNText } from "./ui/input";
 
@@ -26,6 +26,7 @@ type Props<T extends FieldValues> = {
   keyboardType?: "default" | "email-address" | "numeric" | "number-pad";
   autoCapitalize?: TextInputProps["autoCapitalize"];
   secureTextEntry?: boolean;
+  textContentType?: TextInputProps["textContentType"];
   rules?: RegisterOptions<T, Path<T>>;
   Icon?: ComponentType;
   rightElement?: ReactNode;
@@ -40,6 +41,7 @@ const InputForm = <T extends FieldValues>({
   keyboardType = "default",
   autoCapitalize = "words",
   secureTextEntry = false,
+  textContentType,
   rules,
   Icon,
   rightElement,
@@ -74,6 +76,7 @@ const InputForm = <T extends FieldValues>({
                 spellCheck={false}
                 keyboardType={keyboardType}
                 secureTextEntry={secureTextEntry}
+                textContentType={textContentType}
                 style={styles.input}
               />
               {rightElement ? (

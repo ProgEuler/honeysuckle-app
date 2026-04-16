@@ -79,15 +79,10 @@ export default function RootLayout() {
                 },
                 descriptionStyle: {
                   fontFamily: "Regular",
+                  textAlign: "center",
                   fontSize: 13,
                   color: "#6D6661",
                 },
-              }}
-              icons={{
-                success: "✅",
-                error: "❌",
-                info: "ℹ️",
-                warning: "⚠️",
               }}
             />
             {/* </ClerkProvider> */}

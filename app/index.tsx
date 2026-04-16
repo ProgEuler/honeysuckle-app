@@ -12,4 +12,5 @@ export default function Index() {
   }
 
   return <Redirect href={"/welcome"} />;
+   // return <Redirect href={"/auth/terms"} />;
 }

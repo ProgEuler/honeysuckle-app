@@ -35,6 +35,7 @@ export type AuthUserLog = {
   gender: string | null;
   location: string | null;
   notify: boolean;
+  policy: boolean;
   checkin_time: string;
   streak?: number;
   total_checkin?: number;
@@ -102,6 +103,7 @@ export type UpdateMeRequest = Partial<{
   gender: string | null;
   location: string | null;
   notify: boolean;
+  policy: boolean;
   checkin_time: string;
 }>;
 
