@@ -6,12 +6,13 @@ import Lock from "@/assets/svgs/lock.svg";
 import InputForm from "@/components/inputform";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
-import { signIn, SignInRequest } from "@/lib/api/auth";
+import { useAppleSignIn } from "@/hooks/useAppleSignIn";
+import { useGoogleSignIn } from "@/hooks/useGoogleSignIn";
+import { signIn, SignInRequest, socialLogin } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useMutation } from "@tanstack/react-query";
 import { router } from "expo-router";
-import React from "react";
 import { useForm } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -25,6 +26,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { toast } from "sonner-native";
 
 const SignIn = () => {
+  const { signInWithGoogle, isLoading: isGoogleLoading } = useGoogleSignIn();
+  const { signInWithApple, isLoading: isAppleLoading } = useAppleSignIn();
   const setAuthSession = useAuthStore((state) => state.setAuthSession);
   const {
     control,
@@ -68,6 +71,59 @@ const SignIn = () => {
       password: values.password,
     });
   };
+
+  const socialLoginMutation = useMutation({
+    mutationFn: socialLogin,
+    onSuccess: (response) => {
+      setAuthSession(response);
+      toast.success("Signed in successfully.");
+      router.replace("/(tabs)/home");
+    },
+    onError: (error) => {
+      const message =
+        error instanceof ApiError || error instanceof Error
+          ? error.message
+          : "Unable to sign in with social account right now.";
+
+      toast.error(message);
+    },
+  });
+
+  const handleGoogleSignIn = async () => {
+    if (socialLoginMutation.isPending) {
+      return;
+    }
+
+    try {
+      const user = await signInWithGoogle();
+      const idToken = await user.getIdToken(true);
+      await socialLoginMutation.mutateAsync(idToken);
+    } catch (error) {
+      console.error("Google sign-in failed:", error);
+      toast.error("Google sign-in failed. Please try again.");
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    if (socialLoginMutation.isPending) {
+      return;
+    }
+
+    try {
+      const user = await signInWithApple();
+      if (!user) {
+        return;
+      }
+
+      const idToken = await user.getIdToken(true);
+      await socialLoginMutation.mutateAsync(idToken);
+    } catch {
+      toast.error("Apple sign-in failed. Please try again.");
+    }
+  };
+
+  const disableSocialButtons =
+    isGoogleLoading || isAppleLoading || socialLoginMutation.isPending;
 
   return (
     <KeyboardAwareScrollView
@@ -122,16 +178,15 @@ const SignIn = () => {
                 }}
               />
             </View>
-          <TouchableOpacity
-            onPress={() => router.push("/auth/forgot")}
-            style={styles.centerAlign}
-          >
-            <RNText variant="medium" size="lg" style={styles.linkText}>
-              Forgot Password ?
-            </RNText>
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push("/auth/forgot")}
+              style={styles.centerAlign}
+            >
+              <RNText variant="medium" size="lg" style={styles.linkText}>
+                Forgot Password ?
+              </RNText>
+            </TouchableOpacity>
           </View>
-
 
           <View>
             <TouchableOpacity
@@ -155,10 +210,18 @@ const SignIn = () => {
             </TouchableOpacity>
           </View>
           <View style={styles.socialButtonsRow}>
-            <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity
+              onPress={handleGoogleSignIn}
+              disabled={disableSocialButtons}
+              style={styles.socialButton}
+            >
               <Google />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity
+              onPress={handleAppleSignIn}
+              disabled={disableSocialButtons}
+              style={styles.socialButton}
+            >
               <Apple />
             </TouchableOpacity>
           </View>
@@ -213,8 +276,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logo: {
-    height: 60,
-    width: 60,
+    height: 78,
+    width: 78,
   },
   formWrapper: {
     width: "90%",
@@ -252,9 +315,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  centerAlign: {
-
-  },
+  centerAlign: {},
   linkText: {
     color: Colors.orange,
     textDecorationLine: "underline",

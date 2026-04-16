@@ -11,7 +11,7 @@ import { ApiError } from "@/lib/api/client";
 import { useMutation } from "@tanstack/react-query";
 import Checkbox from "expo-checkbox";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -100,6 +100,7 @@ const SignUp = () => {
       contentContainerStyle={styles.contentContainer}
       keyboardShouldPersistTaps="handled"
       bottomOffset={24}
+      scrollEnabled={false}
     >
       <View style={styles.backgroundCircle} />
 

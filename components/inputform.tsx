@@ -1,57 +1,89 @@
-import { Colors } from '@/constants/color';
-import React from 'react';
-import { Control, Controller, FieldErrors } from 'react-hook-form';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
-import { RNText } from './ui/input';
+import { Colors } from "@/constants/color";
+import { ComponentType, ReactNode } from "react";
+import {
+  Control,
+  Controller,
+  FieldErrors,
+  FieldValues,
+  Path,
+  RegisterOptions,
+} from "react-hook-form";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TextInputProps,
+  View,
+} from "react-native";
+import { RNText } from "./ui/input";
 
-type Props<T> = {
-  title: keyof T;
+type Props<T extends FieldValues> = {
+  title: Path<T>;
   label: string;
   placeHolder: string;
   control: Control<T>;
   errors: FieldErrors<T>;
-  keyboardType?: 'default' | 'email-address' | 'numeric' | 'number-pad';
+  keyboardType?: "default" | "email-address" | "numeric" | "number-pad";
+  autoCapitalize?: TextInputProps["autoCapitalize"];
+  secureTextEntry?: boolean;
+  rules?: RegisterOptions<T, Path<T>>;
+  Icon?: ComponentType;
+  rightElement?: ReactNode;
 };
 
-const InputForm = ({
+const InputForm = <T extends FieldValues>({
   title,
   label,
   placeHolder,
   control,
   errors,
-  keyboardType = 'default',
+  keyboardType = "default",
+  autoCapitalize = "words",
+  secureTextEntry = false,
+  rules,
   Icon,
-}: Props) => {
+  rightElement,
+}: Props<T>) => {
+  const rawError = errors[title]?.message;
+  const errorMessage = typeof rawError === "string" ? rawError : null;
+
   return (
-    <View style={{ marginBottom: 10, width: '100%' }}>
+    <View style={{ marginBottom: 10, width: "100%" }}>
       <RNText
         variant="header"
         size="sm"
-        style={{ fontSize: 20, marginBottom: 12 }}
+        style={{ fontSize: 18, marginBottom: 12 }}
       >
         {label}
       </RNText>
       <Controller
         control={control}
         name={title}
+        rules={rules}
         render={({ field: { onChange, value } }) => (
-          <View style={styles.inputContainer}>
-            <Icon />
-            <TextInput
-              placeholder={placeHolder}
-              value={value}
-              onChangeText={onChange}
-              placeholderTextColor={Colors.primaryText}
-              autoCorrect={false}
-              autoCapitalize="words"
-              spellCheck={false}
-              keyboardType={keyboardType}
-              style={styles.input}
-            />
-            {errors[title] && (
-              <Text style={{ color: 'red' }}>{errors[title].message}</Text>
-            )}
-          </View>
+          <>
+            <View style={styles.inputContainer}>
+              {Icon ? <Icon /> : null}
+              <TextInput
+                placeholder={placeHolder}
+                value={value == null ? "" : String(value)}
+                onChangeText={onChange}
+                placeholderTextColor={Colors.primaryText}
+                autoCorrect={false}
+                autoCapitalize={autoCapitalize}
+                spellCheck={false}
+                keyboardType={keyboardType}
+                secureTextEntry={secureTextEntry}
+                style={styles.input}
+              />
+              {rightElement ? (
+                <View style={styles.rightElementWrap}>{rightElement}</View>
+              ) : null}
+            </View>
+            {errorMessage ? (
+              <Text style={styles.error}>{errorMessage}</Text>
+            ) : null}
+          </>
         )}
       />
     </View>
@@ -62,8 +94,8 @@ export default InputForm;
 
 const styles = StyleSheet.create({
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 1,
     borderColor: Colors.green,
     borderRadius: 30,
@@ -77,13 +109,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 10,
     fontSize: 18,
-    fontFamily: 'PoppinsRegular',
+    fontFamily: "PoppinsRegular",
     backgroundColor: Colors.white,
     color: Colors.brown,
   },
+  rightElementWrap: {
+    marginLeft: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   error: {
-    color: 'red',
-    marginTop: -8,
-    marginBottom: 12,
+    color: "red",
+    marginTop: 6,
+    marginLeft: 6,
   },
 });
