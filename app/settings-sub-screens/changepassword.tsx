@@ -1,72 +1,79 @@
-import Back from '@/assets/svgs/back.svg';
-import { RNText } from '@/components/ui/input';
-import { Colors } from '@/constants/color';
-import { router } from 'expo-router';
-import { AlertCircle, CheckCircle } from 'lucide-react-native';
-import React, { useRef, useState } from 'react';
+import Back from "@/assets/svgs/back.svg";
+import { RNText } from "@/components/ui/input";
+import { Colors } from "@/constants/color";
+import { changePassword } from "@/lib/api/auth";
+import { ApiError } from "@/lib/api/client";
+import { Ionicons } from "@expo/vector-icons";
+import { useMutation } from "@tanstack/react-query";
+import { router } from "expo-router";
+import { useState } from "react";
 import {
-    Animated,
-    Dimensions,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-
-const { width } = Dimensions.get('window');
+  ActivityIndicator,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import { toast } from "sonner-native";
 
 const ChangePassword = () => {
   const { bottom } = useSafeAreaInsets();
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'error'>('success');
-  const toastOpacity = useRef(new Animated.Value(0)).current;
+  const changePasswordMutation = useMutation({
+    mutationFn: async (payload: { old_password: string; password: string }) => {
+      const response = await changePassword(payload);
 
-  const showToast = (message: string, type: 'success' | 'error') => {
-    setToastMessage(message);
-    setToastType(type);
+      if (response.status === false) {
+        throw new Error(response.message || "Unable to change password.");
+      }
 
-    Animated.timing(toastOpacity, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
+      return response;
+    },
+    onSuccess: () => {
+      toast.success("Password changed successfully!");
+      router.back();
+    },
+    onError: (error) => {
+      const message =
+        error instanceof ApiError || error instanceof Error
+          ? error.message
+          : "Unable to change password right now.";
 
-    setTimeout(() => {
-      Animated.timing(toastOpacity, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start(() => {
-        if (type === 'success') {
-          router.back();
-        }
-      });
-    }, 2500);
-  };
+      toast.error(message);
+    },
+  });
 
   const handleChangePassword = () => {
     if (!oldPassword || !newPassword || !confirmPassword) {
-      showToast('Please fill all fields', 'error');
+      toast.error("Please fill all fields");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      showToast('New passwords do not match', 'error');
+      toast.error("New passwords do not match");
       return;
     }
 
     if (newPassword === oldPassword) {
-      showToast('New password must not match old password', 'error');
+      toast.error("New password must not match old password");
       return;
     }
 
-    showToast('Password changed successfully!', 'success');
+    changePasswordMutation.mutate({
+      old_password: oldPassword,
+      password: newPassword,
+    });
   };
 
   return (
@@ -88,78 +95,108 @@ const ChangePassword = () => {
         contentContainerStyle={[styles.content, { paddingBottom: bottom + 40 }]}
         keyboardShouldPersistTaps="handled"
         bottomOffset={24}
+        scrollEnabled={false}
       >
         <View style={styles.inputContainer}>
-          <RNText variant="medium" size="sm" style={styles.label}>Old Password</RNText>
+          <RNText variant="medium" size="sm" style={styles.label}>
+            Old Password
+          </RNText>
           <View style={styles.inputWrapper}>
             <TextInput
               style={styles.textInput}
               placeholder="Enter old password"
               placeholderTextColor={Colors.primaryText}
-              secureTextEntry
+              secureTextEntry={!showOldPassword}
               value={oldPassword}
               onChangeText={setOldPassword}
             />
+            <TouchableOpacity
+              onPress={() => setShowOldPassword((prev) => !prev)}
+              hitSlop={10}
+              style={styles.eyeButton}
+            >
+              <Ionicons
+                name={showOldPassword ? "eye-off-outline" : "eye-outline"}
+                size={20}
+                color={Colors.brown}
+              />
+            </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.inputContainer}>
-          <RNText variant="medium" size="sm" style={styles.label}>New Password</RNText>
+          <RNText variant="medium" size="sm" style={styles.label}>
+            New Password
+          </RNText>
           <View style={styles.inputWrapper}>
             <TextInput
               style={styles.textInput}
               placeholder="Enter new password"
               placeholderTextColor={Colors.primaryText}
-              secureTextEntry
+              secureTextEntry={!showNewPassword}
               value={newPassword}
               onChangeText={setNewPassword}
             />
+            <TouchableOpacity
+              onPress={() => setShowNewPassword((prev) => !prev)}
+              hitSlop={10}
+              style={styles.eyeButton}
+            >
+              <Ionicons
+                name={showNewPassword ? "eye-off-outline" : "eye-outline"}
+                size={20}
+                color={Colors.brown}
+              />
+            </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.inputContainer}>
-          <RNText variant="medium" size="sm" style={styles.label}>Confirm New Password</RNText>
+          <RNText variant="medium" size="sm" style={styles.label}>
+            Confirm New Password
+          </RNText>
           <View style={styles.inputWrapper}>
             <TextInput
               style={styles.textInput}
               placeholder="Confirm new password"
               placeholderTextColor={Colors.primaryText}
-              secureTextEntry
+              secureTextEntry={!showConfirmPassword}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
             />
+            <TouchableOpacity
+              onPress={() => setShowConfirmPassword((prev) => !prev)}
+              hitSlop={10}
+              style={styles.eyeButton}
+            >
+              <Ionicons
+                name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+                size={20}
+                color={Colors.brown}
+              />
+            </TouchableOpacity>
           </View>
         </View>
 
         <TouchableOpacity
-          style={styles.submitButton}
+          style={[
+            styles.submitButton,
+            changePasswordMutation.isPending
+              ? styles.submitButtonDisabled
+              : null,
+          ]}
           onPress={handleChangePassword}
+          disabled={changePasswordMutation.isPending}
         >
-          <RNText variant="title" size="lg" style={styles.submitText}>
-            Update Password
-          </RNText>
+          {changePasswordMutation.isPending ? (
+            <ActivityIndicator color={Colors.white} />
+          ) : (
+            <RNText variant="title" size="lg" style={styles.submitText}>
+              Update Password
+            </RNText>
+          )}
         </TouchableOpacity>
       </KeyboardAwareScrollView>
-
-      <Animated.View
-        style={[
-          styles.toastContainer,
-          {
-            opacity: toastOpacity,
-            backgroundColor: toastType === 'success' ? '#4CAF50' : '#F44336'
-          }
-        ]}
-        pointerEvents="none"
-      >
-        {toastType === 'success' ? (
-          <CheckCircle size={20} color={Colors.white} />
-        ) : (
-          <AlertCircle size={20} color={Colors.white} />
-        )}
-        <RNText variant="medium" size="sm" style={styles.toastText}>
-          {toastMessage}
-        </RNText>
-      </Animated.View>
     </SafeAreaView>
   );
 };
@@ -170,17 +207,17 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 20,
     marginLeft: 20,
-    marginTop: 20,
+    marginTop: 12,
   },
   backButton: {
     padding: 12,
     borderWidth: 1,
     borderColor: Colors.brown,
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
     borderRadius: 40,
   },
   headerTitle: {
@@ -202,55 +239,44 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   inputWrapper: {
-    width: '100%',
+    width: "100%",
     height: 56,
     backgroundColor: Colors.white,
     borderColor: Colors.green,
     borderWidth: 1,
     borderRadius: 20,
     paddingHorizontal: 16,
-    justifyContent: 'center',
+    paddingRight: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   textInput: {
     flex: 1,
     fontSize: 16,
     color: Colors.brown,
-    fontFamily: 'PoppinsRegular',
+    fontFamily: "PoppinsRegular",
+  },
+  eyeButton: {
+    marginLeft: 8,
+    padding: 8,
   },
   submitButton: {
-    width: '100%',
+    width: "100%",
     height: 64,
     backgroundColor: Colors.brown,
     borderRadius: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 20,
   },
   submitText: {
     color: Colors.white,
     marginTop: 2,
   },
-  toastContainer: {
-    position: 'absolute',
-    bottom: 50,
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 30,
-    gap: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 5,
-    minWidth: width * 0.8,
+  submitButtonDisabled: {
+    opacity: 0.6,
   },
-  toastText: {
-    color: Colors.white,
-    flex: 1,
-  }
 });
 
 export default ChangePassword;

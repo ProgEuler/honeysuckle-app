@@ -3,13 +3,13 @@ import Feedback from "@/assets/svgs/feedback.svg";
 import Logout from "@/assets/svgs/logout.svg";
 import Next from "@/assets/svgs/next.svg";
 import Notification from "@/assets/svgs/notification.svg";
-import Share from "@/assets/svgs/share.svg";
 import User from "@/assets/svgs/user.svg";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { useMeQuery } from "@/hooks/useMeQuery";
+import { updateMe } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import {
   HelpCircle,
@@ -17,18 +17,20 @@ import {
   ShieldCheck,
   Smile,
 } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
   Image,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Switch,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { toast } from "sonner-native";
 
 const { width } = Dimensions.get("window");
 const AnimatedScrollView: any = Animated.createAnimatedComponent(ScrollView);
@@ -42,25 +44,40 @@ const SCROLL_DISTANCE = 100;
 const PROFILE_IMAGE_FALLBACK = require("@/assets/images/avatar-fallback.png");
 
 const Index = () => {
-  const { data: me } = useMeQuery();
+  const { data: me, refetch, isRefetching } = useMeQuery();
   const clearAuthSession = useAuthStore((state) => state.clearAuthSession);
   const queryClient = useQueryClient();
-  console.log("User data in settings:", me);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+  const [notifyEnabled, setNotifyEnabled] = useState<boolean>(me?.notify ?? false);
+
+  // Sync once when me loads for the first time
+  const syncedRef = useRef(false);
+  if (!syncedRef.current && me !== undefined) {
+    syncedRef.current = true;
+    if (notifyEnabled !== me.notify) setNotifyEnabled(me.notify ?? false);
+  }
+
+  const toggleNotifyMutation = useMutation({
+    mutationFn: (notify: boolean) => updateMe({ notify }),
+    onSuccess: () => { toast.success("Notification settings updated"); },
+    onError: () => {
+      setNotifyEnabled((prev: boolean) => !prev);
+      toast.error("Failed to update notification settings");
+    },
+  });
+
+  const handleToggleNotify = (val: boolean) => {
+    setNotifyEnabled(val);
+    toggleNotifyMutation.mutate(val);
+  };
   const { top } = useSafeAreaInsets();
-  const scrollY = React.useRef(new Animated.Value(0)).current;
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   const handleLogout = () => {
     clearAuthSession();
     queryClient.clear();
     router.replace("/auth");
   };
-
-  useEffect(() => {
-    if (typeof me?.notify === "boolean") {
-      setNotificationsEnabled(me.notify);
-    }
-  }, [me?.notify]);
 
   const displayName = me?.name?.trim() || "User";
   const displayEmail = me?.email || "";
@@ -225,6 +242,9 @@ const Index = () => {
           styles.scrollContent,
           { paddingTop: SCROLL_PADDING_TOP },
         ]}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[Colors.green]} tintColor={Colors.green} />
+        }
       >
         <SectionHeader title="General Settings" />
         <View style={styles.card}>
@@ -238,8 +258,8 @@ const Index = () => {
             title="Push Notifications"
             rightElement={
               <Switch
-                value={notificationsEnabled}
-                onValueChange={setNotificationsEnabled}
+                value={notifyEnabled}
+                onValueChange={handleToggleNotify}
                 trackColor={{ false: "#E0E0E0", true: Colors.green }}
                 thumbColor={Colors.white}
                 ios_backgroundColor="#E0E0E0"

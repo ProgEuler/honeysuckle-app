@@ -6,16 +6,18 @@ import Chat from "@/assets/svgs/xchat.svg";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { useMeQuery } from "@/hooks/useMeQuery";
+import { useNotificationsQuery } from "@/hooks/useNotificationsQuery";
 import { router } from "expo-router";
-import React, { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   Animated,
   Easing,
   Image,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -41,7 +43,9 @@ const getEntranceStyle = (animation: Animated.Value) => ({
 
 const HomeScreen = () => {
   const { top, bottom } = useSafeAreaInsets();
-  const { data: me } = useMeQuery();
+  const { data: me, refetch, isRefetching } = useMeQuery();
+  const { data: notificationsData } = useNotificationsQuery();
+  const unreadCount = (notificationsData?.results ?? []).filter((n: { is_read: boolean }) => !n.is_read).length;
   const scrollY = useRef(new Animated.Value(0)).current;
   const cardAnimations = useRef([
     new Animated.Value(0),
@@ -166,6 +170,13 @@ const HomeScreen = () => {
           >
             <View style={styles.notificationButton}>
               <Notification />
+              {unreadCount > 0 && (
+                <View style={styles.badge}>
+                  <RNText variant="header" size="xs" style={styles.badgeText}>
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </RNText>
+                </View>
+              )}
             </View>
           </TouchableOpacity>
         </View>
@@ -219,6 +230,9 @@ const HomeScreen = () => {
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="never"
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[Colors.green]} tintColor={Colors.green} />
+        }
       >
         <View style={styles.listWrap}>
           <RNText variant="title" size="xl">
@@ -301,7 +315,7 @@ const HomeScreen = () => {
                   Current Streak
                 </RNText>
                 <RNText variant="medium" size="lg">
-                  {me.streak || 0} Days 🔥
+                  {me?.streak || 0} Days 🔥
                 </RNText>
               </View>
 
@@ -372,6 +386,25 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 30,
     alignSelf: "flex-end",
+  },
+  badge: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    backgroundColor: Colors.orange,
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+    borderWidth: 1.5,
+    borderColor: Colors.white,
+  },
+  badgeText: {
+    color: Colors.white,
+    fontSize: 10,
+    lineHeight: 12,
   },
   // FIX: was absolute-positioned but had no bottom anchor — now anchored properly
   collapsedHeader: {

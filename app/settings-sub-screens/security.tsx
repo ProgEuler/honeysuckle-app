@@ -35,6 +35,7 @@ const Security = () => {
         contentContainerStyle={[styles.content, { paddingBottom: bottom + 40 }]}
         keyboardShouldPersistTaps="handled"
         bottomOffset={24}
+        scrollEnabled={false}
       >
         <View style={styles.card}>
           <TouchableOpacity style={styles.settingItem} onPress={() => router.push('/settings-sub-screens/changepassword')}>
@@ -61,7 +62,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 20,
     marginLeft: 20,
-    marginTop: 20,
+    marginTop: 12,
   },
   backButton: {
     padding: 12,

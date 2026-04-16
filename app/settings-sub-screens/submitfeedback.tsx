@@ -1,20 +1,61 @@
-import Back from '@/assets/svgs/back.svg';
-import { RNText } from '@/components/ui/input';
-import { Colors } from '@/constants/color';
-import { router } from 'expo-router';
-import React, { useState } from 'react';
+import Back from "@/assets/svgs/back.svg";
+import { RNText } from "@/components/ui/input";
+import { Colors } from "@/constants/color";
+import { ApiError } from "@/lib/api/client";
+import { createFeedback } from "@/lib/api/feedback";
+import { useMutation } from "@tanstack/react-query";
+import { router } from "expo-router";
+import React, { useState } from "react";
 import {
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    View
-} from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+  ActivityIndicator,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import { toast } from "sonner-native";
 
 const SubmitFeedback = () => {
   const { bottom } = useSafeAreaInsets();
-  const [feedback, setFeedback] = useState('');
+  const [feedback, setFeedback] = useState("");
+  const stars = 5.5;
+
+  const feedbackMutation = useMutation({
+    mutationFn: createFeedback,
+    onSuccess: () => {
+      toast.success("Thanks for your feedback.");
+      setFeedback("");
+      router.back();
+    },
+    onError: (error) => {
+      const message =
+        error instanceof ApiError || error instanceof Error
+          ? error.message
+          : "Unable to submit feedback right now.";
+
+      toast.error(message);
+    },
+  });
+
+  const handleSubmitFeedback = () => {
+    const trimmedFeedback = feedback.trim();
+
+    if (!trimmedFeedback || feedbackMutation.isPending) {
+      return;
+    }
+
+    feedbackMutation.mutate({
+      feedback: trimmedFeedback,
+      stars,
+    });
+  };
+
+  const isSubmitDisabled = !feedback.trim() || feedbackMutation.isPending;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -35,6 +76,7 @@ const SubmitFeedback = () => {
         contentContainerStyle={[styles.content, { paddingBottom: bottom + 40 }]}
         keyboardShouldPersistTaps="handled"
         bottomOffset={24}
+        scrollEnabled={false}
       >
         <RNText variant="medium" size="lg" style={styles.description}>
           We'd love to hear your thoughts. How can we improve your experience?
@@ -53,17 +95,20 @@ const SubmitFeedback = () => {
         </View>
 
         <TouchableOpacity
-          style={[styles.submitButton, !feedback.trim() && styles.submitButtonDisabled]}
-          onPress={() => {
-            if (feedback.trim()) {
-              router.back();
-            }
-          }}
-          disabled={!feedback.trim()}
+          style={[
+            styles.submitButton,
+            isSubmitDisabled && styles.submitButtonDisabled,
+          ]}
+          onPress={handleSubmitFeedback}
+          disabled={isSubmitDisabled}
         >
-          <RNText variant="title" size="lg" style={styles.submitText}>
-            Submit
-          </RNText>
+          {feedbackMutation.isPending ? (
+            <ActivityIndicator color={Colors.white} />
+          ) : (
+            <RNText variant="title" size="lg" style={styles.submitText}>
+              Submit
+            </RNText>
+          )}
         </TouchableOpacity>
       </KeyboardAwareScrollView>
     </SafeAreaView>
@@ -76,17 +121,17 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 20,
     marginLeft: 20,
-    marginTop: 20,
+    marginTop: 12,
   },
   backButton: {
     padding: 12,
     borderWidth: 1,
     borderColor: Colors.brown,
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
     borderRadius: 40,
   },
   headerTitle: {
@@ -105,7 +150,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   inputContainer: {
-    width: '100%',
+    width: "100%",
     height: 200,
     backgroundColor: Colors.white,
     borderColor: Colors.green,
@@ -117,15 +162,15 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: Colors.brown,
-    fontFamily: 'PoppinsRegular',
+    fontFamily: "PoppinsRegular",
   },
   submitButton: {
-    width: '100%',
+    width: "100%",
     height: 64,
     backgroundColor: Colors.brown,
     borderRadius: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 10,
   },
   submitButtonDisabled: {
