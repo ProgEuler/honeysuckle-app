@@ -55,6 +55,17 @@ const getErrorMessage = (payload: unknown, fallback: string) => {
     return payload;
   }
 
+  if (Array.isArray(payload)) {
+    const firstString = payload.find(
+      (item): item is string =>
+        typeof item === "string" && item.trim().length > 0,
+    );
+
+    if (firstString) {
+      return firstString;
+    }
+  }
+
   if (
     payload &&
     typeof payload === "object" &&
@@ -73,6 +84,34 @@ const getErrorMessage = (payload: unknown, fallback: string) => {
     return payload.message;
   }
 
+  if (
+    payload &&
+    typeof payload === "object" &&
+    "log" in payload &&
+    typeof payload.log === "string"
+  ) {
+    return payload.log;
+  }
+
+  if (payload && typeof payload === "object") {
+    for (const value of Object.values(payload as Record<string, unknown>)) {
+      if (typeof value === "string" && value.trim().length > 0) {
+        return value;
+      }
+
+      if (Array.isArray(value)) {
+        const firstString = value.find(
+          (item): item is string =>
+            typeof item === "string" && item.trim().length > 0,
+        );
+
+        if (firstString) {
+          return firstString;
+        }
+      }
+    }
+  }
+
   return fallback;
 };
 
@@ -81,6 +120,8 @@ export async function apiRequest<T>(
   { method = "GET", body, token, headers, signal }: ApiRequestOptions = {},
 ): Promise<T> {
   const requestUrl = buildRequestUrl(path);
+  const isFormDataBody =
+    typeof FormData !== "undefined" && body instanceof FormData;
 
   if (!API_URL && Platform.OS !== "web") {
     throw new Error(
@@ -92,11 +133,17 @@ export async function apiRequest<T>(
     method,
     headers: {
       Accept: "application/json",
-      ...(body ? { "Content-Type": "application/json" } : {}),
+      ...(!isFormDataBody && body
+        ? { "Content-Type": "application/json" }
+        : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
-    ...(body ? { body: JSON.stringify(body) } : {}),
+    ...(body
+      ? {
+          body: isFormDataBody ? (body as BodyInit) : JSON.stringify(body),
+        }
+      : {}),
     signal,
   });
 

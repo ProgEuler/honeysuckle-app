@@ -5,320 +5,487 @@ import Notification from "@/assets/svgs/notification.svg";
 import Chat from "@/assets/svgs/xchat.svg";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
+import { useMeQuery } from "@/hooks/useMeQuery";
 import { router } from "expo-router";
-import React from "react";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import React, { useEffect, useMemo, useRef } from "react";
 import {
-    SafeAreaView,
-    useSafeAreaInsets,
-} from "react-native-safe-area-context";
+  Animated,
+  Easing,
+  Image,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
+const SCROLL_DISTANCE = 120;
+const HEADER_EXPANDED_OFFSET = 208;
+const HEADER_COLLAPSED_OFFSET = 92;
+
+const PROFILE_IMAGE_FALLBACK = require("@/assets/images/avatar-fallback.png");
+
+const getEntranceStyle = (animation: Animated.Value) => ({
+  opacity: animation,
+  transform: [
+    {
+      translateY: animation.interpolate({
+        inputRange: [0, 1],
+        outputRange: [20, 0],
+        extrapolate: "clamp",
+      }),
+    },
+  ],
+});
 
 const HomeScreen = () => {
-    return (
-        <View style={styles.screen}>
-            <KeyboardAwareScrollView
-                style={styles.scroll}
-                contentContainerStyle={styles.scrollContent}
-                keyboardShouldPersistTaps="handled"
-                bottomOffset={24}
-                showsVerticalScrollIndicator={false}
-                stickyHeaderIndices={[0]}
-            >
-                <View style={styles.stickyHeaderContainer}>
-                    <SafeAreaView edges={["top"]}>
-                        <View style={styles.headerTopRow}>
-                            <View style={styles.dateWrap}>
-                                <RNText variant="header" size="lg">
-                                    Tue, Nov 27
-                                </RNText>
-                            </View>
+  const { top, bottom } = useSafeAreaInsets();
+  const { data: me } = useMeQuery();
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const cardAnimations = useRef([
+    new Animated.Value(0),
+    new Animated.Value(0),
+    new Animated.Value(0),
+    new Animated.Value(0),
+  ] as const).current;
 
-                            <View style={styles.logoWrap}>
-                                <Image
-                                    source={require("@/assets/images/logo.png")}
-                                    style={styles.logo}
-                                />
-                            </View>
+  const todayLabel = useMemo(
+    () =>
+      new Date().toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      }),
+    [],
+  );
 
-                            <TouchableOpacity
-                                onPress={() => router.push("/notifications")}
-                                style={styles.notificationButtonWrap}
-                            >
-                                <View style={styles.notificationButton}>
-                                    <Notification />
-                                </View>
-                            </TouchableOpacity>
-                        </View>
+  const displayName = me?.name?.trim() || "Friend";
+  const firstName = displayName.split(" ")[0] || displayName;
+  const subtitleText =
+    me?.bio?.trim() || "Let's make today better than yesterday.";
+  const profileImageSource = me?.image
+    ? { uri: me.image }
+    : PROFILE_IMAGE_FALLBACK;
 
-                        <View style={styles.profileCollapseWrap}>
-                            <View style={styles.profileRow}>
-                                <View style={styles.profileImageFrame}>
-                                    <Image
-                                        source={require("@/assets/images/person.jpg")}
-                                        style={styles.profileImage}
-                                    />
-                                </View>
-
-                                <View style={styles.profileTextWrap}>
-                                    <RNText
-                                        variant="header"
-                                        size="2xl"
-                                        style={styles.welcomeText}
-                                    >
-                                        Welcome back, Selena 👋
-                                    </RNText>
-                                    <View style={styles.subtitleRow}>
-                                        <RNText
-                                            variant="subtitle"
-                                            size="md"
-                                            style={styles.subtitleText}
-                                        >
-                                            Let’s make today better than yesterday.
-                                        </RNText>
-                                    </View>
-                                </View>
-                            </View>
-                        </View>
-                    </SafeAreaView>
-                </View>
-
-                <View style={styles.listWrap}>
-                    <RNText variant="title" size="xl">
-                        Mental Health Metrics
-                    </RNText>
-
-                    <TouchableOpacity
-                        onPress={() => router.push("/(tabs)/dailycheck")}
-                        style={styles.metricCard}
-                    >
-                        <View style={styles.iconBubbleGreen}>
-                            <Clock />
-                        </View>
-                        <View style={styles.metricTextWrap}>
-                            <RNText variant="title" size="lg">
-                                Start Daily Check-In
-                            </RNText>
-                            <RNText variant="medium" size="md">
-                                Take a moment to assess your mood.
-                            </RNText>
-                        </View>
-                        <View>
-                            <Next />
-                        </View>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        onPress={() => router.push("/(tabs)/analytics")}
-                        style={styles.metricCard}
-                    >
-                        <View style={styles.iconBubbleOrange}>
-                            <Analysis />
-                        </View>
-                        <View style={styles.metricTextWrap}>
-                            <RNText variant="title" size="lg">
-                                View Mood Insights
-                            </RNText>
-                            <RNText variant="medium" size="md">
-                                Insightful graphs and mood analytics.
-                            </RNText>
-                        </View>
-                        <View>
-                            <Next />
-                        </View>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        onPress={() => router.push("/chatpages")}
-                        style={styles.metricCard}
-                    >
-                        <View style={styles.iconBubblePurple}>
-                            <Chat />
-                        </View>
-                        <View style={styles.metricTextWrap}>
-                            <RNText variant="title" size="lg">
-                                Chat with AI
-                            </RNText>
-                            <RNText variant="medium" size="md">
-                                Get emotional support and guidance.
-                            </RNText>
-                        </View>
-                        <View>
-                            <Next />
-                        </View>
-                    </TouchableOpacity>
-
-                    <View style={styles.statsCard}>
-                        <View style={styles.statsBlock}>
-                            <RNText variant="header" size="lg">
-                                Current Steak
-                            </RNText>
-                            <RNText variant="medium" size="lg">
-                                7 Days 🔥
-                            </RNText>
-                        </View>
-
-                        <View style={styles.statsBlock}>
-                            <RNText variant="header" size="lg">
-                                Total Check-ins
-                            </RNText>
-                            <RNText variant="medium" size="lg">
-                                24
-                            </RNText>
-                        </View>
-                    </View>
-                </View>
-            </KeyboardAwareScrollView>
-        </View>
+  useEffect(() => {
+    const entranceAnimation = Animated.stagger(
+      85,
+      cardAnimations.map((animation) =>
+        Animated.timing(animation, {
+          toValue: 1,
+          duration: 420,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ),
     );
+
+    entranceAnimation.start();
+
+    return () => {
+      entranceAnimation.stop();
+    };
+  }, [cardAnimations]);
+
+  const headerExpandedHeight = top + HEADER_EXPANDED_OFFSET;
+  const headerCollapsedHeight = top + HEADER_COLLAPSED_OFFSET;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, SCROLL_DISTANCE],
+    outputRange: [headerExpandedHeight, headerCollapsedHeight],
+    extrapolate: "clamp",
+  });
+
+  const onScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    { useNativeDriver: false },
+  );
+
+  // Profile section: fades out and slides up as user scrolls
+  const profileOpacity = scrollY.interpolate({
+    inputRange: [0, SCROLL_DISTANCE * 0.65],
+    outputRange: [1, 0],
+    extrapolate: "clamp",
+  });
+
+  const profileTranslateY = scrollY.interpolate({
+    inputRange: [0, SCROLL_DISTANCE],
+    outputRange: [0, -20],
+    extrapolate: "clamp",
+  });
+
+  const profileScale = scrollY.interpolate({
+    inputRange: [0, SCROLL_DISTANCE],
+    outputRange: [1, 0.96],
+    extrapolate: "clamp",
+  });
+
+  // Collapsed header: greeting fades in as profile fades out
+  const collapsedOpacity = scrollY.interpolate({
+    inputRange: [SCROLL_DISTANCE * 0.5, SCROLL_DISTANCE],
+    outputRange: [0, 1],
+    extrapolate: "clamp",
+  });
+
+  const collapsedTranslateY = scrollY.interpolate({
+    inputRange: [SCROLL_DISTANCE * 0.5, SCROLL_DISTANCE],
+    outputRange: [8, 0],
+    extrapolate: "clamp",
+  });
+
+  return (
+    <View style={styles.screen}>
+      <Animated.View
+        style={[
+          styles.headerShell,
+          {
+            height: headerHeight,
+            paddingTop: top + 8,
+          },
+        ]}
+      >
+        <View style={styles.headerTopRow}>
+          <View style={styles.dateWrap}>
+            <RNText variant="header" size="lg">
+              {todayLabel}
+            </RNText>
+          </View>
+
+          <View style={styles.logoWrap}>
+            <Image
+              source={require("@/assets/images/logo.png")}
+              style={styles.logo}
+            />
+          </View>
+
+          <TouchableOpacity
+            onPress={() => router.push("/notifications")}
+            style={styles.notificationButtonWrap}
+            activeOpacity={0.85}
+          >
+            <View style={styles.notificationButton}>
+              <Notification />
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        <Animated.View
+          style={[
+            styles.profileCollapseWrap,
+            {
+              opacity: profileOpacity,
+              transform: [
+                { translateY: profileTranslateY },
+                { scale: profileScale },
+              ],
+            },
+          ]}
+        >
+          <View style={styles.profileRow}>
+            <View style={styles.profileImageFrame}>
+              <Image source={profileImageSource} style={styles.profileImage} />
+            </View>
+
+            <View style={styles.profileTextWrap}>
+              <RNText variant="header" size="xl" style={styles.welcomeText}>
+                Welcome back, {firstName} 👋
+              </RNText>
+              <View style={styles.subtitleRow}>
+                <RNText
+                  variant="subtitle"
+                  size="md"
+                  style={styles.subtitleText}
+                >
+                  {subtitleText}
+                </RNText>
+              </View>
+            </View>
+          </View>
+        </Animated.View>
+      </Animated.View>
+
+      <AnimatedScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingTop: headerExpandedHeight + 18,
+            paddingBottom: bottom + 140,
+          },
+        ]}
+        onScroll={onScroll}
+        keyboardShouldPersistTaps="handled"
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="never"
+      >
+        <View style={styles.listWrap}>
+          <RNText variant="title" size="xl">
+            Mental Health Metrics
+          </RNText>
+
+          <Animated.View style={getEntranceStyle(cardAnimations[0])}>
+            <TouchableOpacity
+              onPress={() => router.push("/(tabs)/dailycheck")}
+              style={styles.metricCard}
+              activeOpacity={0.85}
+            >
+              <View style={styles.iconBubbleGreen}>
+                <Clock />
+              </View>
+              <View style={styles.metricTextWrap}>
+                <RNText variant="title" size="lg">
+                  Start Daily Check-In
+                </RNText>
+                <RNText variant="medium" size="sm">
+                  Take a moment to assess your mood.
+                </RNText>
+              </View>
+              <View>
+                <Next />
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
+
+          <Animated.View style={getEntranceStyle(cardAnimations[1])}>
+            <TouchableOpacity
+              onPress={() => router.push("/(tabs)/analytics")}
+              style={styles.metricCard}
+              activeOpacity={0.85}
+            >
+              <View style={styles.iconBubbleOrange}>
+                <Analysis />
+              </View>
+              <View style={styles.metricTextWrap}>
+                <RNText variant="title" size="lg">
+                  View Mood Insights
+                </RNText>
+                <RNText variant="medium" size="sm">
+                  Insightful graphs and mood analytics.
+                </RNText>
+              </View>
+              <View>
+                <Next />
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
+
+          <Animated.View style={getEntranceStyle(cardAnimations[2])}>
+            <TouchableOpacity
+              onPress={() => router.push("/chatpages")}
+              style={styles.metricCard}
+              activeOpacity={0.85}
+            >
+              <View style={styles.iconBubblePurple}>
+                <Chat />
+              </View>
+              <View style={styles.metricTextWrap}>
+                <RNText variant="title" size="lg">
+                  Chat with AI
+                </RNText>
+                <RNText variant="medium" size="sm">
+                  Get emotional support and guidance.
+                </RNText>
+              </View>
+              <View>
+                <Next />
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
+
+          <Animated.View style={getEntranceStyle(cardAnimations[3])}>
+            <View style={styles.statsCard}>
+              <View style={styles.statsBlock}>
+                <RNText variant="header" size="lg">
+                  Current Streak
+                </RNText>
+                <RNText variant="medium" size="lg">
+                  {me.streak || 0} Days 🔥
+                </RNText>
+              </View>
+
+              <View style={styles.statsBlock}>
+                <RNText variant="header" size="lg">
+                  Total Check-ins
+                </RNText>
+                <RNText variant="medium" size="lg">
+                  24
+                </RNText>
+              </View>
+            </View>
+          </Animated.View>
+        </View>
+      </AnimatedScrollView>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    screen: {
-        flex: 1,
-        backgroundColor: Colors.background,
-    },
-    stickyHeaderContainer: {
-        backgroundColor: Colors.white,
-        borderBottomLeftRadius: 40,
-        borderBottomRightRadius: 40,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 3,
-        paddingBottom: 16,
-        zIndex: 10,
-    },
-    headerTopRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        paddingHorizontal: 20,
-    },
-    dateWrap: {
-        flexDirection: "row",
-        justifyContent: "flex-start",
-        alignItems: "center",
-        flex: 1,
-    },
-    logoWrap: {
-        flex: 1,
-        alignItems: "center",
-    },
-    logo: {
-        height: 60,
-        width: 60,
-    },
-    notificationButtonWrap: {
-        flex: 1,
-        justifyContent: "center",
-    },
-    notificationButton: {
-        borderWidth: 1,
-        borderColor: Colors.brown,
-        padding: 12,
-        borderRadius: 30,
-        alignSelf: "flex-end",
-    },
-    profileRow: {
-        flexDirection: "row",
-        width: "90%",
-        marginTop: 20,
-        marginHorizontal: "auto",
-    },
-    profileCollapseWrap: {
-        width: "100%",
-        overflow: "hidden",
-    },
-    profileImageFrame: {
-        borderWidth: 1,
-        borderColor: Colors.green,
-        borderRadius: 150,
-        overflow: "hidden",
-        alignSelf: "center",
-    },
-    profileImage: {
-        height: 80,
-        width: 80,
-        overflow: "hidden",
-    },
-    profileTextWrap: {
-        gap: 5,
-        width: "70%",
-        marginHorizontal: "auto",
-    },
-    welcomeText: {
-        color: Colors.brown,
-    },
-    subtitleRow: {
-        flexDirection: "row",
-        gap: 5,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    subtitleText: {
-        color: Colors.orange,
-    },
-    scroll: {
-        flex: 1,
-    },
-    scrollContent: {},
-    listWrap: {
-        marginTop: 20,
-        width: "90%",
-        marginHorizontal: "auto",
-        gap: 10,
-        paddingBottom: 180,
-    },
-    metricCard: {
-        backgroundColor: Colors.white,
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: 20,
-        borderRadius: 30,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 1,
-        elevation: 2,
-    },
-    iconBubbleGreen: {
-        backgroundColor: "#F2F5EB",
-        padding: 12,
-        borderRadius: 16,
-    },
-    iconBubbleOrange: {
-        backgroundColor: "#FFF0EB",
-        padding: 12,
-        borderRadius: 16,
-    },
-    iconBubblePurple: {
-        backgroundColor: "#EDEBFF",
-        padding: 12,
-        borderRadius: 16,
-    },
-    metricTextWrap: {
-        width: "70%",
-        marginHorizontal: "auto",
-        alignSelf: "flex-start",
-    },
-    statsCard: {
-        backgroundColor: Colors.white,
-        flexDirection: "row",
-        justifyContent: "space-between",
-        paddingVertical: 20,
-        paddingHorizontal: 30,
-        borderRadius: 30,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 1,
-        elevation: 2,
-    },
-    statsBlock: {
-        gap: 10,
-    },
+  screen: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  headerShell: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: Colors.white,
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 6,
+    zIndex: 20,
+    overflow: "hidden",
+  },
+  headerTopRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    alignItems: "center",
+  },
+  dateWrap: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    flex: 1,
+  },
+  logoWrap: {
+    flex: 1,
+    alignItems: "center",
+  },
+  logo: {
+    height: 60,
+    width: 60,
+  },
+  notificationButtonWrap: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  notificationButton: {
+    borderWidth: 1,
+    borderColor: Colors.brown,
+    padding: 10,
+    borderRadius: 30,
+    alignSelf: "flex-end",
+  },
+  // FIX: was absolute-positioned but had no bottom anchor — now anchored properly
+  collapsedHeader: {
+    position: "absolute",
+    left: 20,
+    right: 20,
+    bottom: 14,
+    alignItems: "center",
+  },
+  collapsedTitle: {
+    color: Colors.brown,
+  },
+  profileRow: {
+    flexDirection: "row",
+    width: "90%",
+    marginTop: 20,
+    marginHorizontal: "auto",
+    alignItems: "center",
+  },
+  profileCollapseWrap: {
+    width: "100%",
+    overflow: "hidden",
+    marginTop: 8,
+  },
+  profileImageFrame: {
+    borderWidth: 1,
+    borderColor: Colors.green,
+    borderRadius: 150,
+    overflow: "hidden",
+    alignSelf: "center",
+  },
+  profileImage: {
+    height: 72,
+    width: 72,
+  },
+  // FIX: replaced marginHorizontal: "auto" (unreliable in RN) with flex + paddingLeft
+  profileTextWrap: {
+    flex: 1,
+    gap: 5,
+    paddingLeft: 14,
+  },
+  welcomeText: {
+    color: Colors.brown,
+  },
+  subtitleRow: {
+    flexDirection: "row",
+    gap: 5,
+    alignItems: "center",
+  },
+  subtitleText: {
+    color: Colors.orange,
+    fontSize: 14,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 0,
+  },
+  listWrap: {
+    marginTop: 12,
+    width: "90%",
+    marginHorizontal: "auto",
+    gap: 12,
+  },
+  metricCard: {
+    backgroundColor: Colors.white,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    borderRadius: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  iconBubbleGreen: {
+    backgroundColor: "#F2F5EB",
+    padding: 12,
+    borderRadius: 16,
+  },
+  iconBubbleOrange: {
+    backgroundColor: "#FFF0EB",
+    padding: 12,
+    borderRadius: 16,
+  },
+  iconBubblePurple: {
+    backgroundColor: "#EDEBFF",
+    padding: 12,
+    borderRadius: 16,
+  },
+  metricTextWrap: {
+    flex: 1,
+    paddingHorizontal: 14,
+    alignSelf: "flex-start",
+  },
+  statsCard: {
+    backgroundColor: Colors.white,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 20,
+    paddingHorizontal: 30,
+    borderRadius: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  statsBlock: {
+    gap: 10,
+  },
 });
 
 export default HomeScreen;
