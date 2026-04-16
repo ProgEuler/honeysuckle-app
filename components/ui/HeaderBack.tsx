@@ -18,6 +18,7 @@ type HeaderBackProps = {
   onBackPress?: () => void;
   rightElement?: ReactNode;
   edges?: readonly Edge[];
+  hideBorderBottom?: boolean;
 };
 
 type HeaderBackScrollContextValue = {
@@ -76,6 +77,7 @@ const HeaderBack = ({
   onBackPress,
   rightElement,
   edges = ["top"],
+  hideBorderBottom = false,
 }: HeaderBackProps) => {
   const scrollContext = useContext(HeaderBackScrollContext);
   const showBottomBorder = scrollContext?.isScrolled ?? false;
@@ -85,7 +87,7 @@ const HeaderBack = ({
       edges={edges}
       style={[
         styles.safeArea,
-        showBottomBorder ? styles.safeAreaScrolled : null,
+        hideBorderBottom && styles.noBorderBottom,
       ]}
     >
       <View style={styles.container}>
@@ -114,12 +116,16 @@ const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: Colors.background,
   },
-  safeAreaScrolled: {
-    borderBottomWidth: 2,
-    borderBottomColor: Colors.brown,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+  noBorderBottom: {
+    borderBottomWidth: 0,
+    borderBottomColor: "transparent",
   },
+  // safeAreaScrolled: {
+  //   borderBottomWidth: 2,
+  //   borderBottomColor: Colors.brown,
+  //   borderBottomLeftRadius: 20,
+  //   borderBottomRightRadius: 20,
+  // },
   container: {
     flexDirection: "row",
     justifyContent: "space-between",

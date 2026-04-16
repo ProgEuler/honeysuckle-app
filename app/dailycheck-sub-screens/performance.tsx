@@ -14,16 +14,16 @@ import { useReportQuery } from "@/hooks/useReportQuery";
 import { ReportEmotionItem } from "@/lib/api/report";
 import { router } from "expo-router";
 import { ComponentType, useMemo } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
 import {
-  SafeAreaView,
-  useSafeAreaInsets,
+    SafeAreaView,
+    useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
 const Performance = () => {
   const { bottom } = useSafeAreaInsets();
-  const { data: report, isLoading, isError } = useReportQuery();
+  const { data: report, isLoading, isError, refetch, isRefetching } = useReportQuery();
 
   const assessmentMeta: Record<
     string,
@@ -92,6 +92,9 @@ const Performance = () => {
       <ScrollView
         contentContainerStyle={{ paddingBottom: bottom + 40 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[Colors.green]} tintColor={Colors.green} />
+        }
       >
         <View style={styles.chartContainer}>
           <BarChart

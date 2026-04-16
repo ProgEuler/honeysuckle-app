@@ -12,8 +12,8 @@ import HeaderBack, {
   HeaderBackProvider,
   HeaderBackScrollView,
 } from "@/components/ui/HeaderBack";
-import React, { useMemo, useState } from "react";
-import { Text, View } from "react-native";
+import { useMemo, useState } from "react";
+import { RefreshControl, Text, View } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
 
 const assessmentVisualMap: Record<
@@ -64,7 +64,7 @@ const assessmentVisualMap: Record<
 };
 
 const AnalyticsScreen = () => {
-  const { data: insights, isLoading } = useInsightsQuery();
+  const { data: insights, isLoading, refetch, isRefetching } = useInsightsQuery();
   const [selectedSlice, setSelectedSlice] = useState<string | null>(null);
 
   const pieData = useMemo(
@@ -119,10 +119,13 @@ const AnalyticsScreen = () => {
 
   return (
     <HeaderBackProvider>
-      <HeaderBack title="Analytics" />
+      <HeaderBack title="Analytics" hideBorderBottom />
       <HeaderBackScrollView
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[Colors.green]} tintColor={Colors.green} />
+        }
       >
         <View
           style={{

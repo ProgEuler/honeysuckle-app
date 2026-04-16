@@ -1,7 +1,9 @@
 import AI from "@/assets/svgs/ai.svg";
 import AIGreen from "@/assets/svgs/aig.svg";
 import ArrowRight from "@/assets/svgs/arrowright.svg";
-import Back from "@/assets/svgs/back.svg";
+import HeaderBack, {
+    HeaderBackProvider
+} from "@/components/ui/HeaderBack";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { inspirationQuestions } from "@/constants/prompt-inspirations";
@@ -12,25 +14,20 @@ import { useMutation } from "@tanstack/react-query";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
 import { X } from "lucide-react-native";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
-  ActivityIndicator,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    ScrollView,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Portal } from "react-native-portalize";
 import {
-  SafeAreaView,
-  useSafeAreaInsets,
+    useSafeAreaInsets
 } from "react-native-safe-area-context";
 import { toast } from "sonner-native";
-import HeaderBack, {
-  HeaderBackProvider,
-  HeaderBackScrollView,
-} from "@/components/ui/HeaderBack";
 
 const JournalEntry = () => {
   const { bottom } = useSafeAreaInsets();
@@ -89,7 +86,7 @@ const JournalEntry = () => {
 
   return (
     <HeaderBackProvider>
-      <HeaderBack title="Assessment" progressText="3 OF 3" />
+      <HeaderBack title="Assessment" progressText="3 OF 3" hideBorderBottom />
 
         <KeyboardAwareScrollView
           style={{ flex: 1 }}

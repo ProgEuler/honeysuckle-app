@@ -8,7 +8,7 @@ import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { useCheckinStore } from "@/store/useCheckinStore";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { toast } from "sonner-native";
 
@@ -33,7 +33,7 @@ const Index = () => {
 
   return (
     <HeaderBackProvider>
-      <HeaderBack title="Assessment" progressText="1 OF 3" />
+      <HeaderBack title="Assessment" progressText="1 OF 3" hideBorderBottom />
       <HeaderBackScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
