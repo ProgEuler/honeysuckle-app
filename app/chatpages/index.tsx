@@ -2,6 +2,7 @@ import Back from "@/assets/svgs/back.svg";
 import Enter from "@/assets/svgs/enter.svg";
 import Menu from "@/assets/svgs/menu.svg";
 import Type from "@/assets/svgs/type.svg";
+import { Boticon } from "@/components/icons/boticon";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import {
@@ -9,18 +10,20 @@ import {
   useChatHistoryQuery,
 } from "@/hooks/useChatHistoryQuery";
 import { useKeyboardVisibility } from "@/hooks/useKeyborad";
-import { sendChatMessage } from "@/lib/api/chat";
+import { ChatHistoryMessage, clearChatHistory, sendChatMessage } from "@/lib/api/chat";
 import { ApiError } from "@/lib/api/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import React, { useMemo, useState } from "react";
+import { User2 } from "lucide-react-native";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  FlatList,
+  Modal,
   Platform,
-  ScrollView,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -30,7 +33,9 @@ const ChatPage = () => {
   const keyboardVisibility = useKeyboardVisibility();
   const queryClient = useQueryClient();
   const [inputMessage, setInputMessage] = useState("");
+  const flatListRef = useRef<FlatList>(null);
   const pageSize = 20;
+  const [showClearModal, setShowClearModal] = useState(false);
 
   const {
     data,
@@ -41,6 +46,18 @@ const ChatPage = () => {
     isFetchingNextPage,
   } = useChatHistoryQuery(pageSize);
 
+  const clearChatMutation = useMutation({
+    mutationFn: clearChatHistory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: chatHistoryQueryKey(pageSize) });
+      setShowClearModal(false);
+      toast.success("Chat history cleared.");
+    },
+    onError: () => {
+      toast.error("Failed to clear chat history.");
+    },
+  });
+
   const sendMessageMutation = useMutation({
     mutationFn: sendChatMessage,
     onSuccess: async () => {
@@ -48,24 +65,20 @@ const ChatPage = () => {
       await queryClient.invalidateQueries({
         queryKey: chatHistoryQueryKey(pageSize),
       });
+      flatListRef.current?.scrollToEnd({ animated: true });
     },
     onError: (error) => {
       const message =
         error instanceof ApiError || error instanceof Error
           ? error.message
           : "Unable to send message right now.";
-
       toast.error(message);
     },
   });
 
   const handleSendMessage = () => {
     const message = inputMessage.trim();
-
-    if (!message || sendMessageMutation.isPending) {
-      return;
-    }
-
+    if (!message || sendMessageMutation.isPending) return;
     sendMessageMutation.mutate({ message });
   };
 
@@ -73,11 +86,8 @@ const ChatPage = () => {
     inputMessage.trim().length > 0 && !sendMessageMutation.isPending;
 
   const messages = useMemo(() => {
-    if (!data?.pages) {
-      return [];
-    }
-
-    // API returns latest messages first; render oldest-to-newest for chat UX.
+    if (!data?.pages) return [];
+    // API returns latest first; render oldest-to-newest
     return [...data.pages]
       .reverse()
       .flatMap((page) => [...page.messages].reverse());
@@ -85,16 +95,86 @@ const ChatPage = () => {
 
   const formatMessageTime = (value: string) => {
     const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-      return "";
-    }
-
-    return date.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
+
+  const renderItem = useCallback(
+    ({ item }: { item: ChatHistoryMessage }) => {
+      const isUser = item.role === "user";
+      return (
+        <View
+          style={{
+            flexDirection: isUser ? "row-reverse" : "row",
+            alignItems: "flex-end",
+            gap: 8,
+            marginBottom: 15,
+          }}
+        >
+          {isUser ? (
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: Colors.brown,
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <User2 color="#BFA79A" width={18} height={18} />
+            </View>
+          ) : (
+            <Boticon size={32} />
+          )}
+
+          <View style={{ alignItems: isUser ? "flex-end" : "flex-start", flex: 1 }}>
+            <RNText
+              variant="medium"
+              size="md"
+              style={{
+                backgroundColor: isUser ? Colors.brown : "#E8DDD9",
+                paddingVertical: 10,
+                paddingHorizontal: 18,
+                maxWidth: "90%",
+                borderTopLeftRadius: 20,
+                borderTopRightRadius: 20,
+                borderBottomLeftRadius: isUser ? 20 : 6,
+                borderBottomRightRadius: isUser ? 6 : 20,
+                color: isUser ? Colors.white : Colors.brown,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 2,
+                elevation: 1,
+              }}
+            >
+              {item.message}
+            </RNText>
+            <RNText
+              variant="base"
+              size="xs"
+              style={{
+                marginTop: 4,
+                color: Colors.primaryText,
+                marginRight: isUser ? 2 : 0,
+                marginLeft: isUser ? 0 : 2,
+              }}
+            >
+              {formatMessageTime(item.time)}
+            </RNText>
+          </View>
+        </View>
+      );
+    },
+    [],
+  );
+
+  const keyExtractor = useCallback(
+    (item: ChatHistoryMessage, index: number) => `${item.time}-${index}`,
+    [],
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background }}>
@@ -112,18 +192,10 @@ const ChatPage = () => {
           borderBottomLeftRadius: 30,
           borderBottomRightRadius: 30,
           paddingHorizontal: 15,
-          //  paddingTop: 10,
           paddingBottom: -20,
         }}
       >
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "flex-start",
-            alignItems: "center",
-            gap: 20,
-          }}
-        >
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 20 }}>
           <TouchableOpacity
             onPress={() => router.back()}
             style={{
@@ -136,11 +208,10 @@ const ChatPage = () => {
           >
             <Back />
           </TouchableOpacity>
-          <RNText variant="title" size="xl">
-            Chat with AI
-          </RNText>
+          <RNText variant="title" size="xl">Chat with AI</RNText>
         </View>
-        <View
+        <TouchableOpacity
+          onPress={() => setShowClearModal(true)}
           style={{
             padding: 12,
             borderWidth: 1,
@@ -149,111 +220,128 @@ const ChatPage = () => {
           }}
         >
           <Menu />
-        </View>
+        </TouchableOpacity>
       </SafeAreaView>
+
+      {/* Clear chat modal */}
+      <Modal visible={showClearModal} transparent animationType="fade" statusBarTranslucent>
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)", alignItems: "center", justifyContent: "center" }}>
+          <View
+            style={{
+              backgroundColor: Colors.white,
+              borderRadius: 28,
+              padding: 28,
+              width: "82%",
+              gap: 16,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.12,
+              shadowRadius: 16,
+              elevation: 8,
+            }}
+          >
+            <RNText variant="title" size="xl" style={{ textAlign: "center" }}>
+              Clear Chat History
+            </RNText>
+            <RNText variant="medium" size="md" style={{ textAlign: "center", color: Colors.primaryText, lineHeight: 24 }}>
+              This will permanently delete all your messages. This action cannot be undone.
+            </RNText>
+            <TouchableOpacity
+              onPress={() => clearChatMutation.mutate()}
+              disabled={clearChatMutation.isPending}
+              style={{
+                backgroundColor: Colors.orange,
+                paddingVertical: 14,
+                borderRadius: 30,
+                alignItems: "center",
+                justifyContent: "center",
+                opacity: clearChatMutation.isPending ? 0.7 : 1,
+              }}
+            >
+              {clearChatMutation.isPending ? (
+                <ActivityIndicator color={Colors.white} />
+              ) : (
+                <RNText variant="title" size="lg" style={{ color: Colors.white }}>
+                  Clear History
+                </RNText>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setShowClearModal(false)}
+              disabled={clearChatMutation.isPending}
+              style={{
+                paddingVertical: 14,
+                borderRadius: 30,
+                alignItems: "center",
+                borderWidth: 1,
+                borderColor: Colors.brown,
+              }}
+            >
+              <RNText variant="title" size="lg">Cancel</RNText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <ScrollView
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={keyExtractor}
           contentContainerStyle={{
             paddingHorizontal: 20,
+            paddingTop: 16,
             paddingBottom: 30,
-            gap: 15,
           }}
           keyboardShouldPersistTaps="handled"
-        >
-          {hasNextPage ? (
-            <TouchableOpacity
-              onPress={() => fetchNextPage()}
-              disabled={isFetchingNextPage}
-              style={{
-                alignSelf: "center",
-                backgroundColor: "#E8DDD9",
-                paddingHorizontal: 14,
-                paddingVertical: 8,
-                borderRadius: 20,
-                opacity: isFetchingNextPage ? 0.7 : 1,
-              }}
-            >
-              <RNText variant="medium" size="sm">
-                {isFetchingNextPage
-                  ? "Loading older messages..."
-                  : "Load older"}
-              </RNText>
-            </TouchableOpacity>
-          ) : null}
-
-          {isLoading ? (
-            <View style={{ alignItems: "center", marginTop: 30 }}>
-              <RNText variant="medium" size="md">
-                Loading chat history...
-              </RNText>
-            </View>
-          ) : isError ? (
-            <View style={{ alignItems: "center", marginTop: 30 }}>
-              <RNText
-                variant="medium"
-                size="md"
-                style={{ color: Colors.orange }}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
+          ListHeaderComponent={
+            hasNextPage ? (
+              <TouchableOpacity
+                onPress={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                style={{
+                  alignSelf: "center",
+                  backgroundColor: "#E8DDD9",
+                  paddingHorizontal: 14,
+                  paddingVertical: 8,
+                  borderRadius: 20,
+                  marginBottom: 12,
+                  opacity: isFetchingNextPage ? 0.7 : 1,
+                }}
               >
-                Unable to load chat history.
-              </RNText>
-            </View>
-          ) : messages.length === 0 ? (
-            <View style={{ alignItems: "center", marginTop: 30 }}>
-              <RNText variant="medium" size="md">
-                No messages yet. Start your first chat.
-              </RNText>
-            </View>
-          ) : (
-            messages.map((item, index) => {
-              const isUser = item.role === "user";
-
-              return (
-                <View
-                  key={`${item.time}-${index}`}
-                  style={{ alignItems: isUser ? "flex-end" : "flex-start" }}
-                >
-                  <RNText
-                    variant="medium"
-                    size="md"
-                    style={{
-                      backgroundColor: isUser ? Colors.brown : "#E8DDD9",
-                      paddingVertical: 10,
-                      paddingHorizontal: 18,
-                      maxWidth: "82%",
-                      borderTopLeftRadius: 20,
-                      borderTopRightRadius: 20,
-                      borderBottomLeftRadius: isUser ? 20 : 6,
-                      borderBottomRightRadius: isUser ? 6 : 20,
-                      color: isUser ? Colors.white : Colors.brown,
-                      shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 1 },
-                      shadowOpacity: 0.1,
-                      shadowRadius: 2,
-                      elevation: 1,
-                    }}
-                  >
-                    {item.message}
-                  </RNText>
-                  <RNText
-                    variant="base"
-                    size="xs"
-                    style={{
-                      marginTop: 4,
-                      color: Colors.primaryText,
-                      marginRight: isUser ? 2 : 0,
-                      marginLeft: isUser ? 0 : 2,
-                    }}
-                  >
-                    {formatMessageTime(item.time)}
-                  </RNText>
-                </View>
-              );
-            })
-          )}
-        </ScrollView>
+                <RNText variant="medium" size="sm">
+                  {isFetchingNextPage ? "Loading older messages..." : "Load older"}
+                </RNText>
+              </TouchableOpacity>
+            ) : null
+          }
+          ListEmptyComponent={
+            isLoading ? (
+              <View style={{ alignItems: "center", marginTop: 30 }}>
+                <RNText variant="medium" size="md">Loading chat history...</RNText>
+              </View>
+            ) : isError ? (
+              <View style={{ alignItems: "center", marginTop: 30 }}>
+                <RNText variant="medium" size="md" style={{ color: Colors.orange }}>
+                  Unable to load chat history.
+                </RNText>
+              </View>
+            ) : (
+              <View style={{ alignItems: "center", marginTop: 30, gap: 12 }}>
+                <Boticon size={56} />
+                <RNText variant="medium" size="md">
+                  No messages yet. Start your first chat.
+                </RNText>
+              </View>
+            )
+          }
+        />
 
         <View
           style={{
@@ -288,7 +376,7 @@ const ChatPage = () => {
           >
             <Type />
             <TextInput
-              placeholder={"Type to start chatting..."}
+              placeholder="Type to start chatting..."
               placeholderTextColor={Colors.primaryText}
               autoCorrect={false}
               autoCapitalize="sentences"
@@ -303,7 +391,7 @@ const ChatPage = () => {
                 paddingVertical: 5,
                 paddingHorizontal: 15,
                 borderRadius: 10,
-                fontSize: 18,
+                fontSize: 16,
                 fontFamily: "PoppinsRegular",
                 backgroundColor: Colors.background,
                 color: Colors.brown,

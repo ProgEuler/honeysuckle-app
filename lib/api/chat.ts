@@ -46,3 +46,8 @@ export const sendChatMessage = (payload: SendChatMessagePayload) =>
     method: "POST",
     body: payload,
   });
+
+export const clearChatHistory = () =>
+  authenticatedApiRequest<{ status: boolean }>("/api/chat/clear/", {
+    method: "DELETE",
+  });
