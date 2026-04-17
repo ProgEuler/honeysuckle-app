@@ -1,5 +1,7 @@
 import Apple from "@/assets/svgs/apple.svg";
 import Google from "@/assets/svgs/google.svg";
+import { RNText } from "@/components/ui/input";
+import { Colors } from "@/constants/color";
 import { useAppleSignIn } from "@/hooks/useAppleSignIn";
 import { useGoogleSignIn } from "@/hooks/useGoogleSignIn";
 import { socialLogin } from "@/lib/api/auth";
@@ -7,7 +9,7 @@ import { ApiError } from "@/lib/api/client";
 import { navigateAfterAuth } from "@/lib/navigateAfterAuth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useMutation } from "@tanstack/react-query";
-import { Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Modal, Pressable, StyleSheet, View } from "react-native";
 import { toast } from "sonner-native";
 
 export default function SocialAuth() {
@@ -21,7 +23,6 @@ export default function SocialAuth() {
       setAuthSession(response);
       toast.success("Signed in successfully.");
       navigateAfterAuth(response.log);
-      console.log("socail rse: ", response)
     },
     onError: (error) => {
       const message =
@@ -34,10 +35,7 @@ export default function SocialAuth() {
   });
 
   const handleGoogleSignIn = async () => {
-    if (socialLoginMutation.isPending) {
-      return;
-    }
-
+    if (socialLoginMutation.isPending) return;
     try {
       const user = await signInWithGoogle();
       const idToken = await user.getIdToken(true);
@@ -49,16 +47,10 @@ export default function SocialAuth() {
   };
 
   const handleAppleSignIn = async () => {
-    if (socialLoginMutation.isPending) {
-      return;
-    }
-
+    if (socialLoginMutation.isPending) return;
     try {
       const user = await signInWithApple();
-      if (!user) {
-        return;
-      }
-
+      if (!user) return;
       const idToken = await user.getIdToken(true);
       await socialLoginMutation.mutateAsync(idToken);
     } catch {
@@ -66,28 +58,64 @@ export default function SocialAuth() {
     }
   };
 
-  const disableSocialButtons =
-    isGoogleLoading || isAppleLoading || socialLoginMutation.isPending;
+  const isLoading = isGoogleLoading || isAppleLoading || socialLoginMutation.isPending;
+
   return (
-    <View style={styles.socialButtonsRow}>
-      <Pressable
-        onPress={handleGoogleSignIn}
-        disabled={disableSocialButtons}
-        style={styles.socialButton}
-      >
-        <Google />
-      </Pressable>
-      <Pressable
-        onPress={handleAppleSignIn}
-        disabled={disableSocialButtons}
-        style={styles.socialButton}
-      >
-        <Apple />
-      </Pressable>
-    </View>
+    <>
+      <Modal visible={isLoading} transparent animationType="fade" statusBarTranslucent>
+        <View style={styles.overlay}>
+          <View style={styles.loaderCard}>
+            <ActivityIndicator size="large" color={Colors.brown} />
+            <RNText variant="medium" size="md" style={styles.loaderText}>
+              Signing you in...
+            </RNText>
+          </View>
+        </View>
+      </Modal>
+
+      <View style={styles.socialButtonsRow}>
+        <Pressable
+          onPress={handleGoogleSignIn}
+          disabled={isLoading}
+          style={styles.socialButton}
+        >
+          <Google />
+        </Pressable>
+        <Pressable
+          onPress={handleAppleSignIn}
+          disabled={isLoading}
+          style={styles.socialButton}
+        >
+          <Apple />
+        </Pressable>
+      </View>
+    </>
   );
 }
+
 const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loaderCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 24,
+    paddingVertical: 32,
+    paddingHorizontal: 40,
+    alignItems: "center",
+    gap: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  loaderText: {
+    color: Colors.brown,
+  },
   socialButtonsRow: {
     flexDirection: "row",
     justifyContent: "center",

@@ -183,7 +183,7 @@ const PersonalInfo = () => {
                     ? { uri: selectedImageUri }
                     : me?.image
                       ? { uri: me.image }
-                      : require("@/assets/images/person.jpg")
+                      : require("@/assets/images/avatar-fallback.png")
                 }
                 style={styles.profileImage}
                 resizeMode="cover"
@@ -292,7 +292,7 @@ const PersonalInfo = () => {
                 Additional Information
               </RNText>
 
-              <View style={styles.metaRow}>
+              {/* <View style={styles.metaRow}>
                 <RNText variant="medium" size="md" style={styles.metaLabel}>
                   Sought professional help before?
                 </RNText>
@@ -305,7 +305,7 @@ const PersonalInfo = () => {
                     {hasSoughtProfessionalHelp ? "Yes" : "No"}
                   </RNText>
                 </TouchableOpacity>
-              </View>
+              </View> */}
 
               <View style={styles.metaRow}>
                 <RNText variant="medium" size="md" style={styles.metaLabel}>
