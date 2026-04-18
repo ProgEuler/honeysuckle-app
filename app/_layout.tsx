@@ -3,12 +3,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import * as NavigationBar from "expo-navigation-bar";
 import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import { StatusBar } from "react-native";
+import { StatusBar, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Host } from "react-native-portalize";
 import { Toaster } from "sonner-native";
+
+// Keep native splash visible until we're ready
+SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,11 +42,16 @@ export default function RootLayout() {
   useEffect(() => {
     if (fontsLoaded) {
       NavigationBar.setStyle("light");
-      console.log("All fonts loaded");
+      // Hide native splash only after fonts are ready — no white flash
+      SplashScreen.hideAsync();
     }
   }, [fontsLoaded]);
 
-  if (!fontsLoaded) return null;
+  // While fonts load, show the same dark background as step 1
+  // so there's zero visible transition from native splash
+  if (!fontsLoaded) {
+    return <View style={{ flex: 1, backgroundColor: "#2C1D14" }} />;
+  }
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
@@ -55,6 +64,7 @@ export default function RootLayout() {
             />
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="index" />
+              <Stack.Screen name="splash" options={{ animation: "none" }} />
             </Stack>
             <Toaster
               position="top-center"
