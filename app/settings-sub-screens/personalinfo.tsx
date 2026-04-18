@@ -19,6 +19,7 @@ import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Image,
+  RefreshControl,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -47,7 +48,8 @@ const PersonalInfo = () => {
   const queryClient = useQueryClient();
   const { hasSoughtProfessionalHelp, setHasSoughtProfessionalHelp } =
     useUserStore();
-  const { data: me, refetch: refetchMe } = useMeQuery();
+  const { data: me, refetch: refetchMe, isRefetching } = useMeQuery();
+  console.log(me)
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
   const [selectedImageMimeType, setSelectedImageMimeType] = useState<
     string | null
@@ -173,7 +175,11 @@ const PersonalInfo = () => {
   return (
     <>
       <HeaderBack title="Edit Personal Info" />
-      <Layout edges={[]}>
+      <Layout edges={[]} 
+                refreshControl={
+                  <RefreshControl refreshing={isRefetching} onRefresh={refetchMe} colors={[Colors.green]} tintColor={Colors.green} />
+                }
+      >
         <View style={styles.mainContent}>
           <View>
             <View style={styles.profileImageFrame}>

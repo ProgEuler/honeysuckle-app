@@ -201,7 +201,7 @@ const StepTwo = () => {
       ))}
       <View style={styles.centerContent}>
         <RNText variant="title" size="3xl" style={styles.whiteText}>
-          Fetching Data...
+          Gathering Thoughts...
         </RNText>
         <RNText variant="medium" size="md" style={[styles.whiteText, { opacity: 0.85, marginTop: 8 }]}>
           Shake your screen to interact!

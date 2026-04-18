@@ -10,7 +10,11 @@ import {
   useChatHistoryQuery,
 } from "@/hooks/useChatHistoryQuery";
 import { useKeyboardVisibility } from "@/hooks/useKeyborad";
-import { ChatHistoryMessage, clearChatHistory, sendChatMessage } from "@/lib/api/chat";
+import {
+  ChatHistoryMessage,
+  clearChatHistory,
+  sendChatMessage,
+} from "@/lib/api/chat";
 import { ApiError } from "@/lib/api/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -19,11 +23,12 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   Modal,
   Platform,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -49,7 +54,9 @@ const ChatPage = () => {
   const clearChatMutation = useMutation({
     mutationFn: clearChatHistory,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: chatHistoryQueryKey(pageSize) });
+      queryClient.invalidateQueries({
+        queryKey: chatHistoryQueryKey(pageSize),
+      });
       setShowClearModal(false);
       toast.success("Chat history cleared.");
     },
@@ -99,77 +106,76 @@ const ChatPage = () => {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
-  const renderItem = useCallback(
-    ({ item }: { item: ChatHistoryMessage }) => {
-      const isUser = item.role === "user";
-      return (
-        <View
-          style={{
-            flexDirection: isUser ? "row-reverse" : "row",
-            alignItems: "flex-end",
-            gap: 8,
-            marginBottom: 15,
-          }}
-        >
-          {isUser ? (
-            <View
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 16,
-                backgroundColor: Colors.brown,
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
-              <User2 color="#BFA79A" width={18} height={18} />
-            </View>
-          ) : (
-            <Boticon size={32} />
-          )}
-
-          <View style={{ alignItems: isUser ? "flex-end" : "flex-start", flex: 1 }}>
-            <RNText
-              variant="medium"
-              size="md"
-              style={{
-                backgroundColor: isUser ? Colors.brown : "#E8DDD9",
-                paddingVertical: 10,
-                paddingHorizontal: 18,
-                maxWidth: "90%",
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-                borderBottomLeftRadius: isUser ? 20 : 6,
-                borderBottomRightRadius: isUser ? 6 : 20,
-                color: isUser ? Colors.white : Colors.brown,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.1,
-                shadowRadius: 2,
-                elevation: 1,
-              }}
-            >
-              {item.message}
-            </RNText>
-            <RNText
-              variant="base"
-              size="xs"
-              style={{
-                marginTop: 4,
-                color: Colors.primaryText,
-                marginRight: isUser ? 2 : 0,
-                marginLeft: isUser ? 0 : 2,
-              }}
-            >
-              {formatMessageTime(item.time)}
-            </RNText>
+  const renderItem = useCallback(({ item }: { item: ChatHistoryMessage }) => {
+    const isUser = item.role === "user";
+    return (
+      <View
+        style={{
+          flexDirection: isUser ? "row-reverse" : "row",
+          alignItems: "flex-end",
+          gap: 8,
+          marginBottom: 15,
+        }}
+      >
+        {isUser ? (
+          <View
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 16,
+              backgroundColor: Colors.brown,
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <User2 color="#BFA79A" width={18} height={18} />
           </View>
+        ) : (
+          <Boticon size={32} />
+        )}
+
+        <View
+          style={{ alignItems: isUser ? "flex-end" : "flex-start", flex: 1 }}
+        >
+          <RNText
+            variant="medium"
+            size="md"
+            style={{
+              backgroundColor: isUser ? Colors.brown : "#E8DDD9",
+              paddingVertical: 10,
+              paddingHorizontal: 18,
+              maxWidth: "90%",
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              borderBottomLeftRadius: isUser ? 20 : 6,
+              borderBottomRightRadius: isUser ? 6 : 20,
+              color: isUser ? Colors.white : Colors.brown,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.1,
+              shadowRadius: 2,
+              elevation: 1,
+            }}
+          >
+            {item.message}
+          </RNText>
+          <RNText
+            variant="base"
+            size="xs"
+            style={{
+              marginTop: 4,
+              color: Colors.primaryText,
+              marginRight: isUser ? 2 : 0,
+              marginLeft: isUser ? 0 : 2,
+            }}
+          >
+            {formatMessageTime(item.time)}
+          </RNText>
         </View>
-      );
-    },
-    [],
-  );
+      </View>
+    );
+  }, []);
 
   const keyExtractor = useCallback(
     (item: ChatHistoryMessage, index: number) => `${item.time}-${index}`,
@@ -208,7 +214,9 @@ const ChatPage = () => {
           >
             <Back />
           </TouchableOpacity>
-          <RNText variant="title" size="xl">Chat with AI</RNText>
+          <RNText variant="title" size="xl">
+            Chat with AI
+          </RNText>
         </View>
         <TouchableOpacity
           onPress={() => setShowClearModal(true)}
@@ -224,8 +232,20 @@ const ChatPage = () => {
       </SafeAreaView>
 
       {/* Clear chat modal */}
-      <Modal visible={showClearModal} transparent animationType="fade" statusBarTranslucent>
-        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)", alignItems: "center", justifyContent: "center" }}>
+      <Modal
+        visible={showClearModal}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.45)",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <View
             style={{
               backgroundColor: Colors.white,
@@ -243,8 +263,17 @@ const ChatPage = () => {
             <RNText variant="title" size="xl" style={{ textAlign: "center" }}>
               Clear Chat History
             </RNText>
-            <RNText variant="medium" size="md" style={{ textAlign: "center", color: Colors.primaryText, lineHeight: 24 }}>
-              This will permanently delete all your messages. This action cannot be undone.
+            <RNText
+              variant="medium"
+              size="md"
+              style={{
+                textAlign: "center",
+                color: Colors.primaryText,
+                lineHeight: 24,
+              }}
+            >
+              This will permanently delete all your messages. This action cannot
+              be undone.
             </RNText>
             <TouchableOpacity
               onPress={() => clearChatMutation.mutate()}
@@ -261,7 +290,11 @@ const ChatPage = () => {
               {clearChatMutation.isPending ? (
                 <ActivityIndicator color={Colors.white} />
               ) : (
-                <RNText variant="title" size="lg" style={{ color: Colors.white }}>
+                <RNText
+                  variant="title"
+                  size="lg"
+                  style={{ color: Colors.white }}
+                >
                   Clear History
                 </RNText>
               )}
@@ -277,7 +310,9 @@ const ChatPage = () => {
                 borderColor: Colors.brown,
               }}
             >
-              <RNText variant="title" size="lg">Cancel</RNText>
+              <RNText variant="title" size="lg">
+                Cancel
+              </RNText>
             </TouchableOpacity>
           </View>
         </View>
@@ -299,7 +334,9 @@ const ChatPage = () => {
             paddingBottom: 30,
           }}
           keyboardShouldPersistTaps="handled"
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
+          onContentSizeChange={() =>
+            flatListRef.current?.scrollToEnd({ animated: false })
+          }
           ListHeaderComponent={
             hasNextPage ? (
               <TouchableOpacity
@@ -316,7 +353,9 @@ const ChatPage = () => {
                 }}
               >
                 <RNText variant="medium" size="sm">
-                  {isFetchingNextPage ? "Loading older messages..." : "Load older"}
+                  {isFetchingNextPage
+                    ? "Loading older messages..."
+                    : "Load older"}
                 </RNText>
               </TouchableOpacity>
             ) : null
@@ -324,20 +363,59 @@ const ChatPage = () => {
           ListEmptyComponent={
             isLoading ? (
               <View style={{ alignItems: "center", marginTop: 30 }}>
-                <RNText variant="medium" size="md">Loading chat history...</RNText>
+                <RNText variant="medium" size="md">
+                  Loading chat history...
+                </RNText>
               </View>
             ) : isError ? (
               <View style={{ alignItems: "center", marginTop: 30 }}>
-                <RNText variant="medium" size="md" style={{ color: Colors.orange }}>
+                <RNText
+                  variant="medium"
+                  size="md"
+                  style={{ color: Colors.orange }}
+                >
                   Unable to load chat history.
                 </RNText>
               </View>
             ) : (
-              <View style={{ alignItems: "center", marginTop: 30, gap: 12 }}>
-                <Boticon size={56} />
+              <View style={{ alignItems: "center", marginTop: 30, gap: 28 }}>
+                {/* <Boticon size={56} />
                 <RNText variant="medium" size="md">
                   No messages yet. Start your first chat.
-                </RNText>
+                </RNText> */}
+                <View
+                  style={{
+                    height: 240,
+                    width: 240,
+                    backgroundColor: Colors.yellow + 40,
+                    borderRadius: "50%",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Image
+                    source={require("@/assets/images/logo.png")}
+                    style={{ height: 220, width: 220 }}
+                  />
+                </View>
+                <View
+                  style={{
+                    paddingHorizontal: 16,
+                    paddingVertical: 6,
+                    backgroundColor: Colors.orange + 40,
+                    borderRadius: 26,
+                  }}
+                >
+                  <RNText variant="title" style={{ color: Colors.orange }}>
+                    LIMITATIONS
+                  </RNText>
+                </View>
+                <View>
+                  <RNText variant="header" style={{ textAlign: "center" }}>
+                    Limited Knowledge
+                  </RNText>
+                  <RNText>No human being is perfect. So is chatbots.</RNText>
+                </View>
               </View>
             )
           }

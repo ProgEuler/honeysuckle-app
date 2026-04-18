@@ -12,22 +12,24 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import {
-  HelpCircle,
-  MoreVertical,
-  ShieldCheck,
-  Smile,
+    FileText,
+    HelpCircle,
+    MoreVertical,
+    ShieldCheck,
+    Smile
 } from "lucide-react-native";
 import { useRef, useState } from "react";
 import {
-  Animated,
-  Dimensions,
-  Image,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  TouchableOpacity,
-  View
+    Animated,
+    Dimensions,
+    Image,
+    Modal,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    TouchableOpacity,
+    View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { toast } from "sonner-native";
@@ -49,6 +51,7 @@ const Index = () => {
   const queryClient = useQueryClient();
 
   const [notifyEnabled, setNotifyEnabled] = useState<boolean>(me?.notify ?? false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   // Sync once when me loads for the first time
   const syncedRef = useRef(false);
@@ -79,6 +82,10 @@ const Index = () => {
     router.replace("/auth");
   };
 
+  const confirmLogout = () => {
+    setShowLogoutModal(false);
+    handleLogout();
+  };
   const displayName = me?.name?.trim() || "User";
   const displayEmail = me?.email || "";
   const displayBio = me?.bio?.trim() || "Your emotional wellness journey";
@@ -286,6 +293,12 @@ const Index = () => {
             isLucide
             onPress={() => router.push("/settings-sub-screens/security")}
           />
+          <SettingItem
+            icon={FileText}
+            title="Terms & Policy"
+            isLucide
+            onPress={() => router.push("/settings-sub-screens/termsandpolicy")}
+          />
           {false && (
             <SettingItem
               icon={HelpCircle}
@@ -298,9 +311,53 @@ const Index = () => {
 
         <SectionHeader title="Log Out" />
         <View style={styles.card}>
-          <SettingItem icon={Logout} title="Log Out" onPress={handleLogout} />
+          <SettingItem icon={Logout} title="Log Out" onPress={() => setShowLogoutModal(true)} />
         </View>
       </AnimatedScrollView>
+
+      {/* Logout confirmation modal */}
+      <Modal
+        visible={showLogoutModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLogoutModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowLogoutModal(false)}
+        >
+          <TouchableOpacity activeOpacity={1} style={styles.modalCard}>
+            <View style={styles.modalIconWrap}>
+              <Logout width={32} height={32} />
+            </View>
+            <RNText variant="title" size="2xl" style={styles.modalTitle}>
+              Log Out?
+            </RNText>
+            <RNText variant="medium" size="md" style={styles.modalMessage}>
+              Are you sure you want to log out of your account?
+            </RNText>
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setShowLogoutModal(false)}
+              >
+                <RNText variant="header" size="md" style={styles.cancelText}>
+                  Cancel
+                </RNText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.logoutButton}
+                onPress={confirmLogout}
+              >
+                <RNText variant="header" size="md" style={styles.logoutText}>
+                  Log Out
+                </RNText>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
@@ -462,6 +519,74 @@ const styles = StyleSheet.create({
   },
   settingItemTitle: {
     color: Colors.brown,
+  },
+  // Logout modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 32,
+  },
+  modalCard: {
+    width: "100%",
+    backgroundColor: Colors.white,
+    borderRadius: 28,
+    padding: 28,
+    alignItems: "center",
+    gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  modalIconWrap: {
+    backgroundColor: Colors.background,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  modalTitle: {
+    color: Colors.brown,
+  },
+  modalMessage: {
+    color: Colors.primaryText,
+    textAlign: "center",
+    lineHeight: 24,
+    opacity: 0.75,
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 8,
+    width: "100%",
+  },
+  cancelButton: {
+    flex: 1,
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 1.5,
+    borderColor: Colors.brown,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cancelText: {
+    color: Colors.brown,
+  },
+  logoutButton: {
+    flex: 1,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: Colors.brown,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logoutText: {
+    color: Colors.white,
   },
 });
 

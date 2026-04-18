@@ -57,10 +57,10 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <Host>
           <KeyboardProvider>
-            {/* <ClerkProvider tokenCache={tokenCache}> */}
             <StatusBar
               barStyle="dark-content"
-              backgroundColor={"transparent"}
+              backgroundColor="#F7F4F2"
+              translucent={false}
             />
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="index" />
@@ -95,7 +95,6 @@ export default function RootLayout() {
                 },
               }}
             />
-            {/* </ClerkProvider> */}
           </KeyboardProvider>
         </Host>
       </QueryClientProvider>

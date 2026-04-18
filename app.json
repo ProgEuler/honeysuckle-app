@@ -10,8 +10,13 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.honeysuckleco.honeysuckletrail",
+      "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
+        "UIBackgroundModes": ["remote-notification", "fetch"],
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "entitlements": {
+         "aps-environment": "development"
       }
     },
     "android": {
@@ -23,23 +28,45 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.honeysuckleco.honeysuckletrail"
+      "package": "com.honeysuckleco.app",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      "@react-native-google-signin/google-signin",
+      "expo-apple-authentication",
       "expo-router",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0",
+            "googleServicesFile": "./google-services.json"
+          },
+          "ios": {
+            "deploymentTarget": "15.1",
+            "useFrameworks": "static",
+            "forceStaticLinking": ["RNFBApp", "RNFBAuth", "RNFBMessaging"],
+            "googleServicesFile": "./GoogleService-Info.plist"
+          }
+        }
+      ],
       [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#FFF6DD",
+          "backgroundColor": "#2C1D14",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#2C1D14"
           }
         }
       ],
