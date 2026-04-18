@@ -201,7 +201,14 @@ const ChatPage = () => {
           paddingBottom: -20,
         }}
       >
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 20 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 20,
+            paddingTop: 16,
+          }}
+        >
           <TouchableOpacity
             onPress={() => router.back()}
             style={{

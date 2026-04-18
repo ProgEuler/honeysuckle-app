@@ -12,24 +12,24 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import {
-    FileText,
-    HelpCircle,
-    MoreVertical,
-    ShieldCheck,
-    Smile
+  FileText,
+  HelpCircle,
+  MoreVertical,
+  ShieldCheck,
+  Smile,
 } from "lucide-react-native";
 import { useRef, useState } from "react";
 import {
-    Animated,
-    Dimensions,
-    Image,
-    Modal,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Switch,
-    TouchableOpacity,
-    View
+  Animated,
+  Dimensions,
+  Image,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { toast } from "sonner-native";
@@ -50,7 +50,9 @@ const Index = () => {
   const clearAuthSession = useAuthStore((state) => state.clearAuthSession);
   const queryClient = useQueryClient();
 
-  const [notifyEnabled, setNotifyEnabled] = useState<boolean>(me?.notify ?? false);
+  const [notifyEnabled, setNotifyEnabled] = useState<boolean>(
+    me?.notify ?? false,
+  );
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   // Sync once when me loads for the first time
@@ -62,7 +64,9 @@ const Index = () => {
 
   const toggleNotifyMutation = useMutation({
     mutationFn: (notify: boolean) => updateMe({ notify }),
-    onSuccess: () => { toast.success("Notification settings updated"); },
+    onSuccess: () => {
+      toast.success("Notification settings updated");
+    },
     onError: () => {
       setNotifyEnabled((prev: boolean) => !prev);
       toast.error("Failed to update notification settings");
@@ -182,6 +186,7 @@ const Index = () => {
 
   return (
     <View style={styles.container}>
+      {/* <StatusBar style="dark" backgroundColor={Colors.brown} /> */}
       {/*  BANNER — animates height, always flush to screen top  */}
       <Animated.View style={[styles.headerBanner, { height: bannerHeight }]}>
         {/* Collapsed name + email — fades in as banner shrinks */}
@@ -250,7 +255,12 @@ const Index = () => {
           { paddingTop: SCROLL_PADDING_TOP },
         ]}
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[Colors.green]} tintColor={Colors.green} />
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={refetch}
+            colors={[Colors.green]}
+            tintColor={Colors.green}
+          />
         }
       >
         <SectionHeader title="General Settings" />
@@ -311,7 +321,11 @@ const Index = () => {
 
         <SectionHeader title="Log Out" />
         <View style={styles.card}>
-          <SettingItem icon={Logout} title="Log Out" onPress={() => setShowLogoutModal(true)} />
+          <SettingItem
+            icon={Logout}
+            title="Log Out"
+            onPress={() => setShowLogoutModal(true)}
+          />
         </View>
       </AnimatedScrollView>
 

@@ -1,11 +1,13 @@
+import { Colors } from "@/constants/color";
 import { useNotificationHook } from "@/hooks/usePushNotification";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import * as NavigationBar from "expo-navigation-bar";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { StatusBar, View } from "react-native";
+import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Host } from "react-native-portalize";
@@ -26,7 +28,7 @@ const queryClient = new QueryClient({
 });
 
 export default function RootLayout() {
-   useNotificationHook()
+  useNotificationHook();
   const [fontsLoaded] = useFonts({
     Thin: require("@/assets/fonts/Urbanist-Thin.ttf"),
     ExtraLight: require("@/assets/fonts/Urbanist-ExtraLight.ttf"),
@@ -58,9 +60,10 @@ export default function RootLayout() {
         <Host>
           <KeyboardProvider>
             <StatusBar
-              barStyle="dark-content"
-              backgroundColor="#F7F4F2"
-              translucent={false}
+              // barStyle="dark-content"
+              style="dark"
+              backgroundColor={Colors.background}
+              // translucent={false}
             />
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="index" />
