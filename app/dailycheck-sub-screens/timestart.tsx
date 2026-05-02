@@ -4,22 +4,45 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { RNText } from "@/components/ui/input";
 import { useCheckinStore } from "@/store/useCheckinStore";
 import { router } from "expo-router";
-import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { useState } from "react";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { toast } from "sonner-native";
 
+const moodTags = [
+  "Sleep",
+  "Work/School",
+  "Relationships",
+  "Health",
+  "Money",
+  "Family",
+  "Loneliness",
+  "Stress",
+  "Not sure",
+  "Other",
+];
+
 const TimeStart = () => {
   const { bottom } = useSafeAreaInsets();
   const storedTime = useCheckinStore((state) => state.time);
+  const storedTags = useCheckinStore((state) => state.tags);
   const setTime = useCheckinStore((state) => state.setTime);
+  const setTags = useCheckinStore((state) => state.setTags);
+  const [selectedTags, setSelectedTags] = useState<string[]>(
+    () => storedTags ?? [],
+  );
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(() => {
+    if (!storedTime) {
+      return undefined;
+    }
 
-  const parseCheckinDateTime = (value: string): Date | undefined => {
-    const parts = value.split(":");
-    if (parts.length !== 4) return undefined;
+    const parts = storedTime.split(":");
+    if (parts.length !== 4) {
+      return undefined;
+    }
 
     const [datePart, hoursPart, minutesPart, secondsPart] = parts;
     const [year, month, day] = datePart.split("-").map(Number);
@@ -36,23 +59,35 @@ const TimeStart = () => {
     }
 
     return new Date(year, month - 1, day, hours, minutes, seconds);
-  };
+  });
 
   const formatCheckinDateTime = (date: Date) => {
     const pad = (value: number) => value.toString().padStart(2, "0");
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}:${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
   };
 
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(() =>
-    parseCheckinDateTime(storedTime),
-  );
-
   const handleDateChange = (value: Date | undefined) => {
     setSelectedDate(value);
     setTime(value ? formatCheckinDateTime(value) : "");
   };
 
+  const handleTagSelect = (label: string) => {
+    setSelectedTags((currentTags) => {
+      const next = currentTags.includes(label)
+        ? currentTags.filter((tag) => tag !== label)
+        : [...currentTags, label];
+
+      setTags(next);
+      return next;
+    });
+  };
+
   const handleContinue = () => {
+    if (!selectedTags.length) {
+      toast.error("Please select at least one tag to continue.");
+      return;
+    }
+
     if (!selectedDate) {
       toast.error("Please select date and time to continue.");
       return;
@@ -76,28 +111,51 @@ const TimeStart = () => {
           </RNText>
         </View>
       </View>
-      <View style={[styles.contentWrapper, { paddingBottom: bottom + 40 }]}>
-        <View style={styles.contentBlock}>
-          <View style={styles.titleContainer}>
-            <RNText variant="header" size="3xl" style={styles.titleText}>
-              Since When Have You Been Feeling This Way?
-            </RNText>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={[styles.contentWrapper, { paddingBottom: bottom + 40 }]}>
+          <View style={styles.contentBlock}>
+            <View style={styles.titleContainer}>
+              <RNText variant="header" size="3xl" style={styles.titleText}>
+                What may be affecting your mood today?
+              </RNText>
+            </View>
+            <View style={styles.tagsContainer}>
+              {moodTags.map((tag) => {
+                const isActive = selectedTags.includes(tag);
+
+                return (
+                  <TouchableOpacity
+                    key={tag}
+                    onPress={() => handleTagSelect(tag)}
+                    style={[styles.tag, isActive && styles.tagActive]}
+                  >
+                    <RNText
+                      variant="medium"
+                      size="sm"
+                      style={[styles.tagText, isActive && styles.tagTextActive]}
+                    >
+                      {tag}
+                    </RNText>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            <View style={styles.timeSection}>
+              <RNText variant="header" size="xl" style={styles.timeLabel}>
+                About when did this start?
+              </RNText>
+              <DatePicker
+                placeholder="Select date and time"
+                onChange={handleDateChange}
+                value={selectedDate}
+                mode="datetime"
+                timeFormat="24"
+              />
+            </View>
           </View>
-          <View>
-            <RNText variant="header" size="xl" style={styles.questionText}>
-              About when did this start?
-            </RNText>
-            <DatePicker
-              placeholder="Select date and time"
-              onChange={handleDateChange}
-              value={selectedDate}
-              mode="datetime"
-              timeFormat="24"
-            />
-          </View>
+          <RNButton value={"Continue"} onPress={handleContinue} />
         </View>
-        <RNButton value={"Save Entry"} onPress={handleContinue} />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -137,7 +195,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   contentBlock: {
-    gap: 100,
+    gap: 28,
     marginBottom: 40,
   },
   titleContainer: {
@@ -147,7 +205,35 @@ const styles = StyleSheet.create({
   titleText: {
     textAlign: "center",
   },
-  questionText: {
-    marginBottom: 20,
+  tagsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+    justifyContent: "center",
+    marginTop: 10,
+  },
+  tag: {
+    borderWidth: 1,
+    borderColor: "#9BB068",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 999,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  tagActive: {
+    backgroundColor: "#CFD9B5",
+  },
+  tagText: {
+    color: "#8F8985",
+  },
+  tagTextActive: {
+    color: "#5B6B2F",
+  },
+  timeSection: {
+    gap: 20,
+    marginTop: 8,
+  },
+  timeLabel: {
+    marginBottom: 4,
   },
 });

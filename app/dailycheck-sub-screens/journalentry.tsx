@@ -1,9 +1,7 @@
 import AI from "@/assets/svgs/ai.svg";
 import AIGreen from "@/assets/svgs/aig.svg";
 import ArrowRight from "@/assets/svgs/arrowright.svg";
-import HeaderBack, {
-    HeaderBackProvider
-} from "@/components/ui/HeaderBack";
+import HeaderBack, { HeaderBackProvider } from "@/components/ui/HeaderBack";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { inspirationQuestions } from "@/constants/prompt-inspirations";
@@ -16,23 +14,22 @@ import { router } from "expo-router";
 import { X } from "lucide-react-native";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    ScrollView,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Portal } from "react-native-portalize";
-import {
-    useSafeAreaInsets
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { toast } from "sonner-native";
 
 const JournalEntry = () => {
   const { bottom } = useSafeAreaInsets();
   const assesment = useCheckinStore((state) => state.assesment);
   const time = useCheckinStore((state) => state.time);
+  const tags = useCheckinStore((state) => state.tags);
   const storedJournal = useCheckinStore((state) => state.journal);
   const setJournal = useCheckinStore((state) => state.setJournal);
   const resetCheckin = useCheckinStore((state) => state.resetCheckin);
@@ -80,6 +77,7 @@ const JournalEntry = () => {
     checkinMutation.mutate({
       assesment,
       time,
+      tags,
       journal: journalText,
     });
   };
@@ -88,103 +86,103 @@ const JournalEntry = () => {
     <HeaderBackProvider>
       <HeaderBack title="Assessment" progressText="3 OF 3" hideBorderBottom />
 
-        <KeyboardAwareScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{
-            justifyContent: "center",
-            paddingTop: 60,
-            paddingBottom: bottom + 40,
+      <KeyboardAwareScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          justifyContent: "center",
+          paddingTop: 60,
+          paddingBottom: bottom + 40,
+        }}
+      >
+        <View
+          style={{
+            width: "90%",
+            marginHorizontal: "auto",
           }}
         >
-          <View
-            style={{
-              width: "90%",
-              marginHorizontal: "auto",
-            }}
-          >
-            <View style={{ gap: 50, marginBottom: 50 }}>
-              <View style={{ width: "90%", marginHorizontal: "auto" }}>
-                <RNText
-                  variant="header"
-                  size="3xl"
-                  style={{ textAlign: "center" }}
-                >
-                  Want to share what is on your mind?
-                </RNText>
-              </View>
-              <View>
-                <RNText variant="header" size="lg">
-                  Journal Entry
-                </RNText>
-                <View style={{ flex: 1, paddingVertical: 10 }}>
-                  <TextInput
-                    style={{
-                      borderWidth: 1,
-                      borderColor: "#ccc",
-                      borderRadius: 10,
-                      padding: 15,
-                      fontSize: 16,
-                      fontFamily: "Regular",
-                      backgroundColor: "#D3DCBD",
-                      height: 180,
-                    }}
-                    placeholder={"What feels most important right now?"}
-                    multiline={true}
-                    numberOfLines={6}
-                    value={text}
-                    onChangeText={(value) => {
-                      setText(value);
-                      setJournal(value);
-                    }}
-                    textAlignVertical="top"
-                  />
-                </View>
+          <View style={{ gap: 50, marginBottom: 50 }}>
+            <View style={{ width: "90%", marginHorizontal: "auto" }}>
+              <RNText
+                variant="header"
+                size="3xl"
+                style={{ textAlign: "center" }}
+              >
+                Want to share what is on your mind?
+              </RNText>
+            </View>
+            <View>
+              <RNText variant="header" size="lg">
+                Journal Entry
+              </RNText>
+              <View style={{ flex: 1, paddingVertical: 10 }}>
+                <TextInput
+                  style={{
+                    borderWidth: 1,
+                    borderColor: "#ccc",
+                    borderRadius: 10,
+                    padding: 15,
+                    fontSize: 16,
+                    fontFamily: "Regular",
+                    backgroundColor: "#D3DCBD",
+                    height: 180,
+                  }}
+                  placeholder={"What feels most important right now?"}
+                  multiline={true}
+                  numberOfLines={6}
+                  value={text}
+                  onChangeText={(value) => {
+                    setText(value);
+                    setJournal(value);
+                  }}
+                  textAlignVertical="top"
+                />
               </View>
             </View>
-            <TouchableOpacity
-              onPress={() => setInsparation(true)}
-              style={{
-                flexDirection: "row",
-                justifyContent: "center",
-                borderWidth: 1,
-                borderColor: Colors.green,
-                paddingVertical: 13,
-                borderRadius: 30,
-                alignItems: "center",
-                gap: 10,
-                marginBottom: 30,
-              }}
-            >
-              <AI />
-              <RNText variant="subtitle" size="lg">
-                Need inspiration?
-              </RNText>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleSaveEntry}
-              disabled={checkinMutation.isPending}
-              style={{
-                backgroundColor: Colors.brown,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                paddingVertical: 13,
-                gap: 15,
-                borderRadius: 30,
-                opacity: checkinMutation.isPending ? 0.7 : 1,
-              }}
-            >
-              <RNText variant="title" size="lg" style={{ color: Colors.white }}>
-                {checkinMutation.isPending ? "Saving..." : "Save Entry"}
-              </RNText>
-              {checkinMutation.isPending ? (
-                <ActivityIndicator color={Colors.white} />
-              ) : (
-                <ArrowRight />
-              )}
-            </TouchableOpacity>
           </View>
-        </KeyboardAwareScrollView>
+          <TouchableOpacity
+            onPress={() => setInsparation(true)}
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              borderWidth: 1,
+              borderColor: Colors.green,
+              paddingVertical: 13,
+              borderRadius: 30,
+              alignItems: "center",
+              gap: 10,
+              marginBottom: 30,
+            }}
+          >
+            <AI />
+            <RNText variant="subtitle" size="lg">
+              Need inspiration?
+            </RNText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleSaveEntry}
+            disabled={checkinMutation.isPending}
+            style={{
+              backgroundColor: Colors.brown,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              paddingVertical: 13,
+              gap: 15,
+              borderRadius: 30,
+              opacity: checkinMutation.isPending ? 0.7 : 1,
+            }}
+          >
+            <RNText variant="title" size="lg" style={{ color: Colors.white }}>
+              {checkinMutation.isPending ? "Saving..." : "Save Entry"}
+            </RNText>
+            {checkinMutation.isPending ? (
+              <ActivityIndicator color={Colors.white} />
+            ) : (
+              <ArrowRight />
+            )}
+          </TouchableOpacity>
+        </View>
+      </KeyboardAwareScrollView>
       {insparation && (
         <Portal>
           <BlurView
@@ -287,7 +285,7 @@ const JournalEntry = () => {
           </BlurView>
         </Portal>
       )}
-        </HeaderBackProvider>
+    </HeaderBackProvider>
   );
 };
 

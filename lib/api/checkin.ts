@@ -3,6 +3,7 @@ import { authenticatedApiRequest } from "./authenticatedClient";
 export type CheckinPayload = {
   assesment: string;
   time: string;
+  tags?: string[];
   journal: string;
 };
 
@@ -16,6 +17,7 @@ export type JournalEntry = {
   id: string;
   assesment: string;
   time: string;
+  tags?: string[];
   journal: string;
   score: number;
   user: string;
@@ -34,7 +36,10 @@ export const createCheckin = (payload: CheckinPayload) =>
     body: payload,
   });
 
-export const getJournalEntries = ({ page = 1, page_size = 10 }: { page?: number; page_size?: number } = {}) =>
+export const getJournalEntries = ({
+  page = 1,
+  page_size = 10,
+}: { page?: number; page_size?: number } = {}) =>
   authenticatedApiRequest<JournalEntriesResponse>(
     `/api/entries/?page=${page}&page_size=${page_size}`,
     { method: "GET" },

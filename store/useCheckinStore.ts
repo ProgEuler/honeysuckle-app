@@ -16,9 +16,11 @@ interface CheckinState {
   assesment: string;
   time: string;
   journal: string;
+  tags: string[];
   setMood: (moodLabel: string) => void;
   setTime: (time: string) => void;
   setJournal: (journal: string) => void;
+  setTags: (tags: string[]) => void;
   resetCheckin: () => void;
 }
 
@@ -27,6 +29,7 @@ export const useCheckinStore = create<CheckinState>((set) => ({
   assesment: "",
   time: "",
   journal: "",
+  tags: [],
   setMood: (moodLabel) =>
     set({
       selectedMoodLabel: moodLabel,
@@ -34,11 +37,13 @@ export const useCheckinStore = create<CheckinState>((set) => ({
     }),
   setTime: (time) => set({ time }),
   setJournal: (journal) => set({ journal }),
+  setTags: (tags) => set({ tags }),
   resetCheckin: () =>
     set({
       selectedMoodLabel: null,
       assesment: "",
       time: "",
       journal: "",
+      tags: [],
     }),
 }));
