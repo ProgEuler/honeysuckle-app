@@ -17,7 +17,7 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -45,7 +45,9 @@ const HomeScreen = () => {
   const { top, bottom } = useSafeAreaInsets();
   const { data: me, refetch, isRefetching } = useMeQuery();
   const { data: notificationsData } = useNotificationsQuery();
-  const unreadCount = (notificationsData?.results ?? []).filter((n: { is_read: boolean }) => !n.is_read).length;
+  const unreadCount = (notificationsData?.results ?? []).filter(
+    (n: { is_read: boolean }) => !n.is_read,
+  ).length;
   const scrollY = useRef(new Animated.Value(0)).current;
   const cardAnimations = useRef([
     new Animated.Value(0),
@@ -231,7 +233,12 @@ const HomeScreen = () => {
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="never"
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[Colors.green]} tintColor={Colors.green} />
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={refetch}
+            colors={[Colors.green]}
+            tintColor={Colors.green}
+          />
         }
       >
         <View style={styles.listWrap}>

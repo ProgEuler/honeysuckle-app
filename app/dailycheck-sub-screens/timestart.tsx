@@ -193,6 +193,8 @@ const styles = StyleSheet.create({
     marginHorizontal: "auto",
     flex: 1,
     justifyContent: "center",
+   //  backgroundColor: "red",
+    marginTop: 40,
   },
   contentBlock: {
     gap: 28,

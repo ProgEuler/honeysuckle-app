@@ -53,6 +53,17 @@ const EntryCard = ({ item }: { item: JournalEntry }) => {
           {item.journal}
         </RNText>
       ) : null}
+      {item.tags && item.tags.length > 0 ? (
+        <View style={styles.tagsRow}>
+          {item.tags.map((tag) => (
+            <View key={tag} style={styles.tagPill}>
+              <RNText variant="subtitle" size="sm" style={styles.tagText}>
+                {tag}
+              </RNText>
+            </View>
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 };
@@ -213,6 +224,21 @@ const styles = StyleSheet.create({
   journalText: {
     color: Colors.primaryText,
     lineHeight: 22,
+  },
+  tagsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 10,
+  },
+  tagPill: {
+    backgroundColor: "#F1F5E9",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  tagText: {
+    color: Colors.brown,
   },
   emptyState: {
     alignItems: "center",
