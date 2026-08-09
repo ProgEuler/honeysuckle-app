@@ -12,12 +12,16 @@
       "bundleIdentifier": "com.honeysuckleco.honeysuckletrail",
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
-        "UIBackgroundModes": ["remote-notification", "fetch"],
+        "UIBackgroundModes": [
+          "remote-notification",
+          "fetch"
+        ],
         "ITSAppUsesNonExemptEncryption": false
       },
       "entitlements": {
-         "aps-environment": "development"
-      }
+        "aps-environment": "development"
+      },
+      "appleTeamId": "W94782GT86"
     },
     "android": {
       "adaptiveIcon": {
@@ -53,7 +57,11 @@
           "ios": {
             "deploymentTarget": "15.1",
             "useFrameworks": "static",
-            "forceStaticLinking": ["RNFBApp", "RNFBAuth", "RNFBMessaging"],
+            "forceStaticLinking": [
+              "RNFBApp",
+              "RNFBAuth",
+              "RNFBMessaging"
+            ],
             "googleServicesFile": "./GoogleService-Info.plist"
           }
         }
