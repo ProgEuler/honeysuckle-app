@@ -1,8 +1,8 @@
 import { router } from "expo-router";
 import React from "react";
 
-import { OnboardingStepView } from "../_components/OnboardingStepView";
-import { ONBOARDING_STEPS } from "../_data";
+import { OnboardingStepView } from "@/components/onboarding/OnboardingStepView";
+import { ONBOARDING_STEPS } from "@/constants/onboardingSteps";
 
 export default function StepFourScreen() {
     return (

@@ -1,7 +1,8 @@
 import { authenticatedApiRequest } from "@/lib/api/authenticatedClient";
 import { useAuthStore } from "@/store/useAuthStore";
 import { getApp } from "@react-native-firebase/app";
-import messaging, {
+import {
+    AuthorizationStatus,
     FirebaseMessagingTypes,
     getInitialNotification,
     getMessaging,
@@ -9,6 +10,7 @@ import messaging, {
     onMessage,
     onNotificationOpenedApp,
     onTokenRefresh,
+    requestPermission,
     setBackgroundMessageHandler,
 } from "@react-native-firebase/messaging";
 import { router, usePathname } from "expo-router";
@@ -16,11 +18,11 @@ import { useEffect, useRef } from "react";
 import { BackHandler, PermissionsAndroid, Platform } from "react-native";
 import { toast } from "sonner-native";
 
-async function requestUserPermission() {
-    const authStatus = await messaging().requestPermission();
+async function requestUserPermission(messagingInstance: ReturnType<typeof getMessaging>) {
+    const authStatus = await requestPermission(messagingInstance);
     const enabled =
-        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+        authStatus === AuthorizationStatus.AUTHORIZED ||
+        authStatus === AuthorizationStatus.PROVISIONAL;
     if (enabled) {
         console.log("Authorization status:", authStatus);
     }
@@ -262,7 +264,7 @@ export function useNotificationHook() {
                     PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
                 );
             }
-            await requestUserPermission();
+            await requestUserPermission(app_message);
         };
         setupPermissions();
     }, []);
@@ -308,8 +310,11 @@ export function useNotificationHook() {
 
         const setupTokenHandling = async () => {
             try {
-                await messaging().registerDeviceForRemoteMessages();
-
+                // Note: registerDeviceForRemoteMessages() is intentionally
+                // omitted — RN Firebase auto-registers on iOS by default
+                // (controlled by `messaging_ios_auto_register_for_remote_messages`
+                // in firebase.json, which isn't present here so the default
+                // applies). Calling it explicitly triggers a warning.
                 const token = await getToken(app_message);
                 console.log("FCM Token:", token);
 

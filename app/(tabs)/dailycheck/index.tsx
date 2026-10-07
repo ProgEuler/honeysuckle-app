@@ -1,4 +1,4 @@
-import { moodOptions } from "@/app/dailycheck-sub-screens/_moodOptions";
+import { moodOptions } from "@/constants/moodOptions";
 import HeaderBack, {
   HeaderBackProvider,
   HeaderBackScrollView,

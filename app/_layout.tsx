@@ -7,7 +7,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Host } from "react-native-portalize";
@@ -43,7 +43,9 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (fontsLoaded) {
-      NavigationBar.setStyle("light");
+      if (Platform.OS === "android") {
+        NavigationBar.setStyle("light");
+      }
       // Hide native splash only after fonts are ready — no white flash
       SplashScreen.hideAsync();
     }

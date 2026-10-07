@@ -1,5 +1,7 @@
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
+import { WelcomeTabParamList } from "@/constants/onboarding";
+import { ONBOARDING_STEPS } from "@/constants/onboardingSteps";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -14,12 +16,10 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ONBOARDING_STEPS } from "./_data";
 import StepFourScreen from "./_screens/StepFourScreen";
 import StepOneScreen from "./_screens/StepOneScreen";
 import StepThreeScreen from "./_screens/StepThreeScreen";
 import StepTwoScreen from "./_screens/StepTwoScreen";
-import { WelcomeTabParamList } from "./_types";
 
 const { width } = Dimensions.get("window");
 const TopTab = createMaterialTopTabNavigator<WelcomeTabParamList>();

@@ -2,9 +2,9 @@ import { useNavigation } from "@react-navigation/native";
 import { MaterialTopTabNavigationProp } from "@react-navigation/material-top-tabs";
 import React from "react";
 
-import { OnboardingStepView } from "../_components/OnboardingStepView";
-import { ONBOARDING_STEPS } from "../_data";
-import { WelcomeTabParamList } from "../_types";
+import { OnboardingStepView } from "@/components/onboarding/OnboardingStepView";
+import { ONBOARDING_STEPS } from "@/constants/onboardingSteps";
+import { WelcomeTabParamList } from "@/constants/onboarding";
 
 type Navigation = MaterialTopTabNavigationProp<WelcomeTabParamList>;
 
