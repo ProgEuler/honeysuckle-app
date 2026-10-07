@@ -65,8 +65,7 @@ mentalheath/
 │   ├── icons/              # Custom tab bar icons
 │   ├── layout/             # Layout components
 │   ├── shared/             # Shared components (social auth, image picker)
-│   ├── splash/             # Custom splash component
-│   └── custometabbar.tsx   # Custom bottom tab bar
+│   └── splash/             # Custom splash component
 ├── constants/              # Colors, terms & policy, prompt inspirations
 ├── hooks/                  # Custom React hooks (queries, auth, etc.)
 ├── lib/                    # API client & service modules
