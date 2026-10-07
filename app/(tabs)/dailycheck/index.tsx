@@ -1,15 +1,11 @@
 import { moodOptions } from "@/constants/moodOptions";
-import HeaderBack, {
-  HeaderBackProvider,
-  HeaderBackScrollView,
-} from "@/components/ui/HeaderBack";
 import RNButton from "@/components/ui/button";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { useCheckinStore } from "@/store/useCheckinStore";
 import { router } from "expo-router";
 import { useState } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { ScrollView, TouchableOpacity, View } from "react-native";
 import { toast } from "sonner-native";
 
 const Index = () => {
@@ -32,11 +28,11 @@ const Index = () => {
   };
 
   return (
-    <HeaderBackProvider>
-      <HeaderBack title="Assessment" progressText="1 OF 3" hideBorderBottom />
-      <HeaderBackScrollView
+    <View style={{ flex: 1 }}>
+      <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
       >
         <View style={{ paddingBottom: 180 }}>
           <View
@@ -115,8 +111,8 @@ const Index = () => {
             </View>
           </View>
         </View>
-      </HeaderBackScrollView>
-    </HeaderBackProvider>
+      </ScrollView>
+    </View>
   );
 };
 

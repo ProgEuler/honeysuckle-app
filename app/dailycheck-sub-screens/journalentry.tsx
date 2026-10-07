@@ -1,7 +1,6 @@
 import AI from "@/assets/svgs/ai.svg";
 import AIGreen from "@/assets/svgs/aig.svg";
 import ArrowRight from "@/assets/svgs/arrowright.svg";
-import HeaderBack, { HeaderBackProvider } from "@/components/ui/HeaderBack";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { inspirationQuestions } from "@/constants/prompt-inspirations";
@@ -97,9 +96,7 @@ const checkinMutation = useMutation({
   };
 
   return (
-    <HeaderBackProvider>
-      <HeaderBack title="Assessment" progressText="3 OF 3" hideBorderBottom />
-
+    <View style={{ flex: 1 }}>
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
@@ -107,6 +104,7 @@ const checkinMutation = useMutation({
           paddingTop: 60,
           paddingBottom: bottom + 40,
         }}
+        contentInsetAdjustmentBehavior="automatic"
       >
         <View
           style={{
@@ -322,7 +320,7 @@ const checkinMutation = useMutation({
           </BlurView>
         </Portal>
       )}
-    </HeaderBackProvider>
+    </View>
   );
 };
 

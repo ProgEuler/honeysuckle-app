@@ -1,4 +1,5 @@
 import Back from "@/assets/svgs/back.svg";
+import { Layout } from "@/components/layout/Layout";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { changePassword } from "@/lib/api/auth";
@@ -77,26 +78,7 @@ const ChangePassword = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <Back />
-        </TouchableOpacity>
-        <RNText variant="title" size="xl" style={styles.headerTitle}>
-          Change Password
-        </RNText>
-      </View>
-
-      <KeyboardAwareScrollView
-        style={styles.scroll}
-        contentContainerStyle={[styles.content, { paddingBottom: bottom + 40 }]}
-        keyboardShouldPersistTaps="handled"
-        bottomOffset={24}
-        scrollEnabled={false}
-      >
+    <Layout edges={["top"]} style={[styles.container, { paddingBottom: bottom }]}>
         <View style={styles.inputContainer}>
           <RNText variant="medium" size="sm" style={styles.label}>
             Old Password
@@ -196,8 +178,7 @@ const ChangePassword = () => {
             </RNText>
           )}
         </TouchableOpacity>
-      </KeyboardAwareScrollView>
-    </SafeAreaView>
+    </Layout>
   );
 };
 
@@ -205,6 +186,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+    paddingTop: 64,
   },
   header: {
     flexDirection: "row",

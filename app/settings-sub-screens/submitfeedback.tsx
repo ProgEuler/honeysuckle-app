@@ -1,4 +1,5 @@
 import Back from "@/assets/svgs/back.svg";
+import { Layout } from "@/components/layout/Layout";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { ApiError } from "@/lib/api/client";
@@ -58,26 +59,7 @@ const SubmitFeedback = () => {
   const isSubmitDisabled = !feedback.trim() || feedbackMutation.isPending;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <Back />
-        </TouchableOpacity>
-        <RNText variant="title" size="xl" style={styles.headerTitle}>
-          Submit Feedback
-        </RNText>
-      </View>
-
-      <KeyboardAwareScrollView
-        style={styles.scroll}
-        contentContainerStyle={[styles.content, { paddingBottom: bottom + 40 }]}
-        keyboardShouldPersistTaps="handled"
-        bottomOffset={24}
-        scrollEnabled={false}
-      >
+    <Layout edges={["top"]} style={[styles.container, { paddingBottom: bottom }]}>
         <RNText variant="medium" size="lg" style={styles.description}>
           We'd love to hear your thoughts. How can we improve your experience?
         </RNText>
@@ -110,8 +92,7 @@ const SubmitFeedback = () => {
             </RNText>
           )}
         </TouchableOpacity>
-      </KeyboardAwareScrollView>
-    </SafeAreaView>
+    </Layout>
   );
 };
 
@@ -119,6 +100,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+    paddingTop: 64,
   },
   header: {
     flexDirection: "row",

@@ -1,7 +1,5 @@
-import Back from '@/assets/svgs/back.svg';
 import { RNText } from '@/components/ui/input';
 import { Colors } from '@/constants/color';
-import { router } from 'expo-router';
 import { ArrowRight } from 'lucide-react-native';
 import React from 'react';
 import {
@@ -16,24 +14,19 @@ import Svg, { Circle, Path } from 'react-native-svg';
 const InviteFriends = () => {
   const { bottom } = useSafeAreaInsets();
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <Back />
-        </TouchableOpacity>
-        <RNText variant="title" size="xl" style={styles.headerTitle}>
-          Invite Friends
-        </RNText>
-      </View>
-
+    <SafeAreaView
+      style={styles.container}
+      edges={["left", "right", "bottom"]}
+    >
       <KeyboardAwareScrollView
         style={styles.scroll}
-        contentContainerStyle={[styles.content, { paddingBottom: bottom + 40 }]}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: bottom + 40 },
+        ]}
         keyboardShouldPersistTaps="handled"
         bottomOffset={24}
+        contentInsetAdjustmentBehavior="automatic"
       >
         <View style={styles.imageContainer}>
           <Svg width="220" height="220" viewBox="0 0 200 200">
@@ -80,24 +73,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 20,
-    marginLeft: 20,
-    marginTop: 20,
-  },
-  backButton: {
-    padding: 12,
-    borderWidth: 1,
-    borderColor: Colors.brown,
-    alignItems: 'flex-start',
-    borderRadius: 40,
-  },
-  headerTitle: {
-    color: Colors.brown,
-    marginTop: 2,
-  },
   scroll: {
     flex: 1,
   },
@@ -106,7 +81,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
-    marginTop: -40,
+    paddingTop: 24,
   },
   imageContainer: {
     alignItems: 'center',

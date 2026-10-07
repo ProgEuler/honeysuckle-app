@@ -8,14 +8,10 @@ import Excellent from "@/assets/svgs/excellent.svg";
 import Happy from "@/assets/svgs/happy.svg";
 import Neutral from "@/assets/svgs/neutral.svg";
 import Sad from "@/assets/svgs/sad.svg";
-import HeaderBack, {
-  HeaderBackProvider,
-  HeaderBackScrollView,
-} from "@/components/ui/HeaderBack";
 import RNButton from "@/components/ui/button";
 import AnalyticsSkeleton from "@/components/skeletons/screens/AnalyticsSkeleton";
 import { useMemo, useState } from "react";
-import { RefreshControl, Text, View } from "react-native";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
 
 const assessmentVisualMap: Record<
@@ -120,11 +116,11 @@ const AnalyticsScreen = () => {
   };
 
   return (
-    <HeaderBackProvider>
-      <HeaderBack title="Analytics" hideBorderBottom />
-      <HeaderBackScrollView
+    <View style={{ flex: 1 }}>
+      <ScrollView
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[Colors.green]} tintColor={Colors.green} />
         }
@@ -137,7 +133,6 @@ const AnalyticsScreen = () => {
           style={{
             width: "90%",
             marginHorizontal: "auto",
-            marginVertical: 30,
           }}
         >
           <View style={{ gap: 10 }}>
@@ -448,8 +443,8 @@ const AnalyticsScreen = () => {
         </View>
         </>
         )}
-      </HeaderBackScrollView>
-    </HeaderBackProvider>
+      </ScrollView>
+    </View>
   );
 };
 

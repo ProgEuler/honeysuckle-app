@@ -1,8 +1,6 @@
-import Back from "@/assets/svgs/back.svg";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { TERMS } from "@/constants/terms-policy";
-import { router } from "expo-router";
 import { ArrowDown } from "lucide-react-native";
 import { useRef, useState } from "react";
 import {
@@ -42,27 +40,20 @@ export default function TermsAndPolicyScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.headerRow}>
-                <TouchableOpacity
-                    onPress={() => router.back()}
-                    style={styles.backButton}
-                >
-                    <Back />
-                </TouchableOpacity>
-                <View style={styles.headerTextWrap}>
-                    <RNText variant="title" size="xl" style={styles.title}>
-                        Terms & Policy
-                    </RNText>
-                </View>
-            </View>
-
+        <SafeAreaView
+            style={styles.container}
+            edges={["left", "right", "bottom"]}
+        >
             <ScrollView
                 ref={scrollRef}
                 style={styles.scroll}
-                contentContainerStyle={[styles.scrollContent, { paddingBottom: bottom + 40 }]}
+                contentContainerStyle={[
+                    styles.scrollContent,
+                    { paddingBottom: bottom + 100 },
+                ]}
                 showsVerticalScrollIndicator={false}
                 scrollEventThrottle={16}
+                contentInsetAdjustmentBehavior="automatic"
                 onScroll={onScroll}
                 onLayout={(event) => {
                     const nextLayoutHeight = event.nativeEvent.layout.height;
@@ -102,32 +93,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: Colors.background,
-    },
-    headerRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 20,
-        paddingTop: 12,
-        paddingBottom: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: "#E7E1DD",
-    },
-    backButton: {
-        padding: 12,
-        borderWidth: 1,
-        borderColor: Colors.brown,
-        borderRadius: 40,
-        marginRight: 12,
-    },
-    headerTextWrap: {
-        flex: 1,
-        gap: 4,
-    },
-    agreementLabel: {
-        color: "#A59C97",
-    },
-    title: {
-        color: Colors.brown,
     },
     scroll: {
         flex: 1,

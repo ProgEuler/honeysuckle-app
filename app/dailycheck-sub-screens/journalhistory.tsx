@@ -105,11 +105,6 @@ const JournalHistory = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <BackButton />
-        <RNText variant="title" size="xl">Your Journal Entries</RNText>
-      </View>
 
       <FlatList
         data={entries}
@@ -160,6 +155,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+    paddingTop: 64,
   },
   header: {
     flexDirection: "row",
@@ -184,7 +180,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 3,
-    marginBottom: 14,
   },
   cardHeader: {
     flexDirection: "row",

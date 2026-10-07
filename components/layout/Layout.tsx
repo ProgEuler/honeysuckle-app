@@ -72,7 +72,7 @@ export function Layout({
 
   return (
     <SafeAreaView
-      edges={props.edges || ["left", "right", "top"]}
+      edges={props.edges || ["left", "right", "top", "bottom"]}
       style={{
         flex: 1,
         backgroundColor: Colors.background,

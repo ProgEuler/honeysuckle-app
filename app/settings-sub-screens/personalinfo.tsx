@@ -6,7 +6,6 @@ import DatePicker, { DatePickerRef } from "@/components/datepicker";
 import InputForm from "@/components/inputform";
 import { Layout } from "@/components/layout/Layout";
 import PersonalInfoSkeleton from "@/components/skeletons/screens/PersonalInfoSkeleton";
-import HeaderBack from "@/components/ui/HeaderBack";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { meQueryKey, useMeQuery } from "@/hooks/useMeQuery";
@@ -185,19 +184,14 @@ const PersonalInfo = () => {
   // First-load skeleton: shown only when there's no cached `me` to render.
   if (meLoading && !me) {
     return (
-      <>
-        <HeaderBack title="Edit Personal Info" />
-        <Layout edges={[]}>
-          <PersonalInfoSkeleton />
-        </Layout>
-      </>
+      <Layout>
+        <PersonalInfoSkeleton />
+      </Layout>
     );
   }
 
   return (
-    <>
-      <HeaderBack title="Edit Personal Info" />
-      <Layout edges={[]} 
+    <Layout
                 refreshControl={
                   <RefreshControl refreshing={isRefetching} onRefresh={refetchMe} colors={[Colors.green]} tintColor={Colors.green} />
                 }
@@ -378,7 +372,6 @@ const PersonalInfo = () => {
         </View>
         {/* </KeyboardAwareScrollView> */}
       </Layout>
-    </>
   );
 };
 
@@ -392,7 +385,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     gap: 30,
-    //  marginTop: 20,
+     marginTop: 40,
   },
   profileImageFrame: {
     borderWidth: 1,

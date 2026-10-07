@@ -1,5 +1,6 @@
 import Back from '@/assets/svgs/back.svg';
 import Next from '@/assets/svgs/next.svg';
+import { Layout } from '@/components/layout/Layout';
 import { RNText } from '@/components/ui/input';
 import { Colors } from '@/constants/color';
 import { router } from 'expo-router';
@@ -17,26 +18,7 @@ const Security = () => {
   const [biometricsEnabled, setBiometricsEnabled] = useState(false);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <Back />
-        </TouchableOpacity>
-        <RNText variant="title" size="xl" style={styles.headerTitle}>
-          Security
-        </RNText>
-      </View>
-
-      <KeyboardAwareScrollView
-        style={styles.scroll}
-        contentContainerStyle={[styles.content, { paddingBottom: bottom + 40 }]}
-        keyboardShouldPersistTaps="handled"
-        bottomOffset={24}
-        scrollEnabled={false}
-      >
+    <Layout edges={['top']} style={[styles.container, { paddingBottom: bottom }]}>
         <View style={styles.card}>
           <TouchableOpacity style={styles.settingItem} onPress={() => router.push('/settings-sub-screens/changepassword')}>
             <View style={styles.settingItemLeft}>
@@ -47,8 +29,7 @@ const Security = () => {
             <Next />
           </TouchableOpacity>
         </View>
-      </KeyboardAwareScrollView>
-    </SafeAreaView>
+        </Layout>
   );
 };
 
@@ -56,6 +37,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+    paddingTop: 64,
   },
   header: {
     flexDirection: 'row',
