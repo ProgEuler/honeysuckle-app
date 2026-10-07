@@ -7,6 +7,7 @@ import Happy from "@/assets/svgs/happy.svg";
 import Neutral from "@/assets/svgs/neutral.svg";
 import Sad from "@/assets/svgs/sad.svg";
 import { BackButton } from "@/components/ui/BackButton";
+import PerformanceSkeleton from "@/components/skeletons/screens/PerformanceSkeleton";
 import RNButton from "@/components/ui/button";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
@@ -76,6 +77,29 @@ const Performance = () => {
     (report?.streak ?? 0) > 0
       ? `🔥 ${report?.streak ?? 0} day${(report?.streak ?? 0) === 1 ? "" : "s"} streak!`
       : "No streak yet";
+
+  if (isLoading && !report) {
+    return (
+      <>
+        <SafeAreaView edges={["top"]}>
+          <View style={styles.headerContainer}>
+            <View style={styles.headerLeft}>
+              <BackButton onPress={() => router.push("/(tabs)/home")} />
+              <RNText variant="title" size="xl">
+                Performance Level
+              </RNText>
+            </View>
+          </View>
+        </SafeAreaView>
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: 60 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <PerformanceSkeleton />
+        </ScrollView>
+      </>
+    );
+  }
 
   return (
     <>

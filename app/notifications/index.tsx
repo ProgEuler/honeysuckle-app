@@ -1,5 +1,6 @@
 import Back from "@/assets/svgs/back.svg";
 import Bell from "@/assets/svgs/notification.svg";
+import NotificationsSkeleton from "@/components/skeletons/screens/NotificationsSkeleton";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { notificationsQueryKey, useNotificationsQuery } from "@/hooks/useNotificationsQuery";
@@ -88,9 +89,7 @@ export default function NotificationsScreen() {
       </View>
 
       {isLoading ? (
-        <View style={styles.centered}>
-          <ActivityIndicator color={Colors.green} size="large" />
-        </View>
+        <NotificationsSkeleton />
       ) : isError ? (
         <View style={styles.centered}>
           <RNText variant="medium" size="md" style={styles.emptyText}>

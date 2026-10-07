@@ -181,6 +181,29 @@ const JournalEntry = () => {
               <ArrowRight />
             )}
           </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              resetCheckin();
+              router.replace("/(tabs)/home");
+            }}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              paddingVertical: 13,
+              gap: 10,
+              marginTop: 12,
+            }}
+          >
+            <RNText
+              variant="medium"
+              size="md"
+              style={{ color: Colors.brown }}
+            >
+              Go to Home
+            </RNText>
+          </TouchableOpacity>
         </View>
       </KeyboardAwareScrollView>
       {insparation && (

@@ -1,4 +1,5 @@
 import { BackButton } from "@/components/ui/BackButton";
+import JournalHistorySkeleton from "@/components/skeletons/screens/JournalHistorySkeleton";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { getJournalEntries, JournalEntry } from "@/lib/api/checkin";
@@ -133,12 +134,7 @@ const JournalHistory = () => {
         }
         ListEmptyComponent={
           isLoading ? (
-            <View style={styles.emptyState}>
-              <ActivityIndicator color={Colors.green} size="large" />
-              <RNText variant="medium" size="md" style={styles.emptyText}>
-                Loading entries...
-              </RNText>
-            </View>
+            <JournalHistorySkeleton />
           ) : isError ? (
             <View style={styles.emptyState}>
               <RNText variant="medium" size="md" style={{ color: Colors.orange }}>

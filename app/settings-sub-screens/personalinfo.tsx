@@ -5,6 +5,7 @@ import Person from "@/assets/svgs/person.svg";
 import DatePicker, { DatePickerRef } from "@/components/datepicker";
 import InputForm from "@/components/inputform";
 import { Layout } from "@/components/layout/Layout";
+import PersonalInfoSkeleton from "@/components/skeletons/screens/PersonalInfoSkeleton";
 import HeaderBack from "@/components/ui/HeaderBack";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
@@ -48,7 +49,7 @@ const PersonalInfo = () => {
   const queryClient = useQueryClient();
   const { hasSoughtProfessionalHelp, setHasSoughtProfessionalHelp } =
     useUserStore();
-  const { data: me, refetch: refetchMe, isRefetching } = useMeQuery();
+  const { data: me, isLoading: meLoading, refetch: refetchMe, isRefetching } = useMeQuery();
   console.log(me)
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
   const [selectedImageMimeType, setSelectedImageMimeType] = useState<
@@ -171,6 +172,18 @@ const PersonalInfo = () => {
     setSelectedImageMimeType(asset.mimeType || null);
     setSelectedImageName(asset.fileName || null);
   };
+
+  // First-load skeleton: shown only when there's no cached `me` to render.
+  if (meLoading && !me) {
+    return (
+      <>
+        <HeaderBack title="Edit Personal Info" />
+        <Layout edges={[]}>
+          <PersonalInfoSkeleton />
+        </Layout>
+      </>
+    );
+  }
 
   return (
     <>

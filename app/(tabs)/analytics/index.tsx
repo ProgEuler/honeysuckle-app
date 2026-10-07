@@ -12,6 +12,8 @@ import HeaderBack, {
   HeaderBackProvider,
   HeaderBackScrollView,
 } from "@/components/ui/HeaderBack";
+import RNButton from "@/components/ui/button";
+import AnalyticsSkeleton from "@/components/skeletons/screens/AnalyticsSkeleton";
 import { useMemo, useState } from "react";
 import { RefreshControl, Text, View } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
@@ -127,6 +129,10 @@ const AnalyticsScreen = () => {
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[Colors.green]} tintColor={Colors.green} />
         }
       >
+        {isLoading && !insights ? (
+          <AnalyticsSkeleton />
+        ) : (
+        <>
         <View
           style={{
             width: "90%",
@@ -427,6 +433,21 @@ const AnalyticsScreen = () => {
             </View>
           </View>
         </View>
+
+        <View
+          style={{
+            width: "90%",
+            marginHorizontal: "auto",
+            marginBottom: 20,
+          }}
+        >
+          <RNButton
+            value="View Journal Entries"
+            path="/dailycheck-sub-screens/journalhistory"
+          />
+        </View>
+        </>
+        )}
       </HeaderBackScrollView>
     </HeaderBackProvider>
   );

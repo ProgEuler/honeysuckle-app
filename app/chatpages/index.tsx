@@ -2,6 +2,7 @@ import Back from "@/assets/svgs/back.svg";
 import Enter from "@/assets/svgs/enter.svg";
 import Menu from "@/assets/svgs/menu.svg";
 import Type from "@/assets/svgs/type.svg";
+import ChatHistorySkeleton from "@/components/skeletons/screens/ChatHistorySkeleton";
 import { Boticon } from "@/components/icons/boticon";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
@@ -369,11 +370,7 @@ const ChatPage = () => {
           }
           ListEmptyComponent={
             isLoading ? (
-              <View style={{ alignItems: "center", marginTop: 30 }}>
-                <RNText variant="medium" size="md">
-                  Loading chat history...
-                </RNText>
-              </View>
+              <ChatHistorySkeleton />
             ) : isError ? (
               <View style={{ alignItems: "center", marginTop: 30 }}>
                 <RNText

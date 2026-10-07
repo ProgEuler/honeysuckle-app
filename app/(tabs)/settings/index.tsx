@@ -4,6 +4,7 @@ import Logout from "@/assets/svgs/logout.svg";
 import Next from "@/assets/svgs/next.svg";
 import Notification from "@/assets/svgs/notification.svg";
 import User from "@/assets/svgs/user.svg";
+import SettingsSkeleton from "@/components/skeletons/screens/SettingsSkeleton";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { useMeQuery } from "@/hooks/useMeQuery";
@@ -46,7 +47,7 @@ const SCROLL_DISTANCE = 100;
 const PROFILE_IMAGE_FALLBACK = require("@/assets/images/avatar-fallback.png");
 
 const Index = () => {
-  const { data: me, refetch, isRefetching } = useMeQuery();
+  const { data: me, isLoading: meLoading, refetch, isRefetching } = useMeQuery();
   const clearAuthSession = useAuthStore((state) => state.clearAuthSession);
   const queryClient = useQueryClient();
 
@@ -183,6 +184,15 @@ const Index = () => {
       </TouchableOpacity>
     </View>
   );
+
+  // First-load skeleton: shown only when there's no cached `me` to render.
+  if (meLoading && !me) {
+    return (
+      <View style={styles.container}>
+        <SettingsSkeleton />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

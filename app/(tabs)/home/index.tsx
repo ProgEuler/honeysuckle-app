@@ -3,6 +3,7 @@ import Clock from "@/assets/svgs/clock.svg";
 import Next from "@/assets/svgs/next.svg";
 import Notification from "@/assets/svgs/notification.svg";
 import Chat from "@/assets/svgs/xchat.svg";
+import HomeSkeleton from "@/components/skeletons/screens/HomeSkeleton";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { useMeQuery } from "@/hooks/useMeQuery";
@@ -43,8 +44,9 @@ const getEntranceStyle = (animation: Animated.Value) => ({
 
 const HomeScreen = () => {
   const { top, bottom } = useSafeAreaInsets();
-  const { data: me, refetch, isRefetching } = useMeQuery();
+  const { data: me, isLoading: meLoading, refetch, isRefetching } = useMeQuery();
   const { data: notificationsData } = useNotificationsQuery();
+  console.log("Me: ", me)
   const unreadCount = (notificationsData?.results ?? []).filter(
     (n: { is_read: boolean }) => !n.is_read,
   ).length;
@@ -139,6 +141,17 @@ const HomeScreen = () => {
     outputRange: [8, 0],
     extrapolate: "clamp",
   });
+
+  // First-load skeleton: only shown when there's no cached `me` to render.
+  // Pull-to-refresh and refetches keep the real UI behind the existing
+  // RefreshControl spinner instead of blanking the screen.
+  if (meLoading && !me) {
+    return (
+      <View style={styles.screen}>
+        <HomeSkeleton />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.screen}>
@@ -331,7 +344,7 @@ const HomeScreen = () => {
                   Total Check-ins
                 </RNText>
                 <RNText variant="medium" size="lg">
-                  24
+                  {me?.total_checkin || 0} 
                 </RNText>
               </View>
             </View>
