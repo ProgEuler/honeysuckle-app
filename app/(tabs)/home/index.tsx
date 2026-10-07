@@ -46,7 +46,6 @@ const HomeScreen = () => {
   const { top, bottom } = useSafeAreaInsets();
   const { data: me, isLoading: meLoading, refetch, isRefetching } = useMeQuery();
   const { data: notificationsData } = useNotificationsQuery();
-  console.log("Me: ", me)
   const unreadCount = (notificationsData?.results ?? []).filter(
     (n: { is_read: boolean }) => !n.is_read,
   ).length;
@@ -344,7 +343,7 @@ const HomeScreen = () => {
                   Total Check-ins
                 </RNText>
                 <RNText variant="medium" size="lg">
-                  {me?.total_checkin || 0} 
+                  {me?.total_checkin || 0}
                 </RNText>
               </View>
             </View>

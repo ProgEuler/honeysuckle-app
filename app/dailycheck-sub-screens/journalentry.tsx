@@ -8,7 +8,7 @@ import { inspirationQuestions } from "@/constants/prompt-inspirations";
 import { createCheckin } from "@/lib/api/checkin";
 import { ApiError } from "@/lib/api/client";
 import { useCheckinStore } from "@/store/useCheckinStore";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
 import { X } from "lucide-react-native";
@@ -37,9 +37,23 @@ const JournalEntry = () => {
   const [text, setText] = useState(storedJournal);
   const [insparation, setInsparation] = useState(false);
 
-  const checkinMutation = useMutation({
+  const queryClient = useQueryClient();
+
+const checkinMutation = useMutation({
     mutationFn: createCheckin,
     onSuccess: () => {
+      // The check-in affects multiple downstream views:
+      // - Journal History list (new entry at the top)
+      // - Analytics insights (mood distribution, totals)
+      // - Performance report (streak, top emotions, stats)
+      // - `me` (total_checkin, streak) shown on Home
+      // - Notifications badge if unread counters change
+      queryClient.invalidateQueries({ queryKey: ["journal-entries"] });
+      queryClient.invalidateQueries({ queryKey: ["analytics", "insights"] });
+      queryClient.invalidateQueries({ queryKey: ["dailycheck", "report"] });
+      queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+
       toast.success("Check-in saved successfully.");
       resetCheckin();
       router.push("/dailycheck-sub-screens/performance");

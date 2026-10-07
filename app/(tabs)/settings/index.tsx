@@ -7,7 +7,7 @@ import User from "@/assets/svgs/user.svg";
 import SettingsSkeleton from "@/components/skeletons/screens/SettingsSkeleton";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
-import { useMeQuery } from "@/hooks/useMeQuery";
+import { useMeQuery, meQueryKey } from "@/hooks/useMeQuery";
 import { updateMe } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -66,6 +66,7 @@ const Index = () => {
   const toggleNotifyMutation = useMutation({
     mutationFn: (notify: boolean) => updateMe({ notify }),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: meQueryKey });
       toast.success("Notification settings updated");
     },
     onError: () => {

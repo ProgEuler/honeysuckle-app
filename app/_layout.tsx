@@ -20,6 +20,16 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
+      // 2 minutes is the baseline; per-hook `staleTime` overrides win
+      // when set higher (e.g. `useMeQuery` uses 5 minutes). This stops
+      // every screen mount from immediately refetching the same data.
+      staleTime: 1000 * 60 * 2,
+      // Keep cached data for 10 minutes after the last subscriber unmounts
+      // so a tab switch that briefly unmounts a screen doesn't refetch.
+      gcTime: 1000 * 60 * 10,
+      // Mobile apps don't have window-focus semantics; turning this off
+      // prevents spurious refetches when the app returns from background.
+      refetchOnWindowFocus: false,
     },
     mutations: {
       retry: 0,

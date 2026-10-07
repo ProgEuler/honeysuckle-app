@@ -70,9 +70,18 @@ const PersonalInfo = () => {
 
   const updateProfileMutation = useMutation({
     mutationFn: updateMe,
-    onSuccess: async (updatedProfile) => {
+    onSuccess: (updatedProfile) => {
+      // The mutation response is the source of truth — the backend just
+      // returned the freshly updated user. Write it directly into the cache
+      // so every subscriber (Home, Settings, etc.) immediately sees the
+      // new name, bio, image, etc.
+      //
+      // Don't `refetch()` after this. The PATCH response has the same data,
+      // and refetching races against the backend's own caches / eventual
+      // consistency — if the server momentarily returns the old value, the
+      // refetch overwrites our correct optimistic write and Settings shows
+      // the stale name until the user manually refreshes.
       queryClient.setQueryData(meQueryKey, updatedProfile);
-      await refetchMe();
       toast.success("Profile updated successfully.");
       router.back();
     },
