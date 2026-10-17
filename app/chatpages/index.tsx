@@ -305,7 +305,19 @@ function toIMessage(m: ChatHistoryMessage): IMessage {
 
 function EmptyState() {
   return (
-    <View style={{ alignItems: "center", marginTop: 30, gap: 28 }}>
+    <View
+      style={{
+        alignItems: "center",
+        marginTop: 30,
+        gap: 28,
+        // The chat list is inverted (newest at the bottom), so its
+        // ListEmptyComponent is rendered inside a flipped container. The
+        // chat library normally counter-rotates bubble content but does
+        // NOT do the same for the empty component — counter-rotate here
+        // so the logo + text read right-side up.
+        transform: [{ scaleY: -1 }],
+      }}
+    >
       <View
         style={{
           height: 240,

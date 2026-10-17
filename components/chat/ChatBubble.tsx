@@ -108,7 +108,7 @@ export function ChatBubble<TMessage extends IMessage>(
           </View>
         ) : null}
 
-        {!isUser && currentMessage.streaming && props.onStopStream ? (
+        {/* {!isUser && currentMessage.streaming && props.onStopStream ? (
           <TouchableOpacity
             onPress={() => props.onStopStream?.(currentMessage)}
             style={{
@@ -128,7 +128,7 @@ export function ChatBubble<TMessage extends IMessage>(
               fill="currentColor"
             />
           </TouchableOpacity>
-        ) : null}
+        ) : null} */}
 
         <RNText
           variant="base"

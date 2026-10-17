@@ -23,6 +23,12 @@ interface AuthState {
   refreshToken: string | null;
   user: AuthUser | null;
   setAuthSession: (session: SignInResponse) => void;
+  /**
+   * Replace just the tokens, keeping the existing user object. Used by
+   * the token-refresh flow where the user object hasn't changed but the
+   * access (and possibly refresh) token has been rotated.
+   */
+  setTokens: (next: { access: string; refresh?: string | null }) => void;
   setUserProfile: (user: AuthUser | null) => void;
   clearAuthSession: () => void;
 }
@@ -39,6 +45,11 @@ export const useAuthStore = create<AuthState>()(
           refreshToken: session.refresh,
           user: session.log,
         }),
+      setTokens: ({ access, refresh }) =>
+        set((state) => ({
+          accessToken: access,
+          refreshToken: refresh === undefined ? state.refreshToken : refresh,
+        })),
       setUserProfile: (user) => set({ user }),
       clearAuthSession: () =>
         set({

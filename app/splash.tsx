@@ -1,4 +1,5 @@
 import { RNText } from "@/components/ui/input";
+import { bootstrapSession } from "@/lib/api/auth";
 import { navigateAfterAuth } from "@/lib/navigateAfterAuth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { router } from "expo-router";
@@ -246,7 +247,6 @@ export default function SplashScreen() {
   const [step, setStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const fadeAnim = useRef(new Animated.Value(1)).current;
-  const user = useAuthStore((state) => state.user);
   const quote = useRef(QUOTES[Math.floor(Math.random() * QUOTES.length)]).current;
 
   const fadeToNext = (nextStep: number) => {
@@ -286,17 +286,31 @@ export default function SplashScreen() {
     return () => clearTimeout(t);
   }, [step]);
 
-  // Step 2: show for 2.2s then navigate
+  // Step 2: show for 2.2s, then validate the persisted access token
+  // (refreshing it from the refresh token if needed) before deciding
+  // whether to enter the app. If both tokens are dead, route to /auth.
   useEffect(() => {
     if (step !== 2) return;
+
+    let cancelled = false;
     const t = setTimeout(() => {
-      if (user) {
-        navigateAfterAuth(user);
-      } else {
-        router.replace("/welcome");
-      }
+      (async () => {
+        const result = await bootstrapSession();
+        if (cancelled) return;
+        // Re-read user after bootstrap — the store may have been cleared.
+        const freshUser = useAuthStore.getState().user;
+        if (result.ok && freshUser) {
+          navigateAfterAuth(freshUser);
+        } else {
+          router.replace("/auth");
+        }
+      })();
     }, 2200);
-    return () => clearTimeout(t);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
   }, [step]);
 
   return (

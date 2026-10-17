@@ -6,7 +6,7 @@ import { TouchableOpacity, View } from "react-native";
 /**
  * Custom send button:
  * - Default state: green pill with an up-arrow icon.
- * - Streaming state: orange pill with a stop icon.
+ * - Streaming state: green pill with a white square stop icon.
  *
  * Always rendered (the composer reserves layout space for it).
  */
@@ -21,11 +21,7 @@ export function ChatSend<TMessage extends IMessage>(
   const canSend = props.isTextOptional || text.length > 0;
   const isStreaming = !!props.isStreaming;
 
-  const bg = isStreaming
-    ? Colors.orange
-    : canSend
-      ? Colors.green
-      : "#D9D2CE";
+  const bg = canSend || isStreaming ? Colors.green : "#D9D2CE";
 
   const onPress = () => {
     if (isStreaming) {
@@ -63,10 +59,10 @@ export function ChatSend<TMessage extends IMessage>(
       >
         {isStreaming ? (
           <Square
-            color={Colors.white}
+            color={"#fff"}
             width={16}
             height={16}
-            fill="currentColor"
+            fill="#fff"
           />
         ) : (
           <ArrowUp
