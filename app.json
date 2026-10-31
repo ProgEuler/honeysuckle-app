@@ -16,7 +16,9 @@
           "remote-notification",
           "fetch"
         ],
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSSpeechRecognitionUsageDescription": "Allow $(PRODUCT_NAME) to recognize your speech for chat messages.",
+        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone to speak messages."
       },
       "entitlements": {
         "aps-environment": "development"
@@ -80,7 +82,14 @@
       ],
       "@react-native-community/datetimepicker",
       "expo-secure-store",
-      "react-native-bottom-tabs"
+      "react-native-bottom-tabs",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone to speak messages.",
+          "speechRecognitionPermission": "Allow $(PRODUCT_NAME) to recognize your speech for chat messages."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

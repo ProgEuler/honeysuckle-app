@@ -6,11 +6,13 @@ import {
 import { ChatBubble } from "@/components/chat/ChatBubble";
 import { ChatComposer } from "@/components/chat/ChatComposer";
 import { ChatSend } from "@/components/chat/ChatSend";
+import { SpeechListeningBanner } from "@/components/chat/SpeechListeningBanner";
 import { chatTheme } from "@/components/chat/theme";
 import { useStreamChatReply } from "@/components/chat/streaming";
 import ChatHistorySkeleton from "@/components/skeletons/screens/ChatHistorySkeleton";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
+import { useSpeechToText } from "@/hooks/useSpeechToText";
 import {
   chatHistoryQueryKey,
   useChatHistoryQuery,
@@ -116,7 +118,41 @@ const ChatPage = () => {
     lastServerTotalRef.current = serverTotal;
   }, [data?.pages, setMessages]);
 
+  // ----- speech-to-text state -----
+  const currentComposerTextRef = useRef("");
+  const composerChangeTextRef = useRef<((t: string) => void) | undefined>(undefined);
+  const speechInitialTextRef = useRef("");
+
+  const {
+    isListening,
+    startListening,
+    stopListening,
+    abortListening,
+  } = useSpeechToText({
+    onTranscript: (fullText) => {
+      composerChangeTextRef.current?.(fullText);
+    },
+  });
+
+  const handleToggleListening = async () => {
+    if (isListening) {
+      stopListening();
+      return;
+    }
+    speechInitialTextRef.current = currentComposerTextRef.current;
+    await startListening(currentComposerTextRef.current);
+  };
+
+  const handleCancelListening = () => {
+    abortListening(() => {
+      composerChangeTextRef.current?.(speechInitialTextRef.current);
+    });
+  };
+
   const handleSend = async (newMsgs: IMessage[] = []) => {
+    if (isListening) {
+      stopListening();
+    }
     const userMsg = newMsgs[0];
     if (!userMsg?.text) return;
 
@@ -205,42 +241,61 @@ const ChatPage = () => {
           />
         )}
         renderAvatar={(avatarProps) => <ChatAvatar {...avatarProps} />}
-        renderInputToolbar={(toolbarProps) => (
-          <View
-            style={{
-              backgroundColor: Colors.white,
-              borderTopLeftRadius: 30,
-              borderTopRightRadius: 30,
-              paddingHorizontal: 16,
-              paddingBottom: 20,
-              paddingTop: 14,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: -3 },
-              shadowOpacity: 0.1,
-              shadowRadius: 4,
-              elevation: 4,
-            }}
-          >
-            {/* Default InputToolbar would render: actions | composer | send.
-                We render only the composer + send to keep the layout clean
-                and avoid a hairline + white panel that reads as a second
-                input field stacked above the real one. */}
+        renderInputToolbar={(toolbarProps) => {
+          const tp = toolbarProps as unknown as {
+            text?: string;
+            textInputProps?: { onChangeText?: (t: string) => void };
+          };
+          currentComposerTextRef.current = tp.text ?? "";
+          composerChangeTextRef.current = tp.textInputProps?.onChangeText;
+
+          return (
             <View
               style={{
-                flexDirection: "row",
-                alignItems: "flex-end",
-                gap: 10,
+                backgroundColor: Colors.white,
+                borderTopLeftRadius: 30,
+                borderTopRightRadius: 30,
+                paddingHorizontal: 16,
+                paddingBottom: 20,
+                paddingTop: 14,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: -3 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 4,
               }}
             >
-              <ChatComposer {...toolbarProps} />
-              <ChatSend
-                {...toolbarProps}
-                isStreaming={isStreaming}
-                onStopStream={() => stopStream()}
-              />
+              {isListening && (
+                <SpeechListeningBanner
+                  onStop={stopListening}
+                  onCancel={handleCancelListening}
+                />
+              )}
+              {/* Default InputToolbar would render: actions | composer | send.
+                  We render only the composer + send to keep the layout clean
+                  and avoid a hairline + white panel that reads as a second
+                  input field stacked above the real one. */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "flex-end",
+                  gap: 10,
+                }}
+              >
+                <ChatComposer
+                  {...toolbarProps}
+                  isListening={isListening}
+                  onToggleListening={handleToggleListening}
+                />
+                <ChatSend
+                  {...toolbarProps}
+                  isStreaming={isStreaming}
+                  onStopStream={() => stopStream()}
+                />
+              </View>
             </View>
-          </View>
-        )}
+          );
+        }}
         renderLoadEarlier={() =>
           hasNextPage ? (
             <TouchableOpacity
