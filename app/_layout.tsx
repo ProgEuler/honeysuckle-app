@@ -7,7 +7,8 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { Platform, View } from "react-native";
+import { DefaultTheme, ThemeProvider, type Theme } from "@react-navigation/native";
+import { Appearance, Platform, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Host } from "react-native-portalize";
@@ -15,6 +16,23 @@ import { Toaster } from "sonner-native";
 
 // Keep native splash visible until we're ready
 SplashScreen.preventAutoHideAsync();
+
+// The app is light-only: ignore the device's dark mode so native views
+// (tab bar, headers, screen backgrounds) never switch to dark colors.
+Appearance.setColorScheme("light");
+
+const LightTheme: Theme = {
+  ...DefaultTheme,
+  dark: false,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: Colors.brown,
+    background: Colors.background,
+    card: Colors.white,
+    text: Colors.brown,
+    border: "#E8DDD9",
+  },
+};
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -77,10 +95,12 @@ export default function RootLayout() {
               backgroundColor={Colors.background}
               // translucent={false}
             />
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="index" />
-              <Stack.Screen name="splash" options={{ animation: "none" }} />
-            </Stack>
+            <ThemeProvider value={LightTheme}>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="index" />
+                <Stack.Screen name="splash" options={{ animation: "none" }} />
+              </Stack>
+            </ThemeProvider>
             <Toaster
               position="top-center"
               toastOptions={{

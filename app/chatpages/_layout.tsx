@@ -30,6 +30,7 @@ const ChatPagesLayout = () => {
                     headerLargeTitle: false,
                     headerShadowVisible: false,
                     headerTintColor: Colors.brown,
+                    contentStyle: { backgroundColor: Colors.background },
                     headerBackButtonDisplayMode: "minimal",
                     headerLeft: () => <NativeHeaderBack />,
                     title: "Chat with AI",
