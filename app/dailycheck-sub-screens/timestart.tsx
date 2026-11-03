@@ -1,39 +1,37 @@
+import AssessmentQuestionField from "@/components/dailycheck/AssessmentQuestionField";
 import { BackButton } from "@/components/ui/BackButton";
 import RNButton from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { RNText } from "@/components/ui/input";
+import { Colors } from "@/constants/color";
+import { FALLBACK_ASSESSMENT_QUESTIONS } from "@/constants/assessmentFallback";
+import { useAssessmentQuestions } from "@/hooks/useAssessmentQuestions";
+import type { AssessmentAnswerValue } from "@/lib/api/assessment";
 import { useCheckinStore } from "@/store/useCheckinStore";
 import { router } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { toast } from "sonner-native";
 
-const moodTags = [
-  "Sleep",
-  "Work/School",
-  "Relationships",
-  "Health",
-  "Money",
-  "Family",
-  "Loneliness",
-  "Stress",
-  "Not sure",
-  "Other",
-];
+const isAnswered = (value: AssessmentAnswerValue | undefined) =>
+  Array.isArray(value) ? value.length > 0 : Boolean(value?.trim());
 
 const TimeStart = () => {
   const { bottom } = useSafeAreaInsets();
   const storedTime = useCheckinStore((state) => state.time);
-  const storedTags = useCheckinStore((state) => state.tags);
   const setTime = useCheckinStore((state) => state.setTime);
   const setTags = useCheckinStore((state) => state.setTags);
-  const [selectedTags, setSelectedTags] = useState<string[]>(
-    () => storedTags ?? [],
-  );
+  const answers = useCheckinStore((state) => state.answers);
+  const setAnswer = useCheckinStore((state) => state.setAnswer);
+
+  const { data, isLoading, isError } = useAssessmentQuestions();
+  // If the questions can't be loaded, fall back to the built-in one so
+  // the check-in still works offline.
+  const questions = data ?? (isError ? FALLBACK_ASSESSMENT_QUESTIONS : []);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(() => {
     if (!storedTime) {
       return undefined;
@@ -71,20 +69,14 @@ const TimeStart = () => {
     setTime(value ? formatCheckinDateTime(value) : "");
   };
 
-  const handleTagSelect = (label: string) => {
-    setSelectedTags((currentTags) => {
-      const next = currentTags.includes(label)
-        ? currentTags.filter((tag) => tag !== label)
-        : [...currentTags, label];
-
-      setTags(next);
-      return next;
-    });
-  };
-
   const handleContinue = () => {
-    if (!selectedTags.length) {
-      toast.error("Please select at least one tag to continue.");
+    if (isLoading) return;
+
+    const unanswered = questions.find(
+      (question) => question.is_required && !isAnswered(answers[question.id]),
+    );
+    if (unanswered) {
+      toast.error(`Please answer: ${unanswered.text}`);
       return;
     }
 
@@ -92,6 +84,14 @@ const TimeStart = () => {
       toast.error("Please select date and time to continue.");
       return;
     }
+
+    const tags = questions
+      .filter((question) => question.saves_as_tags)
+      .flatMap((question) => {
+        const value = answers[question.id];
+        return Array.isArray(value) ? value : value ? [value] : [];
+      });
+    setTags([...new Set(tags)]);
 
     router.push("/dailycheck-sub-screens/journalentry");
   };
@@ -114,32 +114,18 @@ const TimeStart = () => {
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={[styles.contentWrapper, { paddingBottom: bottom + 40 }]}>
           <View style={styles.contentBlock}>
-            <View style={styles.titleContainer}>
-              <RNText variant="header" size="3xl" style={styles.titleText}>
-                What may be affecting your mood today?
-              </RNText>
-            </View>
-            <View style={styles.tagsContainer}>
-              {moodTags.map((tag) => {
-                const isActive = selectedTags.includes(tag);
-
-                return (
-                  <TouchableOpacity
-                    key={tag}
-                    onPress={() => handleTagSelect(tag)}
-                    style={[styles.tag, isActive && styles.tagActive]}
-                  >
-                    <RNText
-                      variant="medium"
-                      size="sm"
-                      style={[styles.tagText, isActive && styles.tagTextActive]}
-                    >
-                      {tag}
-                    </RNText>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+            {isLoading ? (
+              <ActivityIndicator color={Colors.green} style={styles.loader} />
+            ) : (
+              questions.map((question) => (
+                <AssessmentQuestionField
+                  key={question.id}
+                  question={question}
+                  value={answers[question.id]}
+                  onChange={(value) => setAnswer(question.id, value)}
+                />
+              ))
+            )}
             <View style={styles.timeSection}>
               <RNText variant="header" size="xl" style={styles.timeLabel}>
                 About when did this start?
@@ -200,36 +186,8 @@ const styles = StyleSheet.create({
     gap: 28,
     marginBottom: 40,
   },
-  titleContainer: {
-    width: "90%",
-    marginHorizontal: "auto",
-  },
-  titleText: {
-    textAlign: "center",
-  },
-  tagsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-    justifyContent: "center",
-    marginTop: 10,
-  },
-  tag: {
-    borderWidth: 1,
-    borderColor: "#9BB068",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 999,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  tagActive: {
-    backgroundColor: "#CFD9B5",
-  },
-  tagText: {
-    color: "#8F8985",
-  },
-  tagTextActive: {
-    color: "#5B6B2F",
+  loader: {
+    marginVertical: 40,
   },
   timeSection: {
     gap: 20,

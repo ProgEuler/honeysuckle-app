@@ -1,3 +1,4 @@
+import type { AssessmentAnswerValue } from "@/lib/api/assessment";
 import { create } from "zustand";
 
 const moodToAssessmentMap: Record<string, string> = {
@@ -17,10 +18,13 @@ interface CheckinState {
   time: string;
   journal: string;
   tags: string[];
+  /** Answers to the admin-managed questions, keyed by question id. */
+  answers: Record<string, AssessmentAnswerValue>;
   setMood: (moodLabel: string) => void;
   setTime: (time: string) => void;
   setJournal: (journal: string) => void;
   setTags: (tags: string[]) => void;
+  setAnswer: (questionId: string, answer: AssessmentAnswerValue) => void;
   resetCheckin: () => void;
 }
 
@@ -30,6 +34,7 @@ export const useCheckinStore = create<CheckinState>((set) => ({
   time: "",
   journal: "",
   tags: [],
+  answers: {},
   setMood: (moodLabel) =>
     set({
       selectedMoodLabel: moodLabel,
@@ -38,6 +43,8 @@ export const useCheckinStore = create<CheckinState>((set) => ({
   setTime: (time) => set({ time }),
   setJournal: (journal) => set({ journal }),
   setTags: (tags) => set({ tags }),
+  setAnswer: (questionId, answer) =>
+    set((state) => ({ answers: { ...state.answers, [questionId]: answer } })),
   resetCheckin: () =>
     set({
       selectedMoodLabel: null,
@@ -45,5 +52,6 @@ export const useCheckinStore = create<CheckinState>((set) => ({
       time: "",
       journal: "",
       tags: [],
+      answers: {},
     }),
 }));

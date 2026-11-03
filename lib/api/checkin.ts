@@ -1,9 +1,16 @@
+import type { AssessmentAnswerValue } from "./assessment";
 import { authenticatedApiRequest } from "./authenticatedClient";
+
+export type CheckinAnswer = {
+  question_id: string;
+  answer: AssessmentAnswerValue;
+};
 
 export type CheckinPayload = {
   assesment: string;
   time: string;
   tags?: string[];
+  answers?: CheckinAnswer[];
   journal: string;
 };
 

@@ -4,6 +4,7 @@ import ArrowRight from "@/assets/svgs/arrowright.svg";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { inspirationQuestions } from "@/constants/prompt-inspirations";
+import { useAssessmentQuestions } from "@/hooks/useAssessmentQuestions";
 import { createCheckin } from "@/lib/api/checkin";
 import { ApiError } from "@/lib/api/client";
 import { useCheckinStore } from "@/store/useCheckinStore";
@@ -29,6 +30,8 @@ const JournalEntry = () => {
   const assesment = useCheckinStore((state) => state.assesment);
   const time = useCheckinStore((state) => state.time);
   const tags = useCheckinStore((state) => state.tags);
+  const answers = useCheckinStore((state) => state.answers);
+  const { data: questions } = useAssessmentQuestions();
   const storedJournal = useCheckinStore((state) => state.journal);
   const setJournal = useCheckinStore((state) => state.setJournal);
   const resetCheckin = useCheckinStore((state) => state.resetCheckin);
@@ -91,6 +94,14 @@ const checkinMutation = useMutation({
       assesment,
       time,
       tags,
+      // Only send answers for questions the server gave us; with the
+      // offline fallback, the tags alone carry the selection.
+      answers: questions
+        ?.filter((question) => {
+          const value = answers[question.id];
+          return Array.isArray(value) ? value.length > 0 : Boolean(value?.trim());
+        })
+        .map((question) => ({ question_id: question.id, answer: answers[question.id] })),
       journal: journalText,
     });
   };
