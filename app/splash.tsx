@@ -243,7 +243,63 @@ const StepThree = ({ quote }: { quote: typeof QUOTES[0] }) => {
   );
 };
 
+// Validate the persisted access token (refreshing it from the refresh
+// token if needed) before deciding whether to enter the app. If both
+// tokens are dead, route to /auth.
+const enterApp = async (isCancelled: () => boolean) => {
+  const result = await bootstrapSession();
+  if (isCancelled()) return;
+  // Re-read user after bootstrap — the store may have been cleared.
+  const freshUser = useAuthStore.getState().user;
+  if (result.ok && freshUser) {
+    navigateAfterAuth(freshUser);
+  } else {
+    router.replace("/auth");
+  }
+};
+
+// "pending" until the persisted session has loaded from SecureStore.
+// Signed-in users skip the animated intro ("quick"); first launches and
+// signed-out users get the full animation ("animated").
+type SplashMode = "pending" | "quick" | "animated";
+
 export default function SplashScreen() {
+  const [mode, setMode] = useState<SplashMode>("pending");
+
+  useEffect(() => {
+    const decide = () =>
+      setMode(useAuthStore.getState().user ? "quick" : "animated");
+    if (useAuthStore.persist.hasHydrated()) {
+      decide();
+      return;
+    }
+    return useAuthStore.persist.onFinishHydration(decide);
+  }, []);
+
+  useEffect(() => {
+    if (mode !== "quick") return;
+    let cancelled = false;
+    enterApp(() => cancelled);
+    return () => {
+      cancelled = true;
+    };
+  }, [mode]);
+
+  if (mode === "animated") return <AnimatedSplash />;
+
+  // Same look as the native splash, so returning users see no transition.
+  return (
+    <View style={[styles.screen, styles.staticSplash]}>
+      <Image
+        source={require("@/assets/images/splash-icon.png")}
+        style={styles.staticLogo}
+        resizeMode="contain"
+      />
+    </View>
+  );
+}
+
+function AnimatedSplash() {
   const [step, setStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -286,26 +342,12 @@ export default function SplashScreen() {
     return () => clearTimeout(t);
   }, [step]);
 
-  // Step 2: show for 2.2s, then validate the persisted access token
-  // (refreshing it from the refresh token if needed) before deciding
-  // whether to enter the app. If both tokens are dead, route to /auth.
+  // Step 2: show for 2.2s, then enter the app (or go to /auth)
   useEffect(() => {
     if (step !== 2) return;
 
     let cancelled = false;
-    const t = setTimeout(() => {
-      (async () => {
-        const result = await bootstrapSession();
-        if (cancelled) return;
-        // Re-read user after bootstrap — the store may have been cleared.
-        const freshUser = useAuthStore.getState().user;
-        if (result.ok && freshUser) {
-          navigateAfterAuth(freshUser);
-        } else {
-          router.replace("/auth");
-        }
-      })();
-    }, 2200);
+    const t = setTimeout(() => enterApp(() => cancelled), 2200);
 
     return () => {
       cancelled = true;
@@ -332,6 +374,15 @@ const styles = StyleSheet.create({
   },
   bubble: {
     position: "absolute",
+  },
+  staticSplash: {
+    backgroundColor: "#2C1D14",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  staticLogo: {
+    width: 200,
+    height: 200,
   },
   centerContent: {
     ...StyleSheet.absoluteFillObject,
