@@ -51,7 +51,7 @@ const EntryCard = ({ item }: { item: JournalEntry }) => {
             <RNText variant="subtitle" size="sm">Score: {item.score}/10</RNText>
           </View>
           <RNText variant="medium" size="sm" style={styles.dateText}>
-            {formatDate(item.time)}
+            {formatDate(item.created_at ?? item.time)}
           </RNText>
         </View>
       </View>

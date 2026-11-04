@@ -5,6 +5,18 @@ import { Platform } from "react-native";
 const rawApiUrl = process.env.EXPO_PUBLIC_API_URL?.trim() ?? "";
 const API_URL = rawApiUrl.replace(/\/+$/, "");
 
+// The server works out "today", streaks and monthly analytics in the
+// user's own timezone, not the server's (UTC).
+const getTimeZone = () => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || undefined;
+  } catch {
+    return undefined;
+  }
+};
+const TIME_ZONE = getTimeZone();
+const timeZoneHeader: Record<string, string> = TIME_ZONE ? { "X-Timezone": TIME_ZONE } : {};
+
 const normalizePath = (path: string) => {
   if (!path.startsWith("/")) {
     return `/${path}`;
@@ -139,6 +151,7 @@ export async function apiRequest<T>(
         ? { "Content-Type": "application/json" }
         : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...timeZoneHeader,
       ...headers,
     },
     ...(body
@@ -286,6 +299,7 @@ async function tryRefreshAndRetry(args: RetryArgs): Promise<unknown | null> {
         ? { "Content-Type": "application/json" }
         : {}),
       Authorization: `Bearer ${newAccessToken}`,
+      ...timeZoneHeader,
       ...(args.headers ?? {}),
     },
     ...(args.body

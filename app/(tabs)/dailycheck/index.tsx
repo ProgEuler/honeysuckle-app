@@ -11,9 +11,9 @@ import { toast } from "sonner-native";
 
 // Same bands the server uses to turn a rating into a mood label.
 const moodForRating = (rating: number) => {
-  const [excellent, happy, neutral, sad, depressed] = moodOptions;
+  const [excellent, good, neutral, sad, depressed] = moodOptions;
   if (rating >= 8) return excellent;
-  if (rating >= 6) return happy;
+  if (rating >= 6) return good;
   if (rating >= 4) return neutral;
   if (rating >= 2) return sad;
   return depressed;

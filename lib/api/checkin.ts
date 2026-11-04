@@ -32,6 +32,8 @@ export type JournalEntry = {
   sleep_hours?: string | null;
   sleep_quality?: string;
   time: string;
+  /** When the check-in was made; analytics are based on this. */
+  created_at?: string;
   tags?: string[];
   journal: string;
   score: number;

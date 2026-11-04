@@ -15,7 +15,7 @@ export const moodOptions: MoodOption[] = [
     icon: Excellent,
   },
   {
-    label: "Happy",
+    label: "Good",
     icon: Happy,
   },
   {

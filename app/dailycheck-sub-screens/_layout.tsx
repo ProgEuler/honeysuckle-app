@@ -18,6 +18,18 @@ const DailyCheckSubScreensLayout = () => {
             }}
         >
             <Stack.Screen
+                name="timestart"
+                options={{
+                    title: "Assessment",
+                    headerRight: () => <HeaderProgressBadge text="2 OF 3" />,
+                }}
+            />
+            {/* These screens draw their own header with a back button;
+                without this the native header shows the route name. */}
+            <Stack.Screen name="performance" options={{ headerShown: false }} />
+            <Stack.Screen name="journalhistory" options={{ headerShown: false }} />
+            <Stack.Screen name="emotiontype" options={{ headerShown: false }} />
+            <Stack.Screen
                 name="journalentry"
                 options={{
                     title: "Assessment",
