@@ -7,11 +7,14 @@ export type CheckinAnswer = {
 };
 
 export type CheckinPayload = {
-  assesment: string;
-  time: string;
+  check_in_type: "quick" | "detailed";
+  mood_rating: number;
+  anxiety_rating: number;
+  sleep_hours?: number;
+  sleep_quality?: "poor" | "okay" | "good" | "great";
   tags?: string[];
   answers?: CheckinAnswer[];
-  journal: string;
+  journal?: string;
 };
 
 export type CheckinResponse = {
@@ -22,7 +25,12 @@ export type CheckinResponse = {
 
 export type JournalEntry = {
   id: string;
+  check_in_type?: "quick" | "detailed";
   assesment: string;
+  mood_rating?: number | null;
+  anxiety_rating?: number | null;
+  sleep_hours?: string | null;
+  sleep_quality?: string;
   time: string;
   tags?: string[];
   journal: string;

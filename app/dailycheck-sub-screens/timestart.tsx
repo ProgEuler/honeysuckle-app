@@ -1,7 +1,7 @@
 import AssessmentQuestionField from "@/components/dailycheck/AssessmentQuestionField";
+import SleepInput from "@/components/dailycheck/SleepInput";
 import { BackButton } from "@/components/ui/BackButton";
 import RNButton from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { FALLBACK_ASSESSMENT_QUESTIONS } from "@/constants/assessmentFallback";
@@ -9,7 +9,6 @@ import { useAssessmentQuestions } from "@/hooks/useAssessmentQuestions";
 import type { AssessmentAnswerValue } from "@/lib/api/assessment";
 import { useCheckinStore } from "@/store/useCheckinStore";
 import { router } from "expo-router";
-import { useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import {
   SafeAreaView,
@@ -22,8 +21,10 @@ const isAnswered = (value: AssessmentAnswerValue | undefined) =>
 
 const TimeStart = () => {
   const { bottom } = useSafeAreaInsets();
-  const storedTime = useCheckinStore((state) => state.time);
-  const setTime = useCheckinStore((state) => state.setTime);
+  const sleepHours = useCheckinStore((state) => state.sleepHours);
+  const sleepQuality = useCheckinStore((state) => state.sleepQuality);
+  const setSleepHours = useCheckinStore((state) => state.setSleepHours);
+  const setSleepQuality = useCheckinStore((state) => state.setSleepQuality);
   const setTags = useCheckinStore((state) => state.setTags);
   const answers = useCheckinStore((state) => state.answers);
   const setAnswer = useCheckinStore((state) => state.setAnswer);
@@ -32,56 +33,24 @@ const TimeStart = () => {
   // If the questions can't be loaded, fall back to the built-in one so
   // the check-in still works offline.
   const questions = data ?? (isError ? FALLBACK_ASSESSMENT_QUESTIONS : []);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(() => {
-    if (!storedTime) {
-      return undefined;
-    }
-
-    const parts = storedTime.split(":");
-    if (parts.length !== 4) {
-      return undefined;
-    }
-
-    const [datePart, hoursPart, minutesPart, secondsPart] = parts;
-    const [year, month, day] = datePart.split("-").map(Number);
-    const hours = Number(hoursPart);
-    const minutes = Number(minutesPart);
-    const seconds = Number(secondsPart);
-
-    if (
-      [year, month, day, hours, minutes, seconds].some((part) =>
-        Number.isNaN(part),
-      )
-    ) {
-      return undefined;
-    }
-
-    return new Date(year, month - 1, day, hours, minutes, seconds);
-  });
-
-  const formatCheckinDateTime = (date: Date) => {
-    const pad = (value: number) => value.toString().padStart(2, "0");
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}:${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-  };
-
-  const handleDateChange = (value: Date | undefined) => {
-    setSelectedDate(value);
-    setTime(value ? formatCheckinDateTime(value) : "");
-  };
-
   const handleContinue = () => {
     if (isLoading) return;
+
+    if (sleepHours === null) {
+      toast.error("Please enter how long you slept.");
+      return;
+    }
+
+    if (!sleepQuality) {
+      toast.error("Please choose how well you slept.");
+      return;
+    }
 
     const unanswered = questions.find(
       (question) => question.is_required && !isAnswered(answers[question.id]),
     );
     if (unanswered) {
       toast.error(`Please answer: ${unanswered.text}`);
-      return;
-    }
-
-    if (!selectedDate) {
-      toast.error("Please select date and time to continue.");
       return;
     }
 
@@ -114,6 +83,12 @@ const TimeStart = () => {
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={[styles.contentWrapper, { paddingBottom: bottom + 40 }]}>
           <View style={styles.contentBlock}>
+            <SleepInput
+              hours={sleepHours}
+              quality={sleepQuality}
+              onHoursChange={setSleepHours}
+              onQualityChange={setSleepQuality}
+            />
             {isLoading ? (
               <ActivityIndicator color={Colors.green} style={styles.loader} />
             ) : (
@@ -126,18 +101,6 @@ const TimeStart = () => {
                 />
               ))
             )}
-            <View style={styles.timeSection}>
-              <RNText variant="header" size="xl" style={styles.timeLabel}>
-                About when did this start?
-              </RNText>
-              <DatePicker
-                placeholder="Select date and time"
-                onChange={handleDateChange}
-                value={selectedDate}
-                mode="datetime"
-                timeFormat="24"
-              />
-            </View>
           </View>
           <RNButton value={"Continue"} onPress={handleContinue} />
         </View>
@@ -180,7 +143,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
    //  backgroundColor: "red",
-    marginTop: 40,
+    marginTop: 24,
   },
   contentBlock: {
     gap: 28,
@@ -188,12 +151,5 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginVertical: 40,
-  },
-  timeSection: {
-    gap: 20,
-    marginTop: 8,
-  },
-  timeLabel: {
-    marginBottom: 4,
   },
 });

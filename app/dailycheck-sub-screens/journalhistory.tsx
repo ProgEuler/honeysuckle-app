@@ -33,6 +33,12 @@ const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const EntryCard = ({ item }: { item: JournalEntry }) => {
   const dot = assessmentColor[item.assesment.toLowerCase()] ?? Colors.primaryText;
+  const details = [
+    item.check_in_type === "quick" && "Quick check-in",
+    item.anxiety_rating != null && `Anxiety ${item.anxiety_rating}/10`,
+    item.sleep_hours != null &&
+      `Slept ${Number(item.sleep_hours)}h${item.sleep_quality ? ` (${item.sleep_quality})` : ""}`,
+  ].filter(Boolean) as string[];
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -49,6 +55,11 @@ const EntryCard = ({ item }: { item: JournalEntry }) => {
           </RNText>
         </View>
       </View>
+      {details.length > 0 && (
+        <RNText variant="medium" size="sm" style={styles.detailsText}>
+          {details.join(" · ")}
+        </RNText>
+      )}
       {item.journal ? (
         <RNText variant="base" size="md" style={styles.journalText}>
           {item.journal}
@@ -215,6 +226,9 @@ const styles = StyleSheet.create({
   journalText: {
     color: Colors.primaryText,
     lineHeight: 22,
+  },
+  detailsText: {
+    color: "#8F8985",
   },
   tagsRow: {
     flexDirection: "row",

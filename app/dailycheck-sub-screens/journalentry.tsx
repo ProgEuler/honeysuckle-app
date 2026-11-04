@@ -5,10 +5,8 @@ import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { inspirationQuestions } from "@/constants/prompt-inspirations";
 import { useAssessmentQuestions } from "@/hooks/useAssessmentQuestions";
-import { createCheckin } from "@/lib/api/checkin";
-import { ApiError } from "@/lib/api/client";
+import { useSaveCheckin } from "@/hooks/useSaveCheckin";
 import { useCheckinStore } from "@/store/useCheckinStore";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
 import { X } from "lucide-react-native";
@@ -27,8 +25,10 @@ import { toast } from "sonner-native";
 
 const JournalEntry = () => {
   const { bottom } = useSafeAreaInsets();
-  const assesment = useCheckinStore((state) => state.assesment);
-  const time = useCheckinStore((state) => state.time);
+  const moodRating = useCheckinStore((state) => state.moodRating);
+  const anxietyRating = useCheckinStore((state) => state.anxietyRating);
+  const sleepHours = useCheckinStore((state) => state.sleepHours);
+  const sleepQuality = useCheckinStore((state) => state.sleepQuality);
   const tags = useCheckinStore((state) => state.tags);
   const answers = useCheckinStore((state) => state.answers);
   const { data: questions } = useAssessmentQuestions();
@@ -39,60 +39,29 @@ const JournalEntry = () => {
   const [text, setText] = useState(storedJournal);
   const [insparation, setInsparation] = useState(false);
 
-  const queryClient = useQueryClient();
-
-const checkinMutation = useMutation({
-    mutationFn: createCheckin,
-    onSuccess: () => {
-      // The check-in affects multiple downstream views:
-      // - Journal History list (new entry at the top)
-      // - Analytics insights (mood distribution, totals)
-      // - Performance report (streak, top emotions, stats)
-      // - `me` (total_checkin, streak) shown on Home
-      // - Notifications badge if unread counters change
-      queryClient.invalidateQueries({ queryKey: ["journal-entries"] });
-      queryClient.invalidateQueries({ queryKey: ["analytics", "insights"] });
-      queryClient.invalidateQueries({ queryKey: ["dailycheck", "report"] });
-      queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
-
-      toast.success("Check-in saved successfully.");
-      resetCheckin();
-      router.push("/dailycheck-sub-screens/performance");
-    },
-    onError: (error) => {
-      const message =
-        error instanceof ApiError || error instanceof Error
-          ? error.message
-          : "Unable to save check-in right now.";
-
-      toast.error(message);
-    },
-  });
+  const checkinMutation = useSaveCheckin();
 
   const handleSaveEntry = () => {
     const journalText = text.trim();
 
-    if (!assesment) {
-      toast.error("Please complete step 1 and select your mood.");
+    if (moodRating === null || anxietyRating === null) {
+      toast.error("Please complete step 1 and rate your mood and anxiety.");
       return;
     }
 
-    if (!time) {
-      toast.error("Please complete step 2 and choose date/time.");
-      return;
-    }
-
-    if (!journalText) {
-      toast.error("Please write your journal entry.");
+    if (sleepHours === null || !sleepQuality) {
+      toast.error("Please complete step 2 and add your sleep.");
       return;
     }
 
     setJournal(journalText);
 
     checkinMutation.mutate({
-      assesment,
-      time,
+      check_in_type: "detailed",
+      mood_rating: moodRating,
+      anxiety_rating: anxietyRating,
+      sleep_hours: sleepHours,
+      sleep_quality: sleepQuality,
       tags,
       // Only send answers for questions the server gave us; with the
       // offline fallback, the tags alone carry the selection.
@@ -135,7 +104,10 @@ const checkinMutation = useMutation({
             </View>
             <View>
               <RNText variant="header" size="lg">
-                Journal Entry
+                Journal Entry{" "}
+                <RNText variant="medium" size="sm" style={{ color: "#8F8985" }}>
+                  (optional)
+                </RNText>
               </RNText>
               <View style={{ flex: 1, paddingVertical: 10 }}>
                 <TextInput

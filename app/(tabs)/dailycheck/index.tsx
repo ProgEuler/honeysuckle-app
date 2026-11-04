@@ -1,119 +1,131 @@
-import { moodOptions } from "@/constants/moodOptions";
+import RatingScale from "@/components/dailycheck/RatingScale";
 import RNButton from "@/components/ui/button";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
+import { moodOptions } from "@/constants/moodOptions";
+import { useSaveCheckin } from "@/hooks/useSaveCheckin";
 import { useCheckinStore } from "@/store/useCheckinStore";
 import { router } from "expo-router";
-import { useState } from "react";
-import { ScrollView, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { toast } from "sonner-native";
 
-const Index = () => {
-  const storedMood = useCheckinStore((state) => state.selectedMoodLabel);
-  const setMood = useCheckinStore((state) => state.setMood);
-  const [selectedMood, setSelectedMood] = useState<string | null>(storedMood);
+// Same bands the server uses to turn a rating into a mood label.
+const moodForRating = (rating: number) => {
+  const [excellent, happy, neutral, sad, depressed] = moodOptions;
+  if (rating >= 8) return excellent;
+  if (rating >= 6) return happy;
+  if (rating >= 4) return neutral;
+  if (rating >= 2) return sad;
+  return depressed;
+};
 
-  const handleMoodSelect = (label: string) => {
-    setSelectedMood(label);
-    setMood(label);
+const Index = () => {
+  const moodRating = useCheckinStore((state) => state.moodRating);
+  const anxietyRating = useCheckinStore((state) => state.anxietyRating);
+  const setMoodRating = useCheckinStore((state) => state.setMoodRating);
+  const setAnxietyRating = useCheckinStore((state) => state.setAnxietyRating);
+  const saveCheckin = useSaveCheckin();
+
+  const mood = moodRating === null ? null : moodForRating(moodRating);
+
+  const validate = () => {
+    if (moodRating === null) {
+      toast.error("Please rate your mood to continue.");
+      return false;
+    }
+    if (anxietyRating === null) {
+      toast.error("Please rate your anxiety to continue.");
+      return false;
+    }
+    return true;
   };
 
   const handleContinue = () => {
-    if (!selectedMood) {
-      toast.error("Please select your mood to continue.");
-      return;
-    }
+    if (validate()) router.push("/dailycheck-sub-screens/timestart");
+  };
 
-    router.push("/dailycheck-sub-screens/timestart");
+  const handleQuickSave = () => {
+    if (!validate() || moodRating === null || anxietyRating === null) return;
+    saveCheckin.mutate({
+      check_in_type: "quick",
+      mood_rating: moodRating,
+      anxiety_rating: anxietyRating,
+    });
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        showsVerticalScrollIndicator={false}
-        contentInsetAdjustmentBehavior="automatic"
-      >
-        <View style={{ paddingBottom: 180 }}>
-          <View
-            style={{
-              width: "90%",
-              marginHorizontal: "auto",
-              marginTop: 20,
-            }}
-          >
-            <RNText variant="title" size="2xl" style={{ textAlign: "center" }}>
-              Every day is different. Choose the mood that fits best today.
+    <ScrollView
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+      contentInsetAdjustmentBehavior="automatic"
+    >
+      <RNText variant="title" size="2xl" style={styles.heading}>
+        Every day is different. How are you right now?
+      </RNText>
+
+      <View style={styles.scales}>
+        <RatingScale
+          title="Mood"
+          value={moodRating}
+          onChange={setMoodRating}
+          lowLabel="Very low"
+          highLabel="Excellent"
+          summary={mood && <mood.icon width={28} height={28} />}
+        />
+        <RatingScale
+          title="Anxiety"
+          value={anxietyRating}
+          onChange={setAnxietyRating}
+          lowLabel="Calm"
+          highLabel="Very anxious"
+        />
+      </View>
+
+      <View style={styles.actions}>
+        <RNButton value={"Continue full assessment"} onPress={handleContinue} disabled={saveCheckin.isPending} />
+        <TouchableOpacity
+          onPress={handleQuickSave}
+          disabled={saveCheckin.isPending}
+          style={styles.quickButton}
+          accessibilityHint="Saves just your mood and anxiety"
+        >
+          {saveCheckin.isPending ? (
+            <ActivityIndicator color={Colors.brown} />
+          ) : (
+            <RNText variant="subtitle" size="lg">
+              Save quick check-in
             </RNText>
-          </View>
-          <View
-            style={{
-              width: "90%",
-              marginHorizontal: "auto",
-              gap: 20,
-              marginTop: 50,
-              marginBottom: 30,
-            }}
-          >
-            {moodOptions.map((mood, index) => {
-              const isActive = selectedMood === mood.label;
-              return (
-                <TouchableOpacity
-                  onPress={() => handleMoodSelect(mood.label)}
-                  key={index}
-                  style={{
-                    flexDirection: "row",
-                    borderColor: Colors.green,
-                    backgroundColor: isActive ? "#CFD9B5" : Colors.white,
-                    borderWidth: 1,
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    paddingHorizontal: 25,
-                    paddingVertical: 10,
-                    borderRadius: 20,
-                  }}
-                >
-                  <RNText
-                    variant="title"
-                    size="xl"
-                    style={{ color: "#8F8985" }}
-                  >
-                    {mood.label}
-                  </RNText>
-                  <View
-                    style={{
-                      shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.1,
-                      shadowRadius: 3,
-                      elevation: 3,
-                    }}
-                  >
-                    <mood.icon />
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-          <View
-            style={{
-              width: "90%",
-              marginHorizontal: "auto",
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              gap: 30,
-              marginTop: 20,
-            }}
-          >
-            <View style={{ width: "100%" }}>
-              <RNButton value={"Continue"} onPress={handleContinue} />
-            </View>
-          </View>
-        </View>
-      </ScrollView>
-    </View>
+          )}
+        </TouchableOpacity>
+        <RNText variant="medium" size="sm" style={styles.hint}>
+          Check in as often as you like. The full assessment adds sleep, what's affecting you, and an optional journal.
+        </RNText>
+      </View>
+    </ScrollView>
   );
 };
 
 export default Index;
+
+const styles = StyleSheet.create({
+  content: {
+    width: "90%",
+    marginHorizontal: "auto",
+    paddingTop: 20,
+    paddingBottom: 180,
+    gap: 28,
+  },
+  heading: { textAlign: "center" },
+  scales: { gap: 16 },
+  actions: { gap: 12 },
+  quickButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: Colors.green,
+    borderRadius: 30,
+    paddingVertical: 13,
+    minHeight: 52,
+  },
+  hint: { textAlign: "center", color: "#8F8985", lineHeight: 20 },
+});

@@ -1,57 +1,46 @@
 import type { AssessmentAnswerValue } from "@/lib/api/assessment";
 import { create } from "zustand";
 
-const moodToAssessmentMap: Record<string, string> = {
-  Excellent: "good",
-  Happy: "good",
-  Neutral: "neutral",
-  Sad: "sad",
-  Depressed: "depressed",
-};
-
-const normalizeAssessment = (moodLabel: string) =>
-  moodToAssessmentMap[moodLabel] ?? moodLabel.trim().toLowerCase();
+export type SleepQuality = "poor" | "okay" | "good" | "great";
 
 interface CheckinState {
-  selectedMoodLabel: string | null;
-  assesment: string;
-  time: string;
+  moodRating: number | null;
+  anxietyRating: number | null;
+  sleepHours: number | null;
+  sleepQuality: SleepQuality | null;
   journal: string;
   tags: string[];
   /** Answers to the admin-managed questions, keyed by question id. */
   answers: Record<string, AssessmentAnswerValue>;
-  setMood: (moodLabel: string) => void;
-  setTime: (time: string) => void;
+  setMoodRating: (rating: number) => void;
+  setAnxietyRating: (rating: number) => void;
+  setSleepHours: (hours: number) => void;
+  setSleepQuality: (quality: SleepQuality) => void;
   setJournal: (journal: string) => void;
   setTags: (tags: string[]) => void;
   setAnswer: (questionId: string, answer: AssessmentAnswerValue) => void;
   resetCheckin: () => void;
 }
 
-export const useCheckinStore = create<CheckinState>((set) => ({
-  selectedMoodLabel: null,
-  assesment: "",
-  time: "",
+const initialState = {
+  moodRating: null,
+  anxietyRating: null,
+  sleepHours: null,
+  sleepQuality: null,
   journal: "",
   tags: [],
   answers: {},
-  setMood: (moodLabel) =>
-    set({
-      selectedMoodLabel: moodLabel,
-      assesment: normalizeAssessment(moodLabel),
-    }),
-  setTime: (time) => set({ time }),
+};
+
+export const useCheckinStore = create<CheckinState>((set) => ({
+  ...initialState,
+  setMoodRating: (moodRating) => set({ moodRating }),
+  setAnxietyRating: (anxietyRating) => set({ anxietyRating }),
+  setSleepHours: (sleepHours) => set({ sleepHours }),
+  setSleepQuality: (sleepQuality) => set({ sleepQuality }),
   setJournal: (journal) => set({ journal }),
   setTags: (tags) => set({ tags }),
   setAnswer: (questionId, answer) =>
     set((state) => ({ answers: { ...state.answers, [questionId]: answer } })),
-  resetCheckin: () =>
-    set({
-      selectedMoodLabel: null,
-      assesment: "",
-      time: "",
-      journal: "",
-      tags: [],
-      answers: {},
-    }),
+  resetCheckin: () => set(initialState),
 }));
