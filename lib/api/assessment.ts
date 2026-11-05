@@ -1,14 +1,18 @@
 import { authenticatedApiRequest } from "./authenticatedClient";
 
-export type AssessmentQuestionType = "single_choice" | "multiple_choice" | "text";
+/** "scale" is a scored single choice (e.g. PHQ-9 items); it renders like single_choice. */
+export type AssessmentQuestionType = "single_choice" | "multiple_choice" | "scale" | "text";
 
 export type AssessmentOption = {
   id: string;
   label: string;
+  value?: number | null;
 };
 
 export type AssessmentQuestion = {
   id: string;
+  key?: string;
+  version?: number;
   text: string;
   help_text: string;
   question_type: AssessmentQuestionType;

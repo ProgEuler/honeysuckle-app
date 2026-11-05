@@ -1,3 +1,4 @@
+import QuestionnaireList from "@/components/assessments/QuestionnaireList";
 import RatingScale from "@/components/dailycheck/RatingScale";
 import RNButton from "@/components/ui/button";
 import { RNText } from "@/components/ui/input";
@@ -101,6 +102,8 @@ const Index = () => {
           Check in as often as you like. The full assessment adds sleep, what's affecting you, and an optional journal.
         </RNText>
       </View>
+
+      <QuestionnaireList />
     </ScrollView>
   );
 };

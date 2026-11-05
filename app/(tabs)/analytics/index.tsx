@@ -1,6 +1,8 @@
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { useInsightsQuery } from "@/hooks/useInsightsQuery";
+import { questionnairesQueryKey } from "@/hooks/useQuestionnaires";
+import { useQueryClient } from "@tanstack/react-query";
 import { Calendar, Flame, Heart, Smile, TrendingUp } from "lucide-react-native";
 // import { Calendar, Flame } from 'lucide-react-native';
 import Depressed from "@/assets/svgs/depressed.svg";
@@ -8,6 +10,7 @@ import Excellent from "@/assets/svgs/excellent.svg";
 import Happy from "@/assets/svgs/happy.svg";
 import Neutral from "@/assets/svgs/neutral.svg";
 import Sad from "@/assets/svgs/sad.svg";
+import QuestionnaireTrends from "@/components/assessments/QuestionnaireTrends";
 import RNButton from "@/components/ui/button";
 import AnalyticsSkeleton from "@/components/skeletons/screens/AnalyticsSkeleton";
 import { useMemo, useState } from "react";
@@ -63,6 +66,7 @@ const assessmentVisualMap: Record<
 
 const AnalyticsScreen = () => {
   const { data: insights, isLoading, refetch, isRefetching } = useInsightsQuery();
+  const queryClient = useQueryClient();
   const [selectedSlice, setSelectedSlice] = useState<string | null>(null);
 
   const pieData = useMemo(
@@ -122,7 +126,15 @@ const AnalyticsScreen = () => {
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[Colors.green]} tintColor={Colors.green} />
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={() => {
+              refetch();
+              queryClient.invalidateQueries({ queryKey: questionnairesQueryKey });
+            }}
+            colors={[Colors.green]}
+            tintColor={Colors.green}
+          />
         }
       >
         {isLoading && !insights ? (
@@ -427,6 +439,10 @@ const AnalyticsScreen = () => {
               ))}
             </View>
           </View>
+        </View>
+
+        <View style={{ width: "90%", marginHorizontal: "auto", marginBottom: 24 }}>
+          <QuestionnaireTrends />
         </View>
 
         <View
