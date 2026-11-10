@@ -12,6 +12,15 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 
 const goHome = () => router.navigate("/(tabs)/home");
 
+/**
+ * Leave the finished check-in for Home, then open `path` on top of it, so
+ * Back from there returns Home instead of into the check-in steps.
+ */
+const openFromHome = (path: "/dailycheck-sub-screens/journalhistory" | "/chatpages") => {
+  goHome();
+  setTimeout(() => router.push(path), 0);
+};
+
 const formatTime = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
@@ -134,7 +143,7 @@ export default function CheckinSaved() {
             </RNText>
             <TouchableOpacity
               style={styles.supportButton}
-              onPress={() => router.replace("/chatpages")}
+              onPress={() => openFromHome("/chatpages")}
               accessibilityRole="button"
             >
               <MessageCircleHeart size={18} color={Colors.brown} />
@@ -149,7 +158,7 @@ export default function CheckinSaved() {
       <View style={[styles.footer, { paddingBottom: Math.max(bottom, 16) }]}>
         <RNButton value="Done" onPress={goHome} />
         <TouchableOpacity
-          onPress={() => router.replace("/dailycheck-sub-screens/journalhistory")}
+          onPress={() => openFromHome("/dailycheck-sub-screens/journalhistory")}
           style={styles.secondary}
           accessibilityRole="button"
         >
