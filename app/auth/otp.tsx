@@ -4,7 +4,7 @@ import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { getOtp, verifyOtp } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
-import { navigateAfterAuth } from "@/lib/navigateAfterAuth";
+import { navigateAfterSignIn } from "@/lib/navigateAfterAuth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useMutation } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
@@ -48,7 +48,7 @@ const Otp = () => {
           refresh: response.refresh,
           log: response.log,
         });
-        navigateAfterAuth(response.log);
+        navigateAfterSignIn(response.log);
       } else {
         // fallback: no session in response, send to terms/onboarding
         router.replace("/auth/terms");

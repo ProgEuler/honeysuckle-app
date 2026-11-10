@@ -1,5 +1,4 @@
 import { useAuthStore } from "@/store/useAuthStore";
-import { router } from "expo-router";
 import { Platform } from "react-native";
 
 const rawApiUrl = process.env.EXPO_PUBLIC_API_URL?.trim() ?? "";
@@ -256,17 +255,9 @@ async function refreshAccessToken(): Promise<string | null> {
 }
 
 function forceSignOut() {
+  // Clearing the session removes the signed-in screens from history
+  // (protected routes in app/_layout.tsx); the start route opens sign-in.
   useAuthStore.getState().clearAuthSession();
-  try {
-    router.replace("/auth");
-  } catch {
-    try {
-      router.replace("/welcome");
-    } catch {
-      // give up silently — the next render of any auth-gated screen
-      // will fail-fast because the store is empty.
-    }
-  }
 }
 
 async function tryRefreshAndRetry(args: RetryArgs): Promise<unknown | null> {

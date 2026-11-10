@@ -1,5 +1,6 @@
 import { Colors } from "@/constants/color";
 import { useNotificationHook } from "@/hooks/usePushNotification";
+import { useAuthStore } from "@/store/useAuthStore";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import * as NavigationBar from "expo-navigation-bar";
@@ -57,6 +58,11 @@ const queryClient = new QueryClient({
 
 export default function RootLayout() {
   useNotificationHook();
+  // Which screens exist depends on the session; see the Stack below.
+  const isSignedIn = useAuthStore((state) => Boolean(state.accessToken && state.user));
+  const hasAcceptedSession = useAuthStore((state) =>
+    Boolean(state.accessToken && state.user?.policy),
+  );
   const [fontsLoaded] = useFonts({
     Thin: require("@/assets/fonts/Urbanist-Thin.ttf"),
     ExtraLight: require("@/assets/fonts/Urbanist-ExtraLight.ttf"),
@@ -99,6 +105,30 @@ export default function RootLayout() {
               <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" />
                 <Stack.Screen name="splash" options={{ animation: "none" }} />
+
+                {/* Sign-in / sign-up: only while not fully signed in. When
+                    someone signs in, these leave the history, so Back can't
+                    return to them. */}
+                <Stack.Protected guard={!hasAcceptedSession}>
+                  <Stack.Screen name="auth" />
+                  <Stack.Screen name="welcome/index" />
+                  <Stack.Screen name="welcome/WelcomeRefactored" />
+                </Stack.Protected>
+
+                {/* Onboarding runs right after accepting the terms. */}
+                <Stack.Protected guard={isSignedIn}>
+                  <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
+                </Stack.Protected>
+
+                {/* The app itself: leaves the history on sign-out. */}
+                <Stack.Protected guard={hasAcceptedSession}>
+                  <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
+                  <Stack.Screen name="chatpages" />
+                  <Stack.Screen name="dailycheck-sub-screens" />
+                  <Stack.Screen name="settings-sub-screens" />
+                  <Stack.Screen name="notifications/index" />
+                  <Stack.Screen name="assessments" />
+                </Stack.Protected>
               </Stack>
             </ThemeProvider>
             <Toaster

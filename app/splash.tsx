@@ -1,5 +1,6 @@
 import { RNText } from "@/components/ui/input";
 import { bootstrapSession } from "@/lib/api/auth";
+import { markStartupComplete } from "@/lib/appStartup";
 import { navigateAfterAuth } from "@/lib/navigateAfterAuth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { router } from "expo-router";
@@ -249,6 +250,7 @@ const StepThree = ({ quote }: { quote: typeof QUOTES[0] }) => {
 const enterApp = async (isCancelled: () => boolean) => {
   const result = await bootstrapSession();
   if (isCancelled()) return;
+  markStartupComplete();
   // Re-read user after bootstrap — the store may have been cleared.
   const freshUser = useAuthStore.getState().user;
   if (result.ok && freshUser) {

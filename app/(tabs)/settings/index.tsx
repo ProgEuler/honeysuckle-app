@@ -90,9 +90,10 @@ const Index = () => {
 
   const handleLogout = () => {
     signOutSocial();
+    // Clearing the session removes the app's screens from history (protected
+    // routes in app/_layout.tsx) and the start route opens sign-in.
     clearAuthSession();
     queryClient.clear();
-    router.replace("/auth");
   };
 
   const confirmLogout = () => {
@@ -108,7 +109,6 @@ const Index = () => {
       clearAuthSession();
       queryClient.clear();
       toast.success("Your account has been deleted.");
-      router.replace("/auth");
     } catch (error) {
       toast.error(
         error instanceof AppleReauthCancelled

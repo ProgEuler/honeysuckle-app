@@ -6,7 +6,7 @@ import { useAppleSignIn } from "@/hooks/useAppleSignIn";
 import { useGoogleSignIn } from "@/hooks/useGoogleSignIn";
 import { socialLogin } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
-import { navigateAfterAuth } from "@/lib/navigateAfterAuth";
+import { navigateAfterSignIn } from "@/lib/navigateAfterAuth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useMutation } from "@tanstack/react-query";
 import { ActivityIndicator, Modal, Platform, Pressable, StyleSheet, View } from "react-native";
@@ -22,7 +22,7 @@ export default function SocialAuth() {
     onSuccess: (response) => {
       setAuthSession(response);
       toast.success("Signed in successfully.");
-      navigateAfterAuth(response.log);
+      navigateAfterSignIn(response.log);
     },
     onError: (error) => {
       const message =

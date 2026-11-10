@@ -7,7 +7,7 @@ import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { signIn, SignInRequest } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
-import { navigateAfterAuth } from "@/lib/navigateAfterAuth";
+import { navigateAfterSignIn } from "@/lib/navigateAfterAuth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
@@ -51,7 +51,7 @@ const SignIn = () => {
     onSuccess: (response) => {
       setAuthSession(response);
       toast.success("Signed in successfully.");
-      navigateAfterAuth(response.log);
+      navigateAfterSignIn(response.log);
     },
     onError: (error) => {
       const message =

@@ -93,8 +93,11 @@ export default function TermsScreen() {
             setIsSubmitting(true);
             try {
                 const updated = await updateMe({ policy: true });
-                setUserProfile({ ...user, ...updated, policy: true });
+                // Leave the auth screens first: saving policy:true removes
+                // them (protected routes in app/_layout.tsx), and the router
+                // would otherwise jump to the start route and skip onboarding.
                 router.replace("/onboarding");
+                setUserProfile({ ...user, ...updated, policy: true });
             } catch {
                 toast.error("Failed to save. Please try again.");
             } finally {
