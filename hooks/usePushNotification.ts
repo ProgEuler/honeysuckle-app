@@ -137,12 +137,9 @@ export function useNotificationHook() {
                 // in firebase.json, which isn't present here so the default
                 // applies). Calling it explicitly triggers a warning.
                 const token = await getToken(app_message);
-                console.log("FCM Token:", token);
-
                 if (accessToken && token) {
                     try {
                         await registerFcmDevice(token);
-                        console.log("FCM token registered in backend : ", token);
                     } catch (error) {
                         console.log("FCM token registration failed:", error);
                     }
@@ -151,13 +148,11 @@ export function useNotificationHook() {
                 tokenRefreshUnsubscribe = onTokenRefresh(
                     app_message,
                     async (nextToken) => {
-                        console.log("FCM Token refreshed:", nextToken);
                         if (!accessToken || !nextToken) {
                             return;
                         }
                         try {
                             await registerFcmDevice(nextToken);
-                            console.log("Refreshed FCM token registered in backend");
                         } catch (error) {
                             console.log("Refreshed FCM token registration failed:", error);
                         }

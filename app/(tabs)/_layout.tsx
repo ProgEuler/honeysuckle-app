@@ -1,4 +1,5 @@
 import { router, withLayoutContext } from "expo-router";
+import { Platform, type ImageSourcePropType } from "react-native";
 import type { TabNavigationState } from "@react-navigation/native";
 import {
     createNativeBottomTabNavigator,
@@ -7,6 +8,21 @@ import {
 } from "@bottom-tabs/react-navigation";
 
 const { Navigator } = createNativeBottomTabNavigator();
+
+// SF Symbols only exist on iOS; Android needs image files (Lucide icons,
+// tinted by the tab bar like the symbols are).
+const ANDROID_ICONS = {
+    home: require("@/assets/images/tabs/home.png"),
+    dailycheck: require("@/assets/images/tabs/dailycheck.png"),
+    chat: require("@/assets/images/tabs/chat.png"),
+    analytics: require("@/assets/images/tabs/analytics.png"),
+    settings: require("@/assets/images/tabs/settings.png"),
+};
+
+type TabIcon = ReturnType<NonNullable<NativeBottomTabNavigationOptions["tabBarIcon"]>>;
+
+const tabIcon = (iosIcon: TabIcon, androidIcon: ImageSourcePropType): TabIcon =>
+    Platform.OS === "ios" ? iosIcon : androidIcon;
 
 const Tabs = withLayoutContext<
     NativeBottomTabNavigationOptions,
@@ -32,7 +48,7 @@ export default function TabsLayout() {
                 name="home"
                 options={{
                     title: "Home",
-                    tabBarIcon: () => ({ sfSymbol: "house.fill" }),
+                    tabBarIcon: () => tabIcon({ sfSymbol: "house.fill" }, ANDROID_ICONS.home),
                     tabBarActiveTintColor: "#4B3425",
                 }}
             />
@@ -40,7 +56,7 @@ export default function TabsLayout() {
                 name="dailycheck"
                 options={{
                     title: "Daily Check",
-                    tabBarIcon: () => ({ sfSymbol: "checkmark.circle.fill" }),
+                    tabBarIcon: () => tabIcon({ sfSymbol: "checkmark.circle.fill" }, ANDROID_ICONS.dailycheck),
                     tabBarActiveTintColor: "#4B3425",
                 }}
             />
@@ -49,9 +65,7 @@ export default function TabsLayout() {
                 listeners={chatScreenListeners}
                 options={{
                     title: "Chat",
-                    tabBarIcon: () => ({
-                        sfSymbol: "bubble.left.and.bubble.right.fill",
-                    }),
+                    tabBarIcon: () => tabIcon({ sfSymbol: "bubble.left.and.bubble.right.fill" }, ANDROID_ICONS.chat),
                     tabBarActiveTintColor: "#4B3425",
                 }}
             />
@@ -59,7 +73,7 @@ export default function TabsLayout() {
                 name="analytics"
                 options={{
                     title: "Analytics",
-                    tabBarIcon: () => ({ sfSymbol: "chart.bar.fill" }),
+                    tabBarIcon: () => tabIcon({ sfSymbol: "chart.bar.fill" }, ANDROID_ICONS.analytics),
                     tabBarActiveTintColor: "#4B3425",
                 }}
             />
@@ -67,7 +81,7 @@ export default function TabsLayout() {
                 name="settings"
                 options={{
                     title: "Settings",
-                    tabBarIcon: () => ({ sfSymbol: "gearshape.fill" }),
+                    tabBarIcon: () => tabIcon({ sfSymbol: "gearshape.fill" }, ANDROID_ICONS.settings),
                     tabBarActiveTintColor: "#4B3425",
                 }}
             />

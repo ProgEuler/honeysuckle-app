@@ -46,7 +46,6 @@ const SignIn = () => {
       if (!response.status) {
         throw new Error("Unable to sign in with these credentials.");
       }
-      console.log("Sign-in successful:", response);
       return response;
     },
     onSuccess: (response) => {

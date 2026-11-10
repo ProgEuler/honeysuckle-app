@@ -46,10 +46,6 @@ export function useGoogleSignIn() {
       const userCredential =
         await auth().signInWithCredential(googleCredential);
 
-      console.log("Logged in with Google:", userCredential.user.email);
-
-      console.log("Final TOKNE: ", await userCredential.user.getIdToken(true));
-
       return userCredential.user;
     } catch (error) {
       if (isErrorWithCode(error)) {

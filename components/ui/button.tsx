@@ -32,12 +32,9 @@ const RNButton = ({
           return;
         }
 
-        console.log("tag:", tag);
         if (tag === "push") {
-          console.log("push the path");
           router.push(path as any);
         } else if (tag === "replace") {
-          console.log("replace the path");
           router.replace(path as any);
         }
       }}
