@@ -47,9 +47,9 @@ const ChatScreen = () => {
   const queryClient = useQueryClient();
   const aiConsent = useAiConsent();
   const insets = useSafeAreaInsets();
-  // iOS draws the tab bar over the screen, so keep the input above it while
-  // the keyboard is closed. While typing the tab bar is hidden (see
-  // app/(tabs)/_layout.tsx) and the input rides on the keyboard instead.
+  // iOS draws the (floating) tab bar over the screen. While the keyboard is
+  // closed the white input panel extends down behind it, with the input
+  // itself above the bar; while typing the input rides on the keyboard.
   // Android lays the tab bar out below the screen, so it needs no room.
   const tabBarHeight = useBottomTabBarHeight();
   const keyboardVisible = useKeyboardState((state) => state.isVisible);
@@ -231,7 +231,7 @@ const ChatScreen = () => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.background, paddingBottom: tabBarSpace }}>
+    <View style={{ flex: 1, backgroundColor: Colors.background }}>
       {/* Blocks the chat until the user agrees to AI data sharing. */}
       <AiConsentModal visible={aiConsent.status === "needed"} onAgree={aiConsent.grant} />
       <Chat<IMessage>
@@ -273,7 +273,7 @@ const ChatScreen = () => {
                 borderTopLeftRadius: 30,
                 borderTopRightRadius: 30,
                 paddingHorizontal: 16,
-                paddingBottom: 20,
+                paddingBottom: 20 + tabBarSpace,
                 paddingTop: 14,
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: -3 },

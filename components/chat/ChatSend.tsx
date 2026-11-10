@@ -5,10 +5,9 @@ import { TouchableOpacity, View } from "react-native";
 
 /**
  * Custom send button:
- * - Default state: green pill with an up-arrow icon.
- * - Streaming state: green pill with a white square stop icon.
- *
- * Always rendered (the composer reserves layout space for it).
+ * - Something typed: green circle with an up-arrow icon.
+ * - Streaming: green circle with a white square stop icon.
+ * - Otherwise hidden, so the text box gets the full width.
  */
 export function ChatSend<TMessage extends IMessage>(
   props: SendProps<TMessage> & {
@@ -21,7 +20,9 @@ export function ChatSend<TMessage extends IMessage>(
   const canSend = props.isTextOptional || text.length > 0;
   const isStreaming = !!props.isStreaming;
 
-  const bg = canSend || isStreaming ? Colors.green : "#D9D2CE";
+  if (!canSend && !isStreaming) {
+    return null;
+  }
 
   const onPress = () => {
     if (isStreaming) {
@@ -42,12 +43,11 @@ export function ChatSend<TMessage extends IMessage>(
       <TouchableOpacity
         accessibilityLabel={isStreaming ? "Stop generating" : "Send message"}
         onPress={onPress}
-        disabled={!canSend && !isStreaming}
         style={{
           width: 44,
           height: 44,
           borderRadius: 22,
-          backgroundColor: bg,
+          backgroundColor: Colors.green,
           alignItems: "center",
           justifyContent: "center",
           shadowColor: "#000",

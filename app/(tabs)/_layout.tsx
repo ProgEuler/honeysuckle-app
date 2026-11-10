@@ -34,11 +34,14 @@ const Tabs = withLayoutContext<
 
 export default function TabsLayout() {
     // While typing (e.g. in the Chat tab) show just the content and the
-    // input above the keyboard, not the tab bar.
+    // input above the keyboard, not the tab bar. Only Android needs this:
+    // there the keyboard pushes the tab bar up above it. On iOS the keyboard
+    // already covers the tab bar, and toggling it re-lays out the native tab
+    // view, which takes focus away from the text box and closes the keyboard.
     const keyboardVisible = useKeyboardState((state) => state.isVisible);
 
     return (
-        <Tabs tabBarHidden={keyboardVisible}>
+        <Tabs tabBarHidden={Platform.OS === "android" && keyboardVisible}>
             <Tabs.Screen
                 name="home"
                 options={{
