@@ -319,13 +319,6 @@ const ChatScreen = () => {
                   onStopStream={() => stopStream()}
                 />
               </View>
-              <RNText
-                variant="medium"
-                size="xs"
-                style={{ color: "#A09791", textAlign: "center", marginTop: 8 }}
-              >
-                AI companion, not a therapist. In a crisis, call or text 988.
-              </RNText>
             </Animated.View>
           );
         }}
