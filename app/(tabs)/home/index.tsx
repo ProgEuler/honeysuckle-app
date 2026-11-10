@@ -4,12 +4,14 @@ import Next from "@/assets/svgs/next.svg";
 import Notification from "@/assets/svgs/notification.svg";
 import Chat from "@/assets/svgs/xchat.svg";
 import HomeSkeleton from "@/components/skeletons/screens/HomeSkeleton";
+import SkeletonCircle from "@/components/skeletons/SkeletonCircle";
+import SkeletonText from "@/components/skeletons/SkeletonText";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { useMeQuery } from "@/hooks/useMeQuery";
 import { useNotificationsQuery } from "@/hooks/useNotificationsQuery";
 import { router } from "expo-router";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   Easing,
@@ -44,7 +46,9 @@ const getEntranceStyle = (animation: Animated.Value) => ({
 
 const HomeScreen = () => {
   const { top, bottom } = useSafeAreaInsets();
-  const { data: me, isLoading: meLoading, refetch, isRefetching } = useMeQuery();
+  const { data: me, isLoading: meLoading, isFetching: meFetching, refetch, isRefetching } = useMeQuery();
+  // The avatar downloads separately from the profile, so track it on its own.
+  const [loadedImageUri, setLoadedImageUri] = useState<string | null>(null);
   const { data: notificationsData } = useNotificationsQuery();
   const unreadCount = (notificationsData?.results ?? []).filter(
     (n: { is_read: boolean }) => !n.is_read,
@@ -74,6 +78,14 @@ const HomeScreen = () => {
   const profileImageSource = me?.image
     ? { uri: me.image }
     : PROFILE_IMAGE_FALLBACK;
+  // Skeletons instead of a flash of the fallback avatar / "Friend": the
+  // saved profile may lack a name or photo until the refresh comes back.
+  const nameLoading = !me?.name?.trim() && meFetching;
+  // Photo links are signed, so each profile refresh returns a new URL for
+  // the same file; compare without the signature so the skeleton only
+  // shows for a photo that hasn't loaded before.
+  const imageKey = me?.image?.split("?")[0] ?? null;
+  const avatarLoading = imageKey ? loadedImageUri !== imageKey : meFetching;
 
   useEffect(() => {
     const entranceAnimation = Animated.stagger(
@@ -209,14 +221,30 @@ const HomeScreen = () => {
         >
           <View style={styles.profileRow}>
             <View style={styles.profileImageFrame}>
-              <Image source={profileImageSource} style={styles.profileImage} />
+              <Image
+                source={profileImageSource}
+                style={styles.profileImage}
+                onLoadEnd={() => imageKey && setLoadedImageUri(imageKey)}
+              />
+              {avatarLoading && (
+                <View style={styles.avatarSkeleton}>
+                  <SkeletonCircle size={72} />
+                </View>
+              )}
             </View>
 
             <View style={styles.profileTextWrap}>
-              <RNText variant="header" size="xl" style={styles.welcomeText}>
-                Welcome back, {firstName} 👋
-              </RNText>
-              <View style={styles.subtitleRow}>
+              {nameLoading ? (
+                <View style={styles.nameSkeleton}>
+                  <SkeletonText width="80%" size="lg" />
+                  <SkeletonText width="55%" size="sm" />
+                </View>
+              ) : (
+                <RNText variant="header" size="xl" style={styles.welcomeText}>
+                  Welcome back, {firstName} 👋
+                </RNText>
+              )}
+              <View style={[styles.subtitleRow, nameLoading && styles.hidden]}>
                 <RNText
                   variant="subtitle"
                   size="md"
@@ -458,6 +486,17 @@ const styles = StyleSheet.create({
   profileImage: {
     height: 72,
     width: 72,
+  },
+  avatarSkeleton: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: Colors.background,
+  },
+  nameSkeleton: {
+    gap: 8,
+    paddingVertical: 4,
+  },
+  hidden: {
+    display: "none",
   },
   // FIX: replaced marginHorizontal: "auto" (unreliable in RN) with flex + paddingLeft
   profileTextWrap: {
