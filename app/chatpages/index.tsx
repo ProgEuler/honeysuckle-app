@@ -31,6 +31,7 @@ import { useEffect, useRef } from "react";
 import {
   ActivityIndicator,
   Image,
+  Platform,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -334,19 +335,21 @@ const ChatPage = () => {
             </TouchableOpacity>
           ) : null
         }
-        renderChatEmpty={() =>
-          isLoading ? (
-            <ChatHistorySkeleton />
-          ) : isError ? (
-            <View style={{ alignItems: "center", marginTop: 30 }}>
-              <RNText variant="medium" size="md" style={{ color: Colors.orange }}>
-                Unable to load chat history.
-              </RNText>
-            </View>
-          ) : (
-            <EmptyState />
-          )
-        }
+        renderChatEmpty={() => (
+          <View style={UNFLIP_EMPTY}>
+            {isLoading ? (
+              <ChatHistorySkeleton />
+            ) : isError ? (
+              <View style={{ alignItems: "center", marginTop: 30 }}>
+                <RNText variant="medium" size="md" style={{ color: Colors.orange }}>
+                  Unable to load chat history.
+                </RNText>
+              </View>
+            ) : (
+              <EmptyState />
+            )}
+          </View>
+        )}
       />
     </View>
   );
@@ -371,6 +374,17 @@ function toIMessage(m: ChatHistoryMessage): IMessage {
   };
 }
 
+/**
+ * The chat list is inverted (newest at the bottom), and the chat library
+ * doesn't undo that for the empty state. React Native inverts vertically on
+ * iOS but on both axes on Android, so undo exactly what each platform did;
+ * undoing only the vertical flip left Android mirrored left-to-right.
+ */
+const UNFLIP_EMPTY = {
+  flex: 1,
+  transform: Platform.OS === "android" ? [{ scale: -1 }] : [{ scaleY: -1 }],
+};
+
 function EmptyState() {
   return (
     <View
@@ -378,12 +392,6 @@ function EmptyState() {
         alignItems: "center",
         marginTop: 30,
         gap: 28,
-        // The chat list is inverted (newest at the bottom), so its
-        // ListEmptyComponent is rendered inside a flipped container. The
-        // chat library normally counter-rotates bubble content but does
-        // NOT do the same for the empty component — counter-rotate here
-        // so the logo + text read right-side up.
-        transform: [{ scaleY: -1 }],
       }}
     >
       <View
