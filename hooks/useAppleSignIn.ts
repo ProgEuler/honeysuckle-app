@@ -48,7 +48,24 @@ export function useAppleSignIn() {
           await auth().signInWithCredential(firebaseCredential);
         console.log("Apple Sign-In Success on iOS");
         const user = userCredential.user;
-        console.log("Apple Credential: ", user);
+
+        // Apple's token has no name, and Apple gives the name only on the
+        // very first sign-in. Save it on the Firebase user so the refreshed
+        // ID token (which our backend reads) carries it, like Google's does.
+        const fullName = [
+          credential.fullName?.givenName,
+          credential.fullName?.familyName,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .trim();
+        if (fullName && !user.displayName) {
+          try {
+            await user.updateProfile({ displayName: fullName });
+          } catch (e) {
+            console.warn("Couldn't save Apple name to Firebase:", e);
+          }
+        }
         return user;
       } else {
         // auth().signInWithProvider is not available in this RNFirebase runtime.
