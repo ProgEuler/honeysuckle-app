@@ -8,7 +8,7 @@ const ICON_PILL_SIZE = 48;
 
 export default function AnalyticsSkeleton() {
     return (
-        <View style={{ width: "90%", marginHorizontal: "auto", marginVertical: 30 }}>
+        <View style={{ width: "100%", marginVertical: 14 }}>
             {/* Title block */}
             <View style={{ gap: 10, marginBottom: 20 }}>
                 <SkeletonText width={170} size="xl" />
