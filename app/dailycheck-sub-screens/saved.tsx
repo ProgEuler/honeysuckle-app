@@ -16,7 +16,7 @@ const goHome = () => router.navigate("/(tabs)/home");
  * Leave the finished check-in for Home, then open `path` on top of it, so
  * Back from there returns Home instead of into the check-in steps.
  */
-const openFromHome = (path: "/dailycheck-sub-screens/journalhistory" | "/chatpages") => {
+const openFromHome = (path: "/dailycheck-sub-screens/journalhistory") => {
   goHome();
   setTimeout(() => router.push(path), 0);
 };
@@ -143,7 +143,7 @@ export default function CheckinSaved() {
             </RNText>
             <TouchableOpacity
               style={styles.supportButton}
-              onPress={() => openFromHome("/chatpages")}
+              onPress={() => router.navigate("/(tabs)/chat")}
               accessibilityRole="button"
             >
               <MessageCircleHeart size={18} color={Colors.brown} />

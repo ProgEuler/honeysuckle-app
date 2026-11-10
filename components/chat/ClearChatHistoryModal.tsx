@@ -7,7 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner-native";
 
 /**
- * Confirmation modal for wiping chat history. Lives in `chatpages/_layout.tsx`
+ * Confirmation modal for wiping chat history. Lives in `app/(tabs)/chat/_layout.tsx`
  * so the native-header menu button and the modal can share state without
  * prop-drilling through the chat screen.
  */

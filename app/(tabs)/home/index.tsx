@@ -315,7 +315,7 @@ const HomeScreen = () => {
 
           <Animated.View style={getEntranceStyle(cardAnimations[2])}>
             <TouchableOpacity
-              onPress={() => router.push("/chatpages")}
+              onPress={() => router.navigate("/(tabs)/chat")}
               style={styles.metricCard}
               activeOpacity={0.85}
             >

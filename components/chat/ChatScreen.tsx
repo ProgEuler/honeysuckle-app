@@ -35,15 +35,25 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useBottomTabBarHeight } from "react-native-bottom-tabs";
+import { useKeyboardState } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { toast } from "sonner-native";
 
 const PAGE_SIZE = 20;
 
-const ChatPage = () => {
+/** The AI chat, shown in the Chat tab. */
+const ChatScreen = () => {
   const queryClient = useQueryClient();
   const aiConsent = useAiConsent();
   const insets = useSafeAreaInsets();
+  // iOS draws the tab bar over the screen, so keep the input above it while
+  // the keyboard is closed. While typing the tab bar is hidden (see
+  // app/(tabs)/_layout.tsx) and the input rides on the keyboard instead.
+  // Android lays the tab bar out below the screen, so it needs no room.
+  const tabBarHeight = useBottomTabBarHeight();
+  const keyboardVisible = useKeyboardState((state) => state.isVisible);
+  const tabBarSpace = Platform.OS === "ios" && !keyboardVisible ? tabBarHeight : 0;
   // iOS native-stack header is ~44pt + safe-area top (~44-59pt on modern
   // phones), so reserve that space at the top of the list. Without this,
   // the first message slides *under* the frosted header and gets blurred
@@ -221,7 +231,7 @@ const ChatPage = () => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.background }}>
+    <View style={{ flex: 1, backgroundColor: Colors.background, paddingBottom: tabBarSpace }}>
       {/* Blocks the chat until the user agrees to AI data sharing. */}
       <AiConsentModal visible={aiConsent.status === "needed"} onAgree={aiConsent.grant} />
       <Chat<IMessage>
@@ -355,7 +365,7 @@ const ChatPage = () => {
   );
 };
 
-export default ChatPage;
+export default ChatScreen;
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -1,5 +1,6 @@
-import { router, withLayoutContext } from "expo-router";
+import { withLayoutContext } from "expo-router";
 import { Platform, type ImageSourcePropType } from "react-native";
+import { useKeyboardState } from "react-native-keyboard-controller";
 import type { TabNavigationState } from "@react-navigation/native";
 import {
     createNativeBottomTabNavigator,
@@ -31,19 +32,13 @@ const Tabs = withLayoutContext<
     NativeBottomTabNavigationEventMap
 >(Navigator);
 
-// The chat tab is a launcher for /chatpages (the actual chat screen).
-// We intercept tabPress so the tab doesn't focus on the empty chat screen
-// (which would trigger an unhandled GO_BACK from the native bar).
-const chatScreenListeners = {
-    tabPress: (e: { preventDefault: () => void }) => {
-        e.preventDefault();
-        router.push("/chatpages");
-    },
-};
-
 export default function TabsLayout() {
+    // While typing (e.g. in the Chat tab) show just the content and the
+    // input above the keyboard, not the tab bar.
+    const keyboardVisible = useKeyboardState((state) => state.isVisible);
+
     return (
-        <Tabs>
+        <Tabs tabBarHidden={keyboardVisible}>
             <Tabs.Screen
                 name="home"
                 options={{
@@ -62,7 +57,6 @@ export default function TabsLayout() {
             />
             <Tabs.Screen
                 name="chat"
-                listeners={chatScreenListeners}
                 options={{
                     title: "Chat",
                     tabBarIcon: () => tabIcon({ sfSymbol: "bubble.left.and.bubble.right.fill" }, ANDROID_ICONS.chat),

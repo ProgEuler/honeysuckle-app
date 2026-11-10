@@ -74,7 +74,7 @@ export function AiConsentModal({ visible, onAgree }: { visible: boolean; onAgree
       }
       cancelLabel="Disagree"
       confirmLabel="Agree"
-      onCancel={() => router.back()}
+      onCancel={() => router.navigate("/(tabs)/home")}
       onConfirm={onAgree}
     />
   );

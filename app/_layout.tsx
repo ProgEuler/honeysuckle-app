@@ -123,7 +123,6 @@ export default function RootLayout() {
                 {/* The app itself: leaves the history on sign-out. */}
                 <Stack.Protected guard={hasAcceptedSession}>
                   <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
-                  <Stack.Screen name="chatpages" />
                   <Stack.Screen name="dailycheck-sub-screens" />
                   <Stack.Screen name="settings-sub-screens" />
                   <Stack.Screen name="notifications/index" />
