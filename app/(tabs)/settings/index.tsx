@@ -22,13 +22,12 @@ import {
   Smile,
   Trash2,
 } from "lucide-react-native";
+import AppDialog from "@/components/ui/AppDialog";
 import { useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Animated,
   Dimensions,
   Image,
-  Modal,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -381,96 +380,25 @@ const Index = () => {
         </View>
       </AnimatedScrollView>
 
-      {/* Delete account confirmation modal */}
-      <Modal
+      <AppDialog
         visible={showDeleteModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => !isDeleting && setShowDeleteModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <View style={styles.modalIconWrap}>
-              <Trash2 size={30} color="#C0392B" />
-            </View>
-            <RNText variant="title" size="2xl" style={styles.deleteTitle}>
-              Delete account?
-            </RNText>
-            <RNText variant="medium" size="md" style={styles.modalMessage}>
-              This permanently deletes your account and everything in it: check-ins, journal
-              entries, questionnaire results and AI chat history. This can't be undone.
-            </RNText>
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => setShowDeleteModal(false)}
-                disabled={isDeleting}
-              >
-                <RNText variant="header" size="md" style={styles.cancelText}>
-                  Cancel
-                </RNText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={confirmDeleteAccount}
-                disabled={isDeleting}
-              >
-                {isDeleting ? (
-                  <ActivityIndicator color={Colors.white} />
-                ) : (
-                  <RNText variant="header" size="md" style={styles.logoutText}>
-                    Delete
-                  </RNText>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        title="Delete account?"
+        message="This permanently deletes your account and everything in it: check-ins, journal entries, questionnaire results and AI chat history. This can't be undone."
+        confirmLabel="Delete"
+        destructive
+        loading={isDeleting}
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={confirmDeleteAccount}
+      />
 
-      {/* Logout confirmation modal */}
-      <Modal
+      <AppDialog
         visible={showLogoutModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowLogoutModal(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowLogoutModal(false)}
-        >
-          <TouchableOpacity activeOpacity={1} style={styles.modalCard}>
-            <View style={styles.modalIconWrap}>
-              <Logout width={32} height={32} />
-            </View>
-            <RNText variant="title" size="2xl" style={styles.modalTitle}>
-              Log Out?
-            </RNText>
-            <RNText variant="medium" size="md" style={styles.modalMessage}>
-              Are you sure you want to log out of your account?
-            </RNText>
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => setShowLogoutModal(false)}
-              >
-                <RNText variant="header" size="md" style={styles.cancelText}>
-                  Cancel
-                </RNText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.logoutButton}
-                onPress={confirmLogout}
-              >
-                <RNText variant="header" size="md" style={styles.logoutText}>
-                  Log Out
-                </RNText>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        </TouchableOpacity>
-      </Modal>
+        title="Log out?"
+        message="You can sign back in any time."
+        confirmLabel="Log out"
+        onCancel={() => setShowLogoutModal(false)}
+        onConfirm={confirmLogout}
+      />
     </View>
   );
 };
@@ -632,85 +560,6 @@ const styles = StyleSheet.create({
   },
   settingItemTitle: {
     color: Colors.brown,
-  },
-  // Logout modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 32,
-  },
-  modalCard: {
-    width: "100%",
-    backgroundColor: Colors.white,
-    borderRadius: 28,
-    padding: 28,
-    alignItems: "center",
-    gap: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  modalIconWrap: {
-    backgroundColor: Colors.background,
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 4,
-  },
-  modalTitle: {
-    color: Colors.brown,
-  },
-  modalMessage: {
-    color: Colors.primaryText,
-    textAlign: "center",
-    lineHeight: 24,
-    opacity: 0.75,
-  },
-  modalActions: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 8,
-    width: "100%",
-  },
-  cancelButton: {
-    flex: 1,
-    height: 52,
-    borderRadius: 26,
-    borderWidth: 1.5,
-    borderColor: Colors.brown,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  cancelText: {
-    color: Colors.brown,
-  },
-  logoutButton: {
-    flex: 1,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: Colors.brown,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  logoutText: {
-    color: Colors.white,
-  },
-  deleteButton: {
-    flex: 1,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: "#C0392B",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  deleteTitle: {
-    color: "#C0392B",
   },
 });
 
