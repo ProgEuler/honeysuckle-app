@@ -73,7 +73,7 @@ const EmotionType = () => {
           </View>
         </View>
       </SafeAreaView>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <View style={{ paddingBottom: bottom + 40 }}>
           <View
             style={{

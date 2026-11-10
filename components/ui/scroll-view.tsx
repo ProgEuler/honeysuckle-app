@@ -7,6 +7,7 @@ export const ScrollView = forwardRef<RNScrollView, ScrollViewProps>(
       <RNScrollView
         ref={ref}
         style={[{ backgroundColor: 'transparent' }, style]}
+        showsVerticalScrollIndicator={false}
         {...otherProps}
       />
     );

@@ -125,6 +125,7 @@ const Otp = () => {
       contentContainerStyle={styles.contentContainer}
       keyboardShouldPersistTaps="handled"
       bottomOffset={24}
+      showsVerticalScrollIndicator={false}
     >
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.headerRow}>

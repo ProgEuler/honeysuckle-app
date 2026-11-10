@@ -89,6 +89,7 @@ const ForgotOtp = () => {
       contentContainerStyle={styles.contentContainer}
       keyboardShouldPersistTaps="handled"
       bottomOffset={24}
+      showsVerticalScrollIndicator={false}
     >
       <View style={styles.backgroundCircle} />
       <BackButton style={styles.backButton} onPress={() => router.back()} />

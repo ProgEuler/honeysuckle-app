@@ -27,6 +27,7 @@ const InviteFriends = () => {
         keyboardShouldPersistTaps="handled"
         bottomOffset={24}
         contentInsetAdjustmentBehavior="automatic"
+        showsVerticalScrollIndicator={false}
       >
         <View style={styles.imageContainer}>
           <Svg width="220" height="220" viewBox="0 0 200 200">

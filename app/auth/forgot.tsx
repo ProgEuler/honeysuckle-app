@@ -73,6 +73,7 @@ const Forgot = () => {
       keyboardShouldPersistTaps="handled"
       bottomOffset={24}
       scrollEnabled={false}
+      showsVerticalScrollIndicator={false}
     >
       <View style={styles.backgroundCircle} />
       <BackButton
