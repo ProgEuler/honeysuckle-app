@@ -1,33 +1,47 @@
-import Back from '@/assets/svgs/back.svg';
 import Next from '@/assets/svgs/next.svg';
 import { Layout } from '@/components/layout/Layout';
 import { RNText } from '@/components/ui/input';
 import { Colors } from '@/constants/color';
+import { useMeQuery } from '@/hooks/useMeQuery';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
 import {
     StyleSheet,
     TouchableOpacity,
     View
 } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Security = () => {
   const { bottom } = useSafeAreaInsets();
-  const [biometricsEnabled, setBiometricsEnabled] = useState(false);
+  const { data: me } = useMeQuery();
+  // Google/Apple accounts have no password. Older servers don't send the
+  // flag, so only hide the option when it's explicitly false.
+  const hasPassword = me?.has_password !== false;
 
   return (
     <Layout edges={['top']} style={[styles.container, { paddingBottom: bottom }]}>
         <View style={styles.card}>
-          <TouchableOpacity style={styles.settingItem} onPress={() => router.push('/settings-sub-screens/changepassword')}>
-            <View style={styles.settingItemLeft}>
+          {hasPassword ? (
+            <TouchableOpacity style={styles.settingItem} onPress={() => router.push('/settings-sub-screens/changepassword')}>
+              <View style={styles.settingItemLeft}>
+                <RNText variant="header" size="md" style={styles.settingItemTitle}>
+                  Change Password
+                </RNText>
+              </View>
+              <Next />
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.notice}>
               <RNText variant="header" size="md" style={styles.settingItemTitle}>
-                Change Password
+                You sign in with Google or Apple
+              </RNText>
+              <RNText variant="medium" size="sm" style={{ color: Colors.primaryText, lineHeight: 20 }}>
+                Your account doesn't have a password, so there's nothing to change here. Your
+                sign-in is secured by your Google or Apple account.
               </RNText>
             </View>
-            <Next />
-          </TouchableOpacity>
+          )}
         </View>
         </Layout>
   );
@@ -74,6 +88,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 2,
+  },
+  notice: {
+    gap: 6,
+    paddingVertical: 18,
+    paddingHorizontal: 12,
   },
   settingItem: {
     flexDirection: 'row',

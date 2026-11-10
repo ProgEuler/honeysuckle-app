@@ -1,5 +1,6 @@
-import { createCheckin } from "@/lib/api/checkin";
+import { createCheckin, type JournalEntry } from "@/lib/api/checkin";
 import { ApiError } from "@/lib/api/client";
+import { setLastSavedCheckin } from "@/lib/lastCheckin";
 import { useCheckinStore } from "@/store/useCheckinStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -12,22 +13,21 @@ export const useSaveCheckin = () => {
 
   return useMutation({
     mutationFn: createCheckin,
-    onSuccess: () => {
+    onSuccess: (saved) => {
       // The check-in affects multiple downstream views:
       // - Journal History list (new entry at the top)
       // - Analytics insights (mood distribution, totals)
-      // - Performance report (streak, top emotions, stats)
       // - `me` (total_checkin, streak) shown on Home
       // - Notifications badge if unread counters change
       queryClient.invalidateQueries({ queryKey: ["journal-entries"] });
       queryClient.invalidateQueries({ queryKey: ["analytics", "insights"] });
-      queryClient.invalidateQueries({ queryKey: ["dailycheck", "report"] });
       queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
 
-      toast.success("Check-in saved successfully.");
+      // The server returns the saved check-in; the summary screen shows it.
+      setLastSavedCheckin(saved as unknown as JournalEntry);
       resetCheckin();
-      router.push("/dailycheck-sub-screens/performance");
+      router.push("/dailycheck-sub-screens/saved");
     },
     onError: (error) => {
       const message =

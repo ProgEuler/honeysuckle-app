@@ -2,9 +2,10 @@ import ArrowRight from "@/assets/svgs/arrowright.svg";
 import { BackButton } from "@/components/ui/BackButton";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
-import { verifyOtp } from "@/lib/api/auth";
+import { useResendCooldown } from "@/hooks/useResendCooldown";
+import { getOtp, verifyOtp } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
-import { useAuthStore } from "@/store/useAuthStore";
+import { setPasswordResetToken } from "@/lib/passwordReset";
 import { useMutation } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -23,7 +24,6 @@ import { toast } from "sonner-native";
 const ForgotOtp = () => {
   const { email: emailParam } = useLocalSearchParams<{ email?: string }>();
   const [otpCode, setOtpCode] = useState("");
-  const setAuthSession = useAuthStore((state) => state.setAuthSession);
 
   const email =
     typeof emailParam === "string" ? emailParam.trim().toLowerCase() : "";
@@ -39,16 +39,14 @@ const ForgotOtp = () => {
       return response;
     },
     onSuccess: (response) => {
-      if (response.access && response.refresh && response.log) {
-        setAuthSession({
-          status: response.status ?? true,
-          access: response.access,
-          refresh: response.refresh,
-          log: response.log,
-        });
+      if (!response.access) {
+        toast.error("Couldn't verify the code. Please request a new one.");
+        return;
       }
+      // Only for setting the new password; the user signs in afterwards.
+      setPasswordResetToken(response.access);
 
-      toast.success("OTP verified successfully.");
+      toast.success("Code verified.");
       router.push({
         pathname: "/auth/newpassword",
         params: { email },
@@ -79,6 +77,33 @@ const ForgotOtp = () => {
       email,
       otp_code: otpCode,
     });
+  };
+
+  // A code was just sent from the previous screen, so start counting.
+  const { secondsLeft, canResend, restart } = useResendCooldown();
+  const resendMutation = useMutation({
+    mutationFn: async () => {
+      const response = await getOtp({ email, task: "reset" });
+      if (response.status === false) {
+        throw new Error(response.message || "Unable to resend the code.");
+      }
+      return response;
+    },
+    onSuccess: () => {
+      restart();
+      toast.success("We sent you a new code.");
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Unable to resend the code.");
+    },
+  });
+
+  const handleResend = () => {
+    if (!email) {
+      toast.error("Missing email. Please start again.");
+      return;
+    }
+    if (canResend && !resendMutation.isPending) resendMutation.mutate();
   };
 
   const disableVerify = verifyOtpMutation.isPending || otpCode.length !== 4;
@@ -157,11 +182,21 @@ const ForgotOtp = () => {
               Didn't receive the code?{" "}
             </RNText>
             <TouchableOpacity
-              // onPress={() => router.replace('/auth')}
+              onPress={handleResend}
+              disabled={!canResend || resendMutation.isPending}
               style={styles.centerAlign}
+              accessibilityRole="button"
             >
-              <RNText variant="medium" size="lg" style={styles.linkText}>
-                Resend.
+              <RNText
+                variant="medium"
+                size="lg"
+                style={[styles.linkText, !canResend && { opacity: 0.5 }]}
+              >
+                {resendMutation.isPending
+                  ? "Sending…"
+                  : canResend
+                    ? "Resend."
+                    : `Resend in ${secondsLeft}s`}
               </RNText>
             </TouchableOpacity>
           </View>

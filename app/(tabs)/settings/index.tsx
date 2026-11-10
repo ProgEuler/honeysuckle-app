@@ -7,10 +7,9 @@ import User from "@/assets/svgs/user.svg";
 import SettingsSkeleton from "@/components/skeletons/screens/SettingsSkeleton";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
-import { useMeQuery, meQueryKey } from "@/hooks/useMeQuery";
-import { updateMe } from "@/lib/api/auth";
+import { useMeQuery } from "@/hooks/useMeQuery";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { AppleReauthCancelled, deleteAccount, signOutSocial } from "@/lib/accountDeletion";
 import * as WebBrowser from "expo-web-browser";
@@ -31,7 +30,6 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
-  Switch,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -55,36 +53,19 @@ const Index = () => {
   const clearAuthSession = useAuthStore((state) => state.clearAuthSession);
   const queryClient = useQueryClient();
 
-  const [notifyEnabled, setNotifyEnabled] = useState<boolean>(
-    me?.notify ?? false,
-  );
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Sync once when me loads for the first time
-  const syncedRef = useRef(false);
-  if (!syncedRef.current && me !== undefined) {
-    syncedRef.current = true;
-    if (notifyEnabled !== me.notify) setNotifyEnabled(me.notify ?? false);
-  }
-
-  const toggleNotifyMutation = useMutation({
-    mutationFn: (notify: boolean) => updateMe({ notify }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: meQueryKey });
-      toast.success("Notification settings updated");
-    },
-    onError: () => {
-      setNotifyEnabled((prev: boolean) => !prev);
-      toast.error("Failed to update notification settings");
-    },
-  });
-
-  const handleToggleNotify = (val: boolean) => {
-    setNotifyEnabled(val);
-    toggleNotifyMutation.mutate(val);
-  };
+  // e.g. "On · 9:00 PM" for the Daily reminder row.
+  const reminderStatus = (() => {
+    if (!me) return "";
+    if (!me.notify) return "Off";
+    const [h = 9, m = 0] = (me.checkin_time ?? "09:00").split(":").map(Number);
+    const at = new Date();
+    at.setHours(h, m, 0, 0);
+    return `On · ${at.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
+  })();
   const { top } = useSafeAreaInsets();
   const scrollY = useRef(new Animated.Value(0)).current;
 
@@ -311,15 +292,15 @@ const Index = () => {
           />
           <SettingItem
             icon={Notification}
-            title="Push Notifications"
+            title="Daily reminder"
+            onPress={() => router.push("/settings-sub-screens/reminder")}
             rightElement={
-              <Switch
-                value={notifyEnabled}
-                onValueChange={handleToggleNotify}
-                trackColor={{ false: "#E0E0E0", true: Colors.green }}
-                thumbColor={Colors.white}
-                ios_backgroundColor="#E0E0E0"
-              />
+              <View style={styles.settingItemRight}>
+                <RNText variant="medium" size="sm" style={{ color: Colors.primaryText }}>
+                  {reminderStatus}
+                </RNText>
+                <Next />
+              </View>
             }
           />
           {/* <SettingItem
@@ -548,6 +529,7 @@ const styles = StyleSheet.create({
   settingItemRight: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 6,
   },
   iconContainer: {
     backgroundColor: Colors.background,

@@ -4,7 +4,7 @@ import { BackButton } from "@/components/ui/BackButton";
 import RNButton from "@/components/ui/button";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
-import { getOtp } from "@/lib/api/auth";
+import { getOtp, type GetOtpRequest } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
 import { useMutation } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -30,7 +30,7 @@ const Forgot = () => {
   });
 
   const getOtpMutation = useMutation({
-    mutationFn: async (payload: { email: string }) => {
+    mutationFn: async (payload: GetOtpRequest) => {
       const response = await getOtp(payload);
 
       if (response.status === false) {
@@ -63,6 +63,7 @@ const Forgot = () => {
 
     getOtpMutation.mutate({
       email: values.email.trim().toLowerCase(),
+      task: "reset",
     });
   };
 

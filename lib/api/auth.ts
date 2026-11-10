@@ -15,6 +15,8 @@ export type SignUpRequest = {
 
 export type GetOtpRequest = {
   email: string;
+  /** "reset" makes the email about resetting the password. */
+  task?: "verification" | "reset";
 };
 
 export type VerifyOtpRequest = {
@@ -38,6 +40,10 @@ export type AuthUserLog = {
   notify: boolean;
   policy: boolean;
   checkin_time: string;
+  /** IANA timezone the reminder time is in. */
+  timezone?: string;
+  /** False for Google/Apple accounts, which have no password to change. */
+  has_password?: boolean;
   streak?: number;
   total_checkin?: number;
 };
@@ -155,10 +161,12 @@ export const verifyOtp = (payload: VerifyOtpRequest) =>
     body: payload,
   });
 
-export const resetPassword = (payload: ResetPasswordRequest) =>
-  authenticatedApiRequest<ResetPasswordResponse>("/api/auth/reset-password/", {
+/** Uses the token from the verified reset code, not a signed-in session. */
+export const resetPassword = (payload: ResetPasswordRequest, token: string) =>
+  apiRequest<ResetPasswordResponse>("/api/auth/reset-password/", {
     method: "POST",
     body: payload,
+    token,
   });
 
 export const getMe = () =>

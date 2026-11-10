@@ -5,7 +5,7 @@ import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
 import { resetPassword } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
-import { useAuthStore } from "@/store/useAuthStore";
+import { clearPasswordResetToken, getPasswordResetToken } from "@/lib/passwordReset";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
@@ -45,7 +45,11 @@ const NewPassword = () => {
 
   const resetPasswordMutation = useMutation({
     mutationFn: async (payload: { email: string; new_password: string }) => {
-      const response = await resetPassword(payload);
+      const token = getPasswordResetToken();
+      if (!token) {
+        throw new Error("Your reset code has expired. Please request a new one.");
+      }
+      const response = await resetPassword(payload, token);
 
       if (response.status === false) {
         throw new Error(response.message || "Unable to reset password.");
@@ -54,7 +58,8 @@ const NewPassword = () => {
       return response;
     },
     onSuccess: () => {
-      toast.success("Password reset successfully. Please sign in.");
+      clearPasswordResetToken();
+      toast.success("Password updated. Please sign in with your new password.");
       router.replace("/auth");
     },
     onError: (error) => {

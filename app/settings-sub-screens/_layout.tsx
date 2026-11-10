@@ -22,6 +22,7 @@ const SettingsSubScreensLayout = () => {
             <Stack.Screen name="personalinfo" options={{ title: "Edit Personal Info" }} />
             <Stack.Screen name="invitefriends" options={{ title: "Invite Friends" }} />
             <Stack.Screen name="submitfeedback" options={{ title: "Submit Feedback" }} />
+            <Stack.Screen name="reminder" options={{ title: "Daily Reminder" }} />
             <Stack.Screen name="security" options={{ title: "Security" }} />
             <Stack.Screen name="changepassword" options={{ title: "Change Password" }} />
             <Stack.Screen name="termsandpolicy" options={{ title: "Terms & Policy" }} />

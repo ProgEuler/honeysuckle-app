@@ -2,6 +2,7 @@ import ArrowRight from "@/assets/svgs/arrowright.svg";
 import Back from "@/assets/svgs/back.svg";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
+import { useResendCooldown } from "@/hooks/useResendCooldown";
 import { getOtp, verifyOtp } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
 import { navigateAfterSignIn } from "@/lib/navigateAfterAuth";
@@ -64,6 +65,8 @@ const Otp = () => {
     },
   });
 
+  // A code was just sent when the account was created, so start counting.
+  const { secondsLeft, canResend, restart } = useResendCooldown();
   const resendOtpMutation = useMutation({
     mutationFn: async (payload: { email: string }) => {
       const response = await getOtp(payload);
@@ -75,7 +78,8 @@ const Otp = () => {
       return response;
     },
     onSuccess: () => {
-      toast.success("OTP sent again.");
+      restart();
+      toast.success("We sent you a new code.");
     },
     onError: (error) => {
       const message =
@@ -110,7 +114,7 @@ const Otp = () => {
       return;
     }
 
-    if (resendOtpMutation.isPending) {
+    if (resendOtpMutation.isPending || !canResend) {
       return;
     }
 
@@ -197,10 +201,18 @@ const Otp = () => {
             </RNText>
             <TouchableOpacity
               onPress={handleResendOtp}
-              disabled={resendOtpMutation.isPending}
+              disabled={resendOtpMutation.isPending || !canResend}
             >
-              <RNText variant="subtitle" size="sm" style={styles.linkText}>
-                {resendOtpMutation.isPending ? "Resending..." : "Resend."}
+              <RNText
+                variant="subtitle"
+                size="sm"
+                style={[styles.linkText, !canResend && { opacity: 0.5 }]}
+              >
+                {resendOtpMutation.isPending
+                  ? "Resending..."
+                  : canResend
+                    ? "Resend."
+                    : `Resend in ${secondsLeft}s`}
               </RNText>
             </TouchableOpacity>
           </View>
