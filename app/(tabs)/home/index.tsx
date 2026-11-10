@@ -1,8 +1,8 @@
 import Analysis from "@/assets/svgs/analysis.svg";
-import Clock from "@/assets/svgs/clock.svg";
 import Next from "@/assets/svgs/next.svg";
 import Notification from "@/assets/svgs/notification.svg";
 import Chat from "@/assets/svgs/xchat.svg";
+import TodayCard from "@/components/home/TodayCard";
 import HomeSkeleton from "@/components/skeletons/screens/HomeSkeleton";
 import SkeletonCircle from "@/components/skeletons/SkeletonCircle";
 import SkeletonText from "@/components/skeletons/SkeletonText";
@@ -282,32 +282,13 @@ const HomeScreen = () => {
         }
       >
         <View style={styles.listWrap}>
-          <RNText variant="title" size="xl">
-            Mental Health Metrics
-          </RNText>
-
           <Animated.View style={getEntranceStyle(cardAnimations[0])}>
-            <TouchableOpacity
-              onPress={() => router.push("/(tabs)/dailycheck")}
-              style={styles.metricCard}
-              activeOpacity={0.85}
-            >
-              <View style={styles.iconBubbleGreen}>
-                <Clock />
-              </View>
-              <View style={styles.metricTextWrap}>
-                <RNText variant="title" size="lg">
-                  Start Daily Check-In
-                </RNText>
-                <RNText variant="medium" size="sm">
-                  Take a moment to assess your mood.
-                </RNText>
-              </View>
-              <View>
-                <Next />
-              </View>
-            </TouchableOpacity>
+            <TodayCard />
           </Animated.View>
+
+          <RNText variant="title" size="xl">
+            Explore
+          </RNText>
 
           <Animated.View style={getEntranceStyle(cardAnimations[1])}>
             <TouchableOpacity
@@ -540,11 +521,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 6,
     elevation: 3,
-  },
-  iconBubbleGreen: {
-    backgroundColor: "#F2F5EB",
-    padding: 12,
-    borderRadius: 16,
   },
   iconBubbleOrange: {
     backgroundColor: "#FFF0EB",

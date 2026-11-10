@@ -27,7 +27,7 @@ const DailyCheckSubScreensLayout = () => {
             <Stack.Screen name="journalhistory" options={{ title: "Journal entries" }} />
             {/* These screens draw their own header with a back button;
                 without this the native header shows the route name. */}
-            <Stack.Screen name="performance" options={{ headerShown: false }} />
+            <Stack.Screen name="saved" options={{ headerShown: false, gestureEnabled: false }} />
             <Stack.Screen name="emotiontype" options={{ headerShown: false }} />
             <Stack.Screen
                 name="journalentry"

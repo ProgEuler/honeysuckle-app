@@ -3,22 +3,12 @@ import RatingScale from "@/components/dailycheck/RatingScale";
 import RNButton from "@/components/ui/button";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
-import { moodOptions } from "@/constants/moodOptions";
+import { moodForRating } from "@/constants/moodOptions";
 import { useSaveCheckin } from "@/hooks/useSaveCheckin";
 import { useCheckinStore } from "@/store/useCheckinStore";
 import { router } from "expo-router";
 import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { toast } from "sonner-native";
-
-// Same bands the server uses to turn a rating into a mood label.
-const moodForRating = (rating: number) => {
-  const [excellent, good, neutral, sad, depressed] = moodOptions;
-  if (rating >= 8) return excellent;
-  if (rating >= 6) return good;
-  if (rating >= 4) return neutral;
-  if (rating >= 2) return sad;
-  return depressed;
-};
 
 const Index = () => {
   const moodRating = useCheckinStore((state) => state.moodRating);

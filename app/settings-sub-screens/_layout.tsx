@@ -25,7 +25,7 @@ const SettingsSubScreensLayout = () => {
             <Stack.Screen name="reminder" options={{ title: "Daily Reminder" }} />
             <Stack.Screen name="security" options={{ title: "Security" }} />
             <Stack.Screen name="changepassword" options={{ title: "Change Password" }} />
-            <Stack.Screen name="termsandpolicy" options={{ title: "Terms & Policy" }} />
+            <Stack.Screen name="termsandpolicy" options={{ title: "Terms of Service" }} />
         </Stack>
     );
 };

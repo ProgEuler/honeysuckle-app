@@ -124,8 +124,8 @@ const NewPassword = () => {
             <View style={styles.inputsGroup}>
               <InputForm
                 title={"password"}
-                label={"Password"}
-                placeHolder={"Enter your password"}
+                label={"New password"}
+                placeHolder={"At least 8 characters"}
                 control={control}
                 errors={errors}
                 Icon={Lock}
@@ -145,6 +145,7 @@ const NewPassword = () => {
                 }
                 rules={{
                   required: "Password is required",
+                  minLength: { value: 8, message: "Use at least 8 characters" },
                 }}
               />
               <InputForm
@@ -215,7 +216,7 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    gap: 80,
+    gap: 40,
     marginTop: 20,
     justifyContent: "space-between",
   },

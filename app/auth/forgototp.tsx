@@ -33,7 +33,7 @@ const ForgotOtp = () => {
       const response = await verifyOtp(payload);
 
       if (response.status === false) {
-        throw new Error(response.message || "Invalid OTP code.");
+        throw new Error(response.message || "That code isn't right. Please try again.");
       }
 
       return response;
@@ -56,7 +56,7 @@ const ForgotOtp = () => {
       const message =
         error instanceof ApiError || error instanceof Error
           ? error.message
-          : "Unable to verify OTP right now.";
+          : "Couldn't verify the code right now.";
 
       toast.error(message);
     },
@@ -69,7 +69,7 @@ const ForgotOtp = () => {
     }
 
     if (otpCode.length !== 4) {
-      toast.error("Please enter the 4-digit OTP code.");
+      toast.error("Please enter the 4-digit code.");
       return;
     }
 
@@ -128,11 +128,11 @@ const ForgotOtp = () => {
         <View style={styles.mainContent}>
           <View style={styles.headerContent}>
             <RNText variant="title" size="3xl" style={styles.titleText}>
-              Enter 4 digit OTP Code
+              Check your email
             </RNText>
             <RNText variant="base" size="lg" style={styles.subtitleText}>
-              We’ve sent a 4-digit verification code to your Email. Enter the
-              code below to proceed.
+              Enter the 4-digit code we sent to{" "}
+              {email || "your email"}. It expires in 3 minutes.
             </RNText>
           </View>
           <View>

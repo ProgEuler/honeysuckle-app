@@ -61,6 +61,11 @@ const ChangePassword = () => {
       return;
     }
 
+    if (newPassword.length < 8) {
+      toast.error("Use at least 8 characters for your new password");
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       toast.error("New passwords do not match");
       return;
@@ -113,7 +118,7 @@ const ChangePassword = () => {
           <View style={styles.inputWrapper}>
             <TextInput
               style={styles.textInput}
-              placeholder="Enter new password"
+              placeholder="At least 8 characters"
               placeholderTextColor={Colors.primaryText}
               secureTextEntry={!showNewPassword}
               value={newPassword}

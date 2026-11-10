@@ -1,16 +1,13 @@
 import { BackButton } from "@/components/ui/BackButton";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
-import { TERMS } from "@/constants/terms-policy";
+import TermsSections from "@/components/terms/TermsSections";
 import { updateMe } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/useAuthStore";
 import Checkbox from "expo-checkbox";
 import { router } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
 import {
     ArrowRight,
-    ChevronDown,
-    ExternalLink,
     Leaf,
     Lock,
     type LucideIcon,
@@ -28,8 +25,6 @@ import {
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { toast } from "sonner-native";
-
-const PRIVACY_POLICY_URL = "https://thehoneysucklecompany.com/privacy.html";
 
 // Plain-language summary of the most important sections. The full terms
 // below are the binding text.
@@ -61,9 +56,6 @@ const KEY_POINTS: { Icon: LucideIcon; title: string; body: string }[] = [
     },
 ];
 
-// "Effective Date: …" line from the start of the terms.
-const EFFECTIVE_DATE = TERMS[0]?.body.split("\n")[0] ?? "";
-
 export default function TermsScreen() {
     const { bottom } = useSafeAreaInsets();
     const user = useAuthStore((state) => state.user);
@@ -72,7 +64,6 @@ export default function TermsScreen() {
 
     const [isAgreed, setIsAgreed] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [openSection, setOpenSection] = useState<string | null>(null);
 
     const handleBack = () => {
         if (user) {
@@ -151,57 +142,7 @@ export default function TermsScreen() {
                     ))}
                 </View>
 
-                <View style={styles.fullTermsHeader}>
-                    <RNText variant="header" size="lg">
-                        Full Terms of Service
-                    </RNText>
-                    {!!EFFECTIVE_DATE && (
-                        <RNText variant="medium" size="xs" style={styles.muted}>
-                            {EFFECTIVE_DATE}
-                        </RNText>
-                    )}
-                </View>
-
-                <View style={styles.sections}>
-                    {TERMS.map((section, index) => {
-                        const open = openSection === section.title;
-                        return (
-                            <View key={section.title} style={[styles.section, index > 0 && styles.sectionDivider]}>
-                                <TouchableOpacity
-                                    style={styles.sectionHeader}
-                                    onPress={() => setOpenSection(open ? null : section.title)}
-                                    accessibilityRole="button"
-                                    accessibilityState={{ expanded: open }}
-                                >
-                                    <RNText variant="subtitle" size="md" style={{ flex: 1 }}>
-                                        {index === 0 ? "Introduction" : section.title}
-                                    </RNText>
-                                    <ChevronDown
-                                        size={18}
-                                        color={Colors.primaryText}
-                                        style={{ transform: [{ rotate: open ? "180deg" : "0deg" }] }}
-                                    />
-                                </TouchableOpacity>
-                                {open && (
-                                    <RNText variant="base" size="sm" style={styles.sectionBody}>
-                                        {section.body}
-                                    </RNText>
-                                )}
-                            </View>
-                        );
-                    })}
-                </View>
-
-                <TouchableOpacity
-                    style={styles.privacyLink}
-                    onPress={() => WebBrowser.openBrowserAsync(PRIVACY_POLICY_URL)}
-                    accessibilityRole="link"
-                >
-                    <RNText variant="subtitle" size="md" style={{ color: Colors.green }}>
-                        Read our Privacy Policy
-                    </RNText>
-                    <ExternalLink size={16} color={Colors.green} />
-                </TouchableOpacity>
+                <TermsSections />
             </ScrollView>
 
             <View style={[styles.footer, { paddingBottom: Math.max(bottom, 16) }]}>
@@ -268,13 +209,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
     },
-    fullTermsHeader: { gap: 2, marginTop: 4 },
-    sections: { backgroundColor: Colors.white, borderRadius: 20, paddingHorizontal: 16 },
-    section: { paddingVertical: 4 },
-    sectionDivider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "#E8DDD9" },
-    sectionHeader: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 12 },
-    sectionBody: { color: Colors.primaryText, lineHeight: 21, paddingBottom: 12 },
-    privacyLink: { flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start" },
     footer: {
         paddingHorizontal: 20,
         paddingTop: 12,

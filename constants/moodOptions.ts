@@ -31,3 +31,13 @@ export const moodOptions: MoodOption[] = [
     icon: Depressed,
   },
 ];
+
+/** The mood for a 0–10 rating: same bands the server uses for its labels. */
+export const moodForRating = (rating: number): MoodOption => {
+  const [excellent, good, neutral, sad, depressed] = moodOptions;
+  if (rating >= 8) return excellent;
+  if (rating >= 6) return good;
+  if (rating >= 4) return neutral;
+  if (rating >= 2) return sad;
+  return depressed;
+};

@@ -34,13 +34,13 @@ const Forgot = () => {
       const response = await getOtp(payload);
 
       if (response.status === false) {
-        throw new Error(response.message || "Unable to send OTP.");
+        throw new Error(response.message || "Couldn't send the code.");
       }
 
       return payload.email;
     },
     onSuccess: (email) => {
-      toast.success("OTP sent to your email.");
+      toast.success("We sent a code to your email.");
       router.push({
         pathname: "/auth/forgototp",
         params: { email },
@@ -50,7 +50,7 @@ const Forgot = () => {
       const message =
         error instanceof ApiError || error instanceof Error
           ? error.message
-          : "Unable to send OTP right now.";
+          : "Couldn't send the code right now.";
 
       toast.error(message);
     },
@@ -93,11 +93,11 @@ const Forgot = () => {
         <View style={styles.formWrapper}>
           <View style={styles.titleGroup}>
             <RNText variant="title" size="3xl" style={styles.titleText}>
-              Forgot Password
+              Forgot password?
             </RNText>
             <RNText variant="base" size="lg" style={styles.subtitleText}>
-              Don't worry! Please enter the email address linked with your
-              account.
+              Enter the email you signed up with and we'll send you a code to
+              reset your password.
             </RNText>
           </View>
 
@@ -105,7 +105,7 @@ const Forgot = () => {
             <View style={styles.inputsGroup}>
               <InputForm
                 title={"email"}
-                label={"Enter Your Email Address"}
+                label={"Email address"}
                 placeHolder={"abc@email.com"}
                 control={control}
                 errors={errors}
@@ -124,22 +124,21 @@ const Forgot = () => {
           </View>
 
           <RNButton
-            value={getOtpMutation.isPending ? "Sending..." : "Send"}
+            value={getOtpMutation.isPending ? "Sending..." : "Send code"}
             onPress={handleSubmit(handleSendOtp)}
             disabled={getOtpMutation.isPending}
           />
 
           <View style={styles.footerRow}>
-            <RNText variant="medium" size="lg">
-              {" "}
-              Remember Password?{" "}
+            <RNText variant="medium" size="md">
+              Remembered it?{" "}
             </RNText>
             <TouchableOpacity
               onPress={() => router.replace("/auth")}
               style={styles.centerAlign}
             >
-              <RNText variant="medium" size="lg" style={styles.linkText}>
-                Sign In.
+              <RNText variant="medium" size="md" style={styles.linkText}>
+                Sign in
               </RNText>
             </TouchableOpacity>
           </View>
@@ -179,7 +178,7 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    gap: 80,
+    gap: 40,
     marginTop: 20,
     justifyContent: "space-between",
   },

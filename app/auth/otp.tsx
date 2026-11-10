@@ -35,13 +35,13 @@ const Otp = () => {
       const response = await verifyOtp(payload);
 
       if (response.status === false) {
-        throw new Error(response.message || "Invalid OTP code.");
+        throw new Error(response.message || "That code isn't right. Please try again.");
       }
 
       return response;
     },
     onSuccess: (response) => {
-      toast.success("OTP verified successfully.");
+      toast.success("Email verified.");
       if (response.access && response.refresh && response.log) {
         setAuthSession({
           status: true,
@@ -59,7 +59,7 @@ const Otp = () => {
       const message =
         error instanceof ApiError || error instanceof Error
           ? error.message
-          : "Unable to verify OTP right now.";
+          : "Couldn't verify the code right now.";
 
       toast.error(message);
     },
@@ -72,7 +72,7 @@ const Otp = () => {
       const response = await getOtp(payload);
 
       if (response.status === false) {
-        throw new Error(response.message || "Unable to resend OTP.");
+        throw new Error(response.message || "Couldn't send a new code.");
       }
 
       return response;
@@ -85,7 +85,7 @@ const Otp = () => {
       const message =
         error instanceof ApiError || error instanceof Error
           ? error.message
-          : "Unable to resend OTP right now.";
+          : "Couldn't send a new code right now.";
 
       toast.error(message);
     },
@@ -98,7 +98,7 @@ const Otp = () => {
     }
 
     if (otpCode.length !== 4) {
-      toast.error("Please enter the 4-digit OTP code.");
+      toast.error("Please enter the 4-digit code.");
       return;
     }
 
@@ -140,18 +140,18 @@ const Otp = () => {
             <Back />
           </TouchableOpacity>
           <RNText variant="title" size="xl">
-            OTP Setup
+            Verify your email
           </RNText>
         </View>
 
         <View style={styles.mainContent}>
           <View style={styles.headerContent}>
             <RNText variant="title" size="2xl" style={styles.titleText}>
-              Enter 4 digit OTP Code
+              Check your email
             </RNText>
             <RNText variant="medium" size="md" style={styles.subtitleText}>
-              We’ve sent a 4-digit verification code to your email. Enter the
-              code below to proceed{email ? ` for ${email}` : ""}.
+              Enter the 4-digit code we sent to{" "}
+              {email ? email : "your email"}. It expires in 3 minutes.
             </RNText>
           </View>
           <View>

@@ -1,87 +1,123 @@
-import { BackButton } from "@/components/ui/BackButton";
 import JournalHistorySkeleton from "@/components/skeletons/screens/JournalHistorySkeleton";
 import { RNText } from "@/components/ui/input";
 import { Colors } from "@/constants/color";
+import { moodForRating, moodOptions } from "@/constants/moodOptions";
 import { getJournalEntries, JournalEntry } from "@/lib/api/checkin";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
     ActivityIndicator,
-    FlatList,
     RefreshControl,
+    SectionList,
     StyleSheet,
+    TouchableOpacity,
     View,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 
-const assessmentColor: Record<string, string> = {
-  excellent: "#9BB068",
-  good: "#9BB068",
-  average: Colors.yellow,
-  sad: Colors.orange,
-  depressed: "#c0392b",
+type Filter = "all" | "detailed" | "quick" | "journal";
+const FILTERS: { key: Filter; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "detailed", label: "Full" },
+  { key: "quick", label: "Quick" },
+  { key: "journal", label: "With journal" },
+];
+
+const matches = (entry: JournalEntry, filter: Filter) => {
+  if (filter === "detailed") return entry.check_in_type !== "quick";
+  if (filter === "quick") return entry.check_in_type === "quick";
+  if (filter === "journal") return Boolean(entry.journal?.trim());
+  return true;
 };
 
-const formatDate = (iso: string) => {
-  const d = new Date(iso);
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+const whenOf = (entry: JournalEntry) => new Date(entry.created_at ?? entry.time);
+
+const dayLabel = (date: Date) => {
+  const day = new Date(date);
+  day.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((today.getTime() - day.getTime()) / 86400000);
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  return date.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    ...(date.getFullYear() !== today.getFullYear() ? { year: "numeric" } : {}),
+  });
 };
 
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+// Older check-ins only have a mood label, not a 0–10 rating.
+const LABEL_TO_MOOD: Record<string, number> = { excellent: 0, good: 1, neutral: 2, sad: 3, depressed: 4 };
 
 const EntryCard = ({ item }: { item: JournalEntry }) => {
-  const dot = assessmentColor[item.assesment.toLowerCase()] ?? Colors.primaryText;
+  const [expanded, setExpanded] = useState(false);
+  const mood =
+    item.mood_rating != null
+      ? moodForRating(item.mood_rating)
+      : moodOptions[LABEL_TO_MOOD[item.assesment?.toLowerCase()] ?? 2];
+  const MoodIcon = mood.icon;
   const details = [
-    item.check_in_type === "quick" && "Quick check-in",
     item.anxiety_rating != null && `Anxiety ${item.anxiety_rating}/10`,
     item.sleep_hours != null &&
       `Slept ${Number(item.sleep_hours)}h${item.sleep_quality ? ` (${item.sleep_quality})` : ""}`,
   ].filter(Boolean) as string[];
+
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
-        <View style={styles.assessmentRow}>
-          <View style={[styles.dot, { backgroundColor: dot }]} />
-          <RNText variant="title" size="lg">{capitalize(item.assesment)}</RNText>
-        </View>
-        <View style={styles.metaRow}>
-          <View style={styles.scorePill}>
-            <RNText variant="subtitle" size="sm">Score: {item.score}/10</RNText>
-          </View>
-          <RNText variant="medium" size="sm" style={styles.dateText}>
-            {formatDate(item.created_at ?? item.time)}
+        <MoodIcon width={28} height={28} />
+        <View style={{ flex: 1 }}>
+          <RNText variant="header" size="md">
+            {mood.label}
+            {item.mood_rating != null && (
+              <RNText variant="medium" size="sm" style={styles.muted}> · {item.mood_rating}/10</RNText>
+            )}
           </RNText>
+          {item.check_in_type === "quick" && (
+            <RNText variant="medium" size="xs" style={styles.muted}>Quick check-in</RNText>
+          )}
         </View>
+        <RNText variant="medium" size="sm" style={styles.muted}>
+          {whenOf(item).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+        </RNText>
       </View>
+
       {details.length > 0 && (
-        <RNText variant="medium" size="sm" style={styles.detailsText}>
+        <RNText variant="medium" size="sm" style={styles.muted}>
           {details.join(" · ")}
         </RNText>
       )}
-      {item.journal ? (
-        <RNText variant="base" size="md" style={styles.journalText}>
-          {item.journal}
-        </RNText>
-      ) : null}
-      {item.tags && item.tags.length > 0 ? (
+
+      {!!item.tags?.length && (
         <View style={styles.tagsRow}>
           {item.tags.map((tag) => (
             <View key={tag} style={styles.tagPill}>
-              <RNText variant="subtitle" size="sm" style={styles.tagText}>
+              <RNText variant="medium" size="xs" style={{ color: "#5B6B2F" }}>
                 {tag}
               </RNText>
             </View>
           ))}
         </View>
-      ) : null}
+      )}
+
+      {!!item.journal?.trim() && (
+        <TouchableOpacity activeOpacity={0.7} onPress={() => setExpanded((e) => !e)} accessibilityRole="button">
+          <RNText variant="base" size="md" style={styles.journalText} numberOfLines={expanded ? undefined : 3}>
+            {item.journal}
+          </RNText>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
 
 const JournalHistory = () => {
   const { bottom } = useSafeAreaInsets();
+  const [filter, setFilter] = useState<Filter>("all");
 
   const {
     data,
@@ -101,14 +137,22 @@ const JournalHistory = () => {
       last.next ? pages.length + 1 : undefined,
   });
 
-  const entries = data?.pages.flatMap((p) => p.results) ?? [];
+  const sections = useMemo(() => {
+    const groups: { title: string; data: JournalEntry[] }[] = [];
+    for (const entry of data?.pages.flatMap((p) => p.results) ?? []) {
+      if (!matches(entry, filter)) continue;
+      const title = dayLabel(whenOf(entry));
+      const last = groups[groups.length - 1];
+      if (last?.title === title) last.data.push(entry);
+      else groups.push({ title, data: [entry] });
+    }
+    return groups;
+  }, [data, filter]);
 
   const renderItem = useCallback(
     ({ item }: { item: JournalEntry }) => <EntryCard item={item} />,
     [],
   );
-
-  const keyExtractor = useCallback((item: JournalEntry) => item.id, []);
 
   const onEndReached = () => {
     if (hasNextPage && !isFetchingNextPage) fetchNextPage();
@@ -116,11 +160,37 @@ const JournalHistory = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-
-      <FlatList
-        data={entries}
+      <SectionList
+        sections={sections}
         renderItem={renderItem}
-        keyExtractor={keyExtractor}
+        keyExtractor={(item) => item.id}
+        renderSectionHeader={({ section }) => (
+          <RNText variant="header" size="sm" style={styles.sectionTitle}>
+            {section.title}
+          </RNText>
+        )}
+        ListHeaderComponent={
+          <View style={styles.filters}>
+            {FILTERS.map(({ key, label }) => {
+              const active = filter === key;
+              return (
+                <TouchableOpacity
+                  key={key}
+                  onPress={() => setFilter(key)}
+                  style={[styles.filterChip, active && styles.filterChipActive]}
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: active }}
+                >
+                  <RNText variant="header" size="sm" style={{ color: active ? Colors.white : Colors.brown }}>
+                    {label}
+                  </RNText>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        }
+        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+        stickySectionHeadersEnabled={false}
         contentContainerStyle={[styles.listContent, { paddingBottom: bottom + 40 }]}
         onEndReached={onEndReached}
         onEndReachedThreshold={0.3}
@@ -144,13 +214,15 @@ const JournalHistory = () => {
           ) : isError ? (
             <View style={styles.emptyState}>
               <RNText variant="medium" size="md" style={{ color: Colors.orange }}>
-                Failed to load journal entries.
+                Couldn't load your entries. Pull down to try again.
               </RNText>
             </View>
           ) : (
             <View style={styles.emptyState}>
-              <RNText variant="medium" size="md" style={styles.emptyText}>
-                No journal entries yet.
+              <RNText variant="medium" size="md" style={styles.muted}>
+                {filter === "all"
+                  ? "No check-ins yet. They'll show up here."
+                  : "Nothing matches this filter yet."}
               </RNText>
             </View>
           )
@@ -168,89 +240,44 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     paddingTop: 64,
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-  },
   listContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    gap: 14,
+  },
+  filters: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 4 },
+  filterChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: "#E8DDD9",
+  },
+  filterChipActive: { backgroundColor: Colors.brown, borderColor: Colors.brown },
+  sectionTitle: {
+    color: "#A09791",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginTop: 20,
+    marginBottom: 10,
+    marginLeft: 4,
   },
   card: {
     backgroundColor: Colors.white,
     borderRadius: 20,
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    gap: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  assessmentRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  metaRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     gap: 10,
   },
-  scorePill: {
-    backgroundColor: "#ECEEF2",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
-  },
-  dateText: {
-    color: Colors.primaryText,
-  },
-  journalText: {
-    color: Colors.primaryText,
-    lineHeight: 22,
-  },
-  detailsText: {
-    color: "#8F8985",
-  },
-  tagsRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 10,
-  },
+  cardHeader: { flexDirection: "row", alignItems: "center", gap: 10 },
+  muted: { color: "#8F8985" },
+  journalText: { color: Colors.primaryText, lineHeight: 22 },
+  tagsRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
   tagPill: {
-    backgroundColor: "#F1F5E9",
+    backgroundColor: "#F2F5EB",
     paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingVertical: 5,
     borderRadius: 999,
   },
-  tagText: {
-    color: Colors.brown,
-  },
-  emptyState: {
-    alignItems: "center",
-    marginTop: 60,
-    gap: 12,
-  },
-  emptyText: {
-    color: Colors.primaryText,
-  },
+  emptyState: { alignItems: "center", marginTop: 60, paddingHorizontal: 24 },
 });

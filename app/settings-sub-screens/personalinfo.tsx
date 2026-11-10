@@ -12,6 +12,7 @@ import { meQueryKey, useMeQuery } from "@/hooks/useMeQuery";
 import { updateMe } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
 import { useUserStore } from "@/store/useUserStore";
+import { ChevronDown } from "lucide-react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
@@ -21,7 +22,6 @@ import {
   Image,
   RefreshControl,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -240,21 +240,30 @@ const PersonalInfo = () => {
                 render={({ field: { onChange, value } }) => (
                   <>
                     <DatePicker ref={datePickRef} onChange={onChange} />
+                    {/* A picker button, not a text field: tapping opens the calendar. */}
                     <TouchableOpacity
                       onPress={() => {
                         datePickRef.current?.showDatePicker();
                       }}
                       style={styles.dateInputWrap}
+                      accessibilityRole="button"
+                      accessibilityLabel="Choose date of birth"
                     >
                       <Calender />
-                      <TextInput
-                        placeholder="Select Date"
-                        value={value ? (value as Date).toDateString() : ""}
-                        editable={false}
-                        pointerEvents="none"
-                        placeholderTextColor="#999"
-                        style={styles.dateInput}
-                      />
+                      <RNText
+                        variant="medium"
+                        size="md"
+                        style={[styles.dateValue, !value && styles.datePlaceholder]}
+                      >
+                        {value
+                          ? (value as Date).toLocaleDateString("en-US", {
+                              month: "long",
+                              day: "numeric",
+                              year: "numeric",
+                            })
+                          : "Choose a date"}
+                      </RNText>
+                      <ChevronDown size={18} color={Colors.primaryText} />
                     </TouchableOpacity>
                   </>
                 )}
@@ -424,15 +433,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderColor: Colors.green,
   },
-  dateInput: {
+  dateValue: {
     flex: 1,
-    paddingVertical: 5,
     paddingHorizontal: 10,
-    borderRadius: 10,
-    fontSize: 18,
-    fontFamily: "PoppinsRegular",
-    backgroundColor: Colors.white,
     color: Colors.brown,
+  },
+  datePlaceholder: {
+    color: "#999",
   },
   genderSection: {
     marginBottom: 10,

@@ -53,13 +53,13 @@ const SignUp = () => {
       const otpResponse = await getOtp({ email: payload.email });
 
       if (otpResponse.status === false) {
-        throw new Error(otpResponse.message || "Unable to send OTP.");
+        throw new Error(otpResponse.message || "Couldn't send the verification code.");
       }
 
       return { email: payload.email };
     },
     onSuccess: ({ email }) => {
-      toast.success("Account created. OTP sent to your email.");
+      toast.success("Account created. Check your email for a code.");
       router.push({
         pathname: "/auth/otp",
         params: { email },
@@ -109,7 +109,7 @@ const SignUp = () => {
 
         <View style={styles.formWrapper}>
           <RNText variant="title" size="2xl" style={styles.title}>
-            Sign Up For Free
+            Create your account
           </RNText>
 
           <View style={styles.formGroup}>
@@ -134,7 +134,7 @@ const SignUp = () => {
               <InputForm
                 title={"password"}
                 label={"Password"}
-                placeHolder={"Enter your password"}
+                placeHolder={"At least 8 characters"}
                 control={control}
                 errors={errors}
                 Icon={Lock}
@@ -143,6 +143,7 @@ const SignUp = () => {
                 textContentType="oneTimeCode"
                 rules={{
                   required: "Password is required",
+                  minLength: { value: 8, message: "Use at least 8 characters" },
                 }}
                 rightElement={
                   <TouchableOpacity onPress={() => setShowNewPassword((p) => !p)} hitSlop={10}>
@@ -211,7 +212,7 @@ const SignUp = () => {
             ]}
           >
             <RNText variant="title" size="lg" style={styles.submitButtonText}>
-              {signUpMutation.isPending ? "Creating Account..." : "Sign Up"}
+              {signUpMutation.isPending ? "Creating account..." : "Sign up"}
             </RNText>
             {signUpMutation.isPending ? (
               <ActivityIndicator color={Colors.white} />
@@ -224,16 +225,16 @@ const SignUp = () => {
           <SocialAuth />
 
           <View style={styles.centerRow}>
-            <RNText variant="medium" size="lg">
-              {" "}
+            <RNText variant="medium" size="md">
               Already have an account?{" "}
             </RNText>
             <TouchableOpacity
               onPress={() => router.replace("/auth")}
               style={styles.centerAlign}
+              hitSlop={8}
             >
-              <RNText variant="medium" size="lg" style={styles.linkText}>
-                Sign In.
+              <RNText variant="medium" size="md" style={styles.linkText}>
+                Sign in
               </RNText>
             </TouchableOpacity>
           </View>
@@ -266,7 +267,7 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    gap: 80,
+    gap: 40,
     //  marginTop: 20,
     justifyContent: "space-between",
   },

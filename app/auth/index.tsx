@@ -138,8 +138,8 @@ const SignIn = () => {
               onPress={() => router.push("/auth/forgot")}
               style={styles.centerAlign}
             >
-              <RNText variant="medium" size="lg" style={styles.linkText}>
-                Forgot Password ?
+              <RNText variant="medium" size="md" style={styles.linkText}>
+                Forgot password?
               </RNText>
             </TouchableOpacity>
           </View>
@@ -170,16 +170,16 @@ const SignIn = () => {
           <SocialAuth />
 
           <View style={styles.centerRow}>
-            <RNText variant="medium" size="lg">
-              {" "}
-              Already have an account?{" "}
+            <RNText variant="medium" size="md">
+              Don't have an account?{" "}
             </RNText>
             <TouchableOpacity
               onPress={() => router.replace("/auth/signup")}
               style={styles.centerAlign}
+              hitSlop={8}
             >
-              <RNText variant="medium" size="lg" style={styles.linkText}>
-                Sign Up.
+              <RNText variant="medium" size="md" style={styles.linkText}>
+                Sign up
               </RNText>
             </TouchableOpacity>
           </View>
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    gap: 80,
+    gap: 40,
     marginTop: 20,
     justifyContent: "space-between",
   },
