@@ -172,6 +172,12 @@ export const updateMe = (payload: UpdateMeRequest | FormData) =>
     body: payload,
   });
 
+/** Permanently deletes the account and everything stored for it. */
+export const deleteMe = () =>
+  authenticatedApiRequest<null>("/api/auth/user/", {
+    method: "DELETE",
+  });
+
 export const changePassword = (payload: ChangePasswordRequest) =>
   authenticatedApiRequest<ChangePasswordResponse>("/api/auth/user/", {
     method: "PATCH",

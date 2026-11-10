@@ -12,15 +12,19 @@ import { updateMe } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
+import { AppleReauthCancelled, deleteAccount, signOutSocial } from "@/lib/accountDeletion";
+import * as WebBrowser from "expo-web-browser";
 import {
   FileText,
   HelpCircle,
-  MoreVertical,
+  Lock,
   ShieldCheck,
   Smile,
+  Trash2,
 } from "lucide-react-native";
 import { useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Animated,
   Dimensions,
   Image,
@@ -45,6 +49,7 @@ const PROFILE_INFO_HEIGHT = 90;
 const PROFILE_OVERLAP = 46; // how much avatar overlaps the banner bottom
 const SCROLL_DISTANCE = 100;
 const PROFILE_IMAGE_FALLBACK = require("@/assets/images/avatar-fallback.png");
+const PRIVACY_POLICY_URL = "https://thehoneysucklecompany.com/privacy.html";
 
 const Index = () => {
   const { data: me, isLoading: meLoading, refetch, isRefetching } = useMeQuery();
@@ -55,6 +60,8 @@ const Index = () => {
     me?.notify ?? false,
   );
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Sync once when me loads for the first time
   const syncedRef = useRef(false);
@@ -83,6 +90,7 @@ const Index = () => {
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const handleLogout = () => {
+    signOutSocial();
     clearAuthSession();
     queryClient.clear();
     router.replace("/auth");
@@ -91,6 +99,26 @@ const Index = () => {
   const confirmLogout = () => {
     setShowLogoutModal(false);
     handleLogout();
+  };
+
+  const confirmDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteAccount();
+      setShowDeleteModal(false);
+      clearAuthSession();
+      queryClient.clear();
+      toast.success("Your account has been deleted.");
+      router.replace("/auth");
+    } catch (error) {
+      toast.error(
+        error instanceof AppleReauthCancelled
+          ? "Please confirm with Apple to delete your account."
+          : "Couldn't delete your account. Please try again.",
+      );
+    } finally {
+      setIsDeleting(false);
+    }
   };
   const displayName = me?.name?.trim() || "User";
   const displayEmail = me?.email || "";
@@ -180,9 +208,6 @@ const Index = () => {
       <RNText variant="title" size="lg" style={styles.sectionTitle}>
         {title}
       </RNText>
-      <TouchableOpacity>
-        <MoreVertical size={20} color={Colors.primaryText} opacity={0.4} />
-      </TouchableOpacity>
     </View>
   );
 
@@ -237,7 +262,11 @@ const Index = () => {
           <View style={styles.statusBadge}>
             <Smile size={20} color={Colors.white} />
           </View>
-          <TouchableOpacity style={styles.editBadge}>
+          <TouchableOpacity
+            style={styles.editBadge}
+            onPress={() => router.push("/settings-sub-screens/personalinfo")}
+            accessibilityLabel="Edit profile"
+          >
             <Edit width={18} height={18} fill={Colors.white} />
           </TouchableOpacity>
         </View>
@@ -316,9 +345,15 @@ const Index = () => {
           />
           <SettingItem
             icon={FileText}
-            title="Terms & Policy"
+            title="Terms of Service"
             isLucide
             onPress={() => router.push("/settings-sub-screens/termsandpolicy")}
+          />
+          <SettingItem
+            icon={Lock}
+            title="Privacy Policy"
+            isLucide
+            onPress={() => WebBrowser.openBrowserAsync(PRIVACY_POLICY_URL)}
           />
           {false && (
             <SettingItem
@@ -330,15 +365,68 @@ const Index = () => {
           )}
         </View>
 
-        <SectionHeader title="Log Out" />
+        <SectionHeader title="Account" />
         <View style={styles.card}>
           <SettingItem
             icon={Logout}
             title="Log Out"
             onPress={() => setShowLogoutModal(true)}
           />
+          <SettingItem
+            icon={Trash2}
+            title="Delete Account"
+            isLucide
+            onPress={() => setShowDeleteModal(true)}
+          />
         </View>
       </AnimatedScrollView>
+
+      {/* Delete account confirmation modal */}
+      <Modal
+        visible={showDeleteModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => !isDeleting && setShowDeleteModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalIconWrap}>
+              <Trash2 size={30} color="#C0392B" />
+            </View>
+            <RNText variant="title" size="2xl" style={styles.deleteTitle}>
+              Delete account?
+            </RNText>
+            <RNText variant="medium" size="md" style={styles.modalMessage}>
+              This permanently deletes your account and everything in it: check-ins, journal
+              entries, questionnaire results and AI chat history. This can't be undone.
+            </RNText>
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+              >
+                <RNText variant="header" size="md" style={styles.cancelText}>
+                  Cancel
+                </RNText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={confirmDeleteAccount}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <ActivityIndicator color={Colors.white} />
+                ) : (
+                  <RNText variant="header" size="md" style={styles.logoutText}>
+                    Delete
+                  </RNText>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* Logout confirmation modal */}
       <Modal
@@ -612,6 +700,17 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: Colors.white,
+  },
+  deleteButton: {
+    flex: 1,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#C0392B",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  deleteTitle: {
+    color: "#C0392B",
   },
 });
 

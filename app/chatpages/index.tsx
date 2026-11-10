@@ -3,6 +3,7 @@ import {
   ChatAvatar,
   USER_ID,
 } from "@/components/chat/ChatAvatar";
+import { AiConsentModal, useAiConsent } from "@/components/chat/AiConsent";
 import { ChatBubble } from "@/components/chat/ChatBubble";
 import { ChatComposer } from "@/components/chat/ChatComposer";
 import { ChatSend } from "@/components/chat/ChatSend";
@@ -40,6 +41,7 @@ const PAGE_SIZE = 20;
 
 const ChatPage = () => {
   const queryClient = useQueryClient();
+  const aiConsent = useAiConsent();
   const insets = useSafeAreaInsets();
   // iOS native-stack header is ~44pt + safe-area top (~44-59pt on modern
   // phones), so reserve that space at the top of the list. Without this,
@@ -150,6 +152,8 @@ const ChatPage = () => {
   };
 
   const handleSend = async (newMsgs: IMessage[] = []) => {
+    // Nothing goes to the AI until the user has agreed.
+    if (aiConsent.status !== "granted") return;
     if (isListening) {
       stopListening();
     }
@@ -217,6 +221,8 @@ const ChatPage = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background }}>
+      {/* Blocks the chat until the user agrees to AI data sharing. */}
+      <AiConsentModal visible={aiConsent.status === "needed"} onAgree={aiConsent.grant} />
       <Chat<IMessage>
         messages={messages}
         onSend={handleSend}
@@ -293,6 +299,13 @@ const ChatPage = () => {
                   onStopStream={() => stopStream()}
                 />
               </View>
+              <RNText
+                variant="medium"
+                size="xs"
+                style={{ color: "#A09791", textAlign: "center", marginTop: 8 }}
+              >
+                AI companion, not a therapist. In a crisis, call or text 988.
+              </RNText>
             </View>
           );
         }}
@@ -397,15 +410,16 @@ function EmptyState() {
         }}
       >
         <RNText variant="title" style={{ color: Colors.orange }}>
-          LIMITATIONS
+          YOUR AI COMPANION
         </RNText>
       </View>
-      <View>
+      <View style={{ paddingHorizontal: 24, gap: 6 }}>
         <RNText variant="header" style={{ textAlign: "center" }}>
-          Limited Knowledge
+          Here to listen and help you reflect
         </RNText>
         <RNText style={{ textAlign: "center" }}>
-          No human being is perfect. So is chatbots.
+          It can make mistakes and isn't a therapist or a crisis service. If you're in crisis,
+          call or text 988.
         </RNText>
       </View>
     </View>

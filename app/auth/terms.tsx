@@ -45,7 +45,7 @@ const TERMS = [
     },
     {
         title: "5. Privacy Policy",
-        body: "Your use of the Service is also governed by our Privacy Policy, which explains how we collect, use, store, share, and delete your information.\n\nPrivacy Policy: https://thehoneysucklecompany.com/privacy\n\nBy using the Service, you acknowledge that you have reviewed the Privacy Policy.",
+        body: "Your use of the Service is also governed by our Privacy Policy, which explains how we collect, use, store, share, and delete your information.\n\nPrivacy Policy: https://thehoneysucklecompany.com/privacy.html\n\nBy using the Service, you acknowledge that you have reviewed the Privacy Policy.",
     },
     {
         title: "6. User Content",
@@ -77,7 +77,7 @@ const TERMS = [
     },
     {
         title: "13. Account Deletion",
-        body: "You may request deletion of your account at any time through the app or through our account deletion page:\n\nDelete Account Page: https://thehoneysucklecompany.com/delete-account\n\nWhen you request deletion, we will process your request in accordance with our Privacy Policy and applicable law. Some information may be retained when needed for security, fraud prevention, dispute resolution, or legal compliance.",
+        body: "You can delete your account at any time in the app under Settings > Delete Account. This permanently deletes your account and your check-ins, journal entries, questionnaire results and AI chat history. You can also email hello@thehoneysucklecompany.com and ask us to delete it.\n\nWhen you request deletion, we will process your request in accordance with our Privacy Policy and applicable law. Some information may be retained when needed for security, fraud prevention, dispute resolution, or legal compliance.",
     },
     {
         title: "14. Intellectual Property",

@@ -37,57 +37,10 @@ async function registerFcmDevice(registrationId: string) {
     });
 }
 
-const normalizeType = (message: FirebaseMessagingTypes.RemoteMessage) => {
-    const type =
-        message?.data?.notification_type ||
-        message?.data?.type ||
-        message?.data?.event_type ||
-        "";
-    return String(type).toLowerCase();
-};
-
-const getChatId = (message: FirebaseMessagingTypes.RemoteMessage) => {
-    const value =
-        message?.data?.conversation_id ||
-        message?.data?.chat_id ||
-        message?.data?.thread_id ||
-        message?.data?.room_id;
-    return value ? String(value) : null;
-};
-
-const getPostId = (message: FirebaseMessagingTypes.RemoteMessage) => {
-    const value =
-        message?.data?.post_id ||
-        message?.data?.target_post_id ||
-        message?.data?.target_id;
-    return value ? String(value) : null;
-};
-
-const getUserId = (message: FirebaseMessagingTypes.RemoteMessage) => {
-    const value =
-        message?.data?.sender_id ||
-        message?.data?.user_id ||
-        message?.data?.actor_id ||
-        message?.data?.target_user_id;
-    return value ? String(value) : null;
-};
-
-const isMessageNotification = (type: string) =>
-    type === "new_message" ||
-    type === "chat_message" ||
-    type === "message" ||
-    type.includes("message");
-
-const isPostNotification = (type: string) =>
-    type === "post_like" ||
-    type === "post_comment" ||
-    type === "like_comment_post" ||
-    type.includes("post");
-
-const isFriendNotification = (type: string) =>
-    type === "friend_request" ||
-    type === "friend_accept" ||
-    type.includes("friend");
+// This app's pushes are reminders, streaks and insights; they all live on
+// the notifications screen.
+const NOTIFICATIONS_ROUTE = "/notifications";
+const COLD_START_BASE_ROUTE = "/(tabs)/home";
 
 const normalizePath = (value?: string | null) =>
     String(value || "")
@@ -95,149 +48,21 @@ const normalizePath = (value?: string | null) =>
         .toLowerCase()
         .replace(/\/+$/, "");
 
-const isSameDynamicRoute = (
-    pathname: string,
-    routeBase: string,
-    id: string,
-) => {
-    const normalizedBase = normalizePath(routeBase);
-    const normalizedPathname = normalizePath(pathname);
-    const normalizedId = normalizePath(id);
-
-    if (
-        normalizedPathname === `${normalizedBase}/${normalizedId}` ||
-        normalizedPathname === `${normalizedBase}/[id]`
-    ) {
-        return true;
-    }
-
-    if (!normalizedPathname.startsWith(`${normalizedBase}/`)) {
-        return false;
-    }
-
-    const lastSegment = normalizedPathname.split("/").pop();
-    return lastSegment === normalizedId;
-};
-
-const isSameStaticRoute = (pathname: string, routePath: string) => {
-    const normalizedPathname = normalizePath(pathname);
-    const normalizedRoutePath = normalizePath(routePath);
-    return (
-        normalizedPathname === normalizedRoutePath ||
-        normalizedPathname === `${normalizedRoutePath}/index`
-    );
-};
-
-const shouldSkipForegroundToast = (
-    message: FirebaseMessagingTypes.RemoteMessage,
-    currentPathname?: string,
-) => {
-    const type = normalizeType(message);
-    if (!isMessageNotification(type)) {
-        return false;
-    }
-    const chatId = getChatId(message);
-    if (!chatId) {
-        return false;
-    }
-    return isSameDynamicRoute(normalizePath(currentPathname), "/inbox", chatId);
-};
-
-const COLD_START_BASE_ROUTE = "/(drawer)/(tabs)/explore";
-
 const navigateFromNotification = (
-    message: FirebaseMessagingTypes.RemoteMessage,
+    _message: FirebaseMessagingTypes.RemoteMessage,
     currentPathname?: string,
     replace = false,
 ) => {
-    const navigate = (pathname: string, params?: object) => {
-        if (replace) {
-            router.replace(COLD_START_BASE_ROUTE as any);
-            setTimeout(() => {
-                router.push(
-                    params ? { pathname: pathname as any, params } : (pathname as any),
-                );
-            }, 0);
-        } else {
-            router.push(
-                params ? { pathname: pathname as any, params } : (pathname as any),
-            );
-        }
-    };
-
-    const type = normalizeType(message);
-    const normalizedCurrentPath = normalizePath(currentPathname);
-    const senderNameRaw =
-        message?.data?.sender_name ||
-        message?.data?.sender_username ||
-        message?.notification?.title ||
-        "Chat";
-    const senderAvatarRaw =
-        message?.data?.sender_avatar || message?.data?.avatar || "";
-    const senderName =
-        typeof senderNameRaw === "string" || typeof senderNameRaw === "number"
-            ? String(senderNameRaw)
-            : "Chat";
-    const senderAvatar =
-        typeof senderAvatarRaw === "string" || typeof senderAvatarRaw === "number"
-            ? String(senderAvatarRaw)
-            : "";
-
-    if (isMessageNotification(type)) {
-        const chatId = getChatId(message);
-        const prettyName = senderName.includes("New message from")
-            ? senderName.replace("New message from ", "")
-            : senderName;
-
-        if (chatId) {
-            if (
-                !replace &&
-                isSameDynamicRoute(normalizedCurrentPath, "/inbox", chatId)
-            ) {
-                return;
-            }
-            navigate("/inbox/[id]", {
-                id: chatId,
-                name: prettyName,
-                avatar: senderAvatar,
-            });
-            return;
-        }
-    }
-
-    if (isPostNotification(type)) {
-        const postId = getPostId(message);
-        if (postId) {
-            if (
-                !replace &&
-                isSameDynamicRoute(normalizedCurrentPath, "/post", postId)
-            ) {
-                return;
-            }
-            navigate("/post/[id]", { id: postId });
-            return;
-        }
-    }
-
-    if (isFriendNotification(type)) {
-        const userId = getUserId(message);
-        if (userId) {
-            if (
-                !replace &&
-                isSameDynamicRoute(normalizedCurrentPath, "/other-profile", userId)
-            ) {
-                return;
-            }
-            navigate("/other-profile/[id]", { id: userId });
-            return;
-        }
-    }
-
-    if (!replace && isSameStaticRoute(normalizedCurrentPath, "/notification")) {
+    if (replace) {
+        // Cold start: put Home underneath so Back has somewhere to go.
+        router.replace(COLD_START_BASE_ROUTE as any);
+        setTimeout(() => router.push(NOTIFICATIONS_ROUTE as any), 0);
         return;
     }
-
-    navigate("/notification");
+    if (normalizePath(currentPathname) === NOTIFICATIONS_ROUTE) {
+        return;
+    }
+    router.push(NOTIFICATIONS_ROUTE as any);
 };
 
 const app = getApp();
@@ -287,10 +112,6 @@ export function useNotificationHook() {
     useEffect(() => {
         const unsub = onMessage(app_message, async (remoteMessage) => {
             console.log("Received foreground message:", remoteMessage);
-
-            if (shouldSkipForegroundToast(remoteMessage, pathnameRef.current)) {
-                return;
-            }
 
             toast.success(remoteMessage.notification?.title || "New Notification", {
                 description: remoteMessage.notification?.body || "",

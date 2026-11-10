@@ -16,7 +16,7 @@ export default function NotificationPermissionBanner() {
           Push notifications are off
         </RNText>
         <RNText variant="medium" size="sm" style={styles.description}>
-          Turn them on so you don't miss messages, friend requests, and activity on your posts.
+          Turn them on to get your check-in reminders and questionnaire due dates.
         </RNText>
       </View>
       <TouchableOpacity onPress={enable} activeOpacity={0.8} style={styles.button}>

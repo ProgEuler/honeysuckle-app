@@ -9,7 +9,7 @@ import { ApiError } from "@/lib/api/client";
 import { navigateAfterAuth } from "@/lib/navigateAfterAuth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useMutation } from "@tanstack/react-query";
-import { ActivityIndicator, Modal, Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Modal, Platform, Pressable, StyleSheet, View } from "react-native";
 import { toast } from "sonner-native";
 
 export default function SocialAuth() {
@@ -81,13 +81,18 @@ export default function SocialAuth() {
         >
           <Google />
         </Pressable>
-        <Pressable
-          onPress={handleAppleSignIn}
-          disabled={isLoading}
-          style={styles.socialButton}
-        >
-          <Apple />
-        </Pressable>
+        {/* Sign in with Apple only works on iOS in this setup. */}
+        {Platform.OS === "ios" && (
+          <Pressable
+            onPress={handleAppleSignIn}
+            disabled={isLoading}
+            style={styles.socialButton}
+            accessibilityRole="button"
+            accessibilityLabel="Sign in with Apple"
+          >
+            <Apple />
+          </Pressable>
+        )}
       </View>
     </>
   );
