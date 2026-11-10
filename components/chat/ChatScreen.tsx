@@ -36,7 +36,8 @@ import {
   View,
 } from "react-native";
 import { useBottomTabBarHeight } from "react-native-bottom-tabs";
-import { useKeyboardState } from "react-native-keyboard-controller";
+import { useReanimatedKeyboardAnimation } from "react-native-keyboard-controller";
+import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { toast } from "sonner-native";
 
@@ -51,9 +52,15 @@ const ChatScreen = () => {
   // closed the white input panel extends down behind it, with the input
   // itself above the bar; while typing the input rides on the keyboard.
   // Android lays the tab bar out below the screen, so it needs no room.
+  // The room for the tab bar shrinks frame by frame as the keyboard rises
+  // (progress 0 = closed, 1 = open) and grows back as it falls, in step
+  // with the keyboard, so the input never jumps or slips under the bar.
   const tabBarHeight = useBottomTabBarHeight();
-  const keyboardVisible = useKeyboardState((state) => state.isVisible);
-  const tabBarSpace = Platform.OS === "ios" && !keyboardVisible ? tabBarHeight : 0;
+  const tabBarSpace = Platform.OS === "ios" ? tabBarHeight : 0;
+  const { progress: keyboardProgress } = useReanimatedKeyboardAnimation();
+  const toolbarInsetStyle = useAnimatedStyle(() => ({
+    paddingBottom: 20 + tabBarSpace * (1 - keyboardProgress.value),
+  }));
   // iOS native-stack header is ~44pt + safe-area top (~44-59pt on modern
   // phones), so reserve that space at the top of the list. Without this,
   // the first message slides *under* the frosted header and gets blurred
@@ -267,20 +274,22 @@ const ChatScreen = () => {
           composerChangeTextRef.current = tp.textInputProps?.onChangeText;
 
           return (
-            <View
-              style={{
-                backgroundColor: Colors.white,
-                borderTopLeftRadius: 30,
-                borderTopRightRadius: 30,
-                paddingHorizontal: 16,
-                paddingBottom: 20 + tabBarSpace,
-                paddingTop: 14,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: -3 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 4,
-              }}
+            <Animated.View
+              style={[
+                {
+                  backgroundColor: Colors.white,
+                  borderTopLeftRadius: 30,
+                  borderTopRightRadius: 30,
+                  paddingHorizontal: 16,
+                  paddingTop: 14,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: -3 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 4,
+                },
+                toolbarInsetStyle,
+              ]}
             >
               {isListening && (
                 <SpeechListeningBanner
@@ -317,7 +326,7 @@ const ChatScreen = () => {
               >
                 AI companion, not a therapist. In a crisis, call or text 988.
               </RNText>
-            </View>
+            </Animated.View>
           );
         }}
         renderLoadEarlier={() =>
