@@ -116,7 +116,7 @@
         {
           "photosPermission": "Honeysuckle Trail accesses your photos when you choose a profile picture from your library.",
           "cameraPermission": "Honeysuckle Trail uses the camera when you choose to take a new profile photo.",
-          "microphonePermission": false
+          "microphonePermission": "Honeysuckle Trail uses the microphone when you tap the mic button in chat, so you can speak your message instead of typing it."
         }
       ]
     ],
